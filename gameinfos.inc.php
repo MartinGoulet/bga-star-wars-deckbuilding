@@ -89,7 +89,7 @@ $gameinfos = [
         //  default: 740
         //  maximum possible value: 740 (ie: your game interface should fit with a 740px width (correspond to a 1024px screen)
         //  minimum possible value: 320 (the lowest value you specify, the better the display is on mobile)
-        'min' => 740,
+        'min' => 1100,
     ],
 
     // Flag to enable 3D mode (adds a 3D button to the menu)

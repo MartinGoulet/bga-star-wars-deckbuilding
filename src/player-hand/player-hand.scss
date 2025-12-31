@@ -1,0 +1,8 @@
+.wiz-player-hand {
+   flex-basis: 100%;
+   min-height: 108px;
+
+   .card-stock.hand-stock.floating {
+      --bga-cards_hand-stock-floating-z-index: 10;
+   }
+}

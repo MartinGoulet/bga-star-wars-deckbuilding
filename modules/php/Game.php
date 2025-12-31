@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -14,18 +15,35 @@
  *
  * In this PHP file, you are going to defines the rules of the game.
  */
+
 declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding;
 
-use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn;
+use Bga\GameFramework\Actions\Debug;
 use Bga\GameFramework\Components\Counters\PlayerCounter;
+use Bga\GameFramework\Components\Counters\TableCounter;
+use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
+use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
+use CardInstance;
 
-class Game extends \Bga\GameFramework\Table
-{
-    public static array $CARD_TYPES;
+require_once('constants.inc.php');
+require_once('Cards/CardInstance.php');
 
-    public PlayerCounter $playerEnergy;
+class Game extends \Bga\GameFramework\Table {
+    public array $card_types;
+    public array $starter_decks;
+    public array $galaxy_deck_composition;
+    public array $base_decks;
+    public array $all_bases;
+
+    public TableCounter $forceTrack;
+    public PlayerCounter $playerResources;
+
+    private \Bga\GameFramework\Components\Deck $cards;
+    public CardRepository $cardRepository;
+
+    private static Game $instance;
 
     /**
      * Your global variables labels:
@@ -36,37 +54,46 @@ class Game extends \Bga\GameFramework\Table
      * NOTE: afterward, you can get/set the global variables with `getGameStateValue`, `setGameStateInitialValue` or
      * `setGameStateValue` functions.
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
         $this->initGameStateLabels([]); // mandatory, even if the array is empty
 
-        $this->playerEnergy = $this->counterFactory->createPlayerCounter('energy');
+        $this->playerResources = $this->counterFactory->createPlayerCounter('resources', 0);
+        $this->forceTrack = $this->counterFactory->createTableCounter('force', -3, 3);
 
-        self::$CARD_TYPES = [
-            1 => [
-                "card_name" => clienttranslate('Troll'), // ...
-            ],
-            2 => [
-                "card_name" => clienttranslate('Goblin'), // ...
-            ],
-            // ...
-        ];
+        require('material.inc.php');
 
-        /* example of notification decorator.
         // automatically complete notification args when needed
-        $this->notify->addDecorator(function(string $message, array $args) {
+        $this->notify->addDecorator(function (string $message, array $args) {
             if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
                 $args['player_name'] = $this->getPlayerNameById($args['player_id']);
             }
-        
-            if (isset($args['card_id']) && !isset($args['card_name']) && str_contains($message, '${card_name}')) {
-                $args['card_name'] = self::$CARD_TYPES[$args['card_id']]['card_name'];
+
+            if (isset($args['card']) && !isset($args['card_name']) && str_contains($message, '${card_name}')) {
+                /** @var CardInstance $card */
+                $card = $args['card'];
+                $args['card_name'] = $card->name;
                 $args['i18n'][] = ['card_name'];
             }
-            
+
+            if (isset($args['card_id']) && !isset($args['card_name']) && str_contains($message, '${card_name}')) {
+                /** @var CardInstance $card */
+                $card = $this->cardRepository->getCard($args['card_id']);
+                $args['card_name'] = $card->name;
+                $args['i18n'][] = ['card_name'];
+            }
+
             return $args;
-        });*/
+        });
+
+        $this->cards = $this->deckFactory->createDeck('card');
+        self::$instance = $this;
+
+        $this->cardRepository = new CardRepository($this, $this->cards);
+    }
+
+    public static function get(): Game {
+        return self::$instance;
     }
 
     /**
@@ -79,8 +106,7 @@ class Game extends \Bga\GameFramework\Table
      * @return int
      * @see ./states.inc.php
      */
-    public function getGameProgression()
-    {
+    public function getGameProgression() {
         // TODO: compute and return the game progression
 
         return 0;
@@ -97,23 +123,22 @@ class Game extends \Bga\GameFramework\Table
      * @param int $from_version
      * @return void
      */
-    public function upgradeTableDb($from_version)
-    {
-//       if ($from_version <= 1404301345)
-//       {
-//            // ! important ! Use `DBPREFIX_<table_name>` for all tables
-//
-//            $sql = "ALTER TABLE `DBPREFIX_xxxxxxx` ....";
-//            $this->applyDbUpgradeToAllDB( $sql );
-//       }
-//
-//       if ($from_version <= 1405061421)
-//       {
-//            // ! important ! Use `DBPREFIX_<table_name>` for all tables
-//
-//            $sql = "CREATE TABLE `DBPREFIX_xxxxxxx` ....";
-//            $this->applyDbUpgradeToAllDB( $sql );
-//       }
+    public function upgradeTableDb($from_version) {
+        //       if ($from_version <= 1404301345)
+        //       {
+        //            // ! important ! Use `DBPREFIX_<table_name>` for all tables
+        //
+        //            $sql = "ALTER TABLE `DBPREFIX_xxxxxxx` ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
+        //
+        //       if ($from_version <= 1405061421)
+        //       {
+        //            // ! important ! Use `DBPREFIX_<table_name>` for all tables
+        //
+        //            $sql = "CREATE TABLE `DBPREFIX_xxxxxxx` ....";
+        //            $this->applyDbUpgradeToAllDB( $sql );
+        //       }
     }
 
     /*
@@ -124,8 +149,7 @@ class Game extends \Bga\GameFramework\Table
      * - when the game starts
      * - when a player refreshes the game page (F5)
      */
-    protected function getAllDatas(): array
-    {
+    protected function getAllDatas(): array {
         $result = [];
 
         // WARNING: We must only return information visible by the current player.
@@ -134,11 +158,32 @@ class Game extends \Bga\GameFramework\Table
         // Get information about players.
         // NOTE: you can retrieve some extra field you added for "player" table in `dbmodel.sql` if you need it.
         $result["players"] = $this->getCollectionFromDb(
-            "SELECT `player_id` `id`, `player_score` `score` FROM `player`"
+            "SELECT `player_id` `id`, `player_score` `score`, `player_faction` `faction`, `player_no` `playerNo` FROM `player`"
         );
-        $this->playerEnergy->fillResult($result);
+        // $this->playerEnergy->fillResult($result);
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
+
+        $result['galaxyRow'] = $this->cardRepository->getGalaxyRow();
+        $result['galaxyDeckCount'] = $this->cardRepository->countGalaxyDeck();
+        $result['galaxyDiscard'] = $this->cardRepository->getGalaxyDiscardPile();
+        $result['playerHand'] = array_values($this->cardRepository->getPlayerHand($current_player_id));
+        
+        foreach($result["players"] as &$player) {
+            $pId = intval($player['id']);
+            $player['playAreaCards'] = array_values($this->cardRepository->getPlayerPlayArea($pId));
+            $player['deckCount'] = $this->cardRepository->countPlayerDeck($pId);
+            $player['discard'] = array_values($this->cardRepository->getPlayerDiscardPile($pId));
+            $player['activeBase'] = $this->cardRepository->getActiveBase($pId);
+            $player['ships'] = array_values($this->cardRepository->getPlayerShips($pId));
+        }
+
+        $this->playerResources->fillResult($result);
+        $this->forceTrack->fillResult($result);
+
+        if($this->getBgaEnvironment() == 'studio') {
+            $result['debug_cards'] = array_values($this->getCollectionFromDB("SELECT * FROM card"));
+        }
 
         return $result;
     }
@@ -147,23 +192,28 @@ class Game extends \Bga\GameFramework\Table
      * This method is called only once, when a new game is launched. In this method, you must setup the game
      *  according to the game rules, so that the game is ready to be played.
      */
-    protected function setupNewGame($players, $options = [])
-    {
-        $this->playerEnergy->initDb(array_keys($players), initialValue: 2);
+    protected function setupNewGame($players, $options = []) {
+        $this->playerResources->initDb(array_keys($players), initialValue: 0);
+        $this->forceTrack->initDb(initialValue: 3); // Rebel side
 
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
         // number of colors defined here must correspond to the maximum number of players allowed for the gams.
         $gameinfos = $this->getGameinfos();
         $default_colors = $gameinfos['player_colors'];
 
-        foreach ($players as $player_id => $player) {
+        $factions = [FACTION_REBEL, FACTION_EMPIRE];
+        shuffle($factions);
+
+        foreach ($players as $player_id => &$player) {
+            $player['faction'] = array_shift($factions);
             // Now you can access both $player_id and $player array
-            $query_values[] = vsprintf("('%s', '%s', '%s', '%s', '%s')", [
+            $query_values[] = vsprintf("('%s', '%s', '%s', '%s', '%s', '%s')", [
                 $player_id,
                 array_shift($default_colors),
                 $player["player_canal"],
                 addslashes($player["player_name"]),
                 addslashes($player["player_avatar"]),
+                $player['faction'],
             ]);
         }
 
@@ -173,7 +223,7 @@ class Game extends \Bga\GameFramework\Table
         // additional fields directly here.
         static::DbQuery(
             sprintf(
-                "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES %s",
+                "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, player_faction) VALUES %s",
                 implode(",", $query_values)
             )
         );
@@ -192,11 +242,12 @@ class Game extends \Bga\GameFramework\Table
         // $this->playerStats->init('player_teststat1', 0);
 
         // TODO: Setup the initial game situation here.
+        $this->cardRepository->setup($players);
 
         // Activate first player once everything has been initialized and ready.
         $this->activeNextPlayer();
 
-        return PlayerTurn::class;
+        return PlayerTurn_ActionSelection::class;
     }
 
     /**
@@ -213,6 +264,17 @@ class Game extends \Bga\GameFramework\Table
      */
     public function debug_playOneMove() {
         $this->debug->playUntil(fn(int $count) => $count == 1);
+    }
+
+    #[Debug(reload: true)]
+    public function debug_resetDeck() {
+        $sql = "TRUNCATE TABLE card";
+        self::DbQuery($sql);
+        $sql = "SELECT player_id, player_faction `faction` FROM player";
+        $players = $this->getCollectionFromDb($sql);
+        $this->cardRepository->setup($players);
+        $this->playerResources->setAll(0);
+        $this->forceTrack->set(3);
     }
 
     /*

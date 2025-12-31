@@ -1,0 +1,102 @@
+.swd-table-center {
+   padding: 10px;
+   margin: 10px;
+
+   .galaxy-row-label {
+      color: #f3ae25;
+      text-transform: uppercase;
+      padding-bottom: 10px;
+   }
+
+   .card[data-type="ship"] {
+      &[data-is-ally="true"],
+      &[data-is-enemy="true"] {
+         width: var(--bga-cards_card-height);
+         height: var(--bga-cards_card-width);
+      }
+
+      &[data-is-ally="true"] .bga-cards_card-sides {
+         transform: rotate(90deg);
+         transform-origin: center center;
+      }
+      &[data-is-enemy="true"] .bga-cards_card-sides {
+         transform: rotate(-90deg);
+         transform-origin: center center;
+      }
+   }
+
+   .card[data-is-enemy="true"] .bga-cards_card-sides {
+      transform: rotate(180deg);
+      transform-origin: center center;
+   }
+
+   .galaxy-row-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      > div {
+         display: flex;
+         flex-direction: row;
+         align-items: center;
+         justify-content: space-evenly;
+      }
+
+      .galaxy-decks {
+         display: flex;
+         flex-direction: row;
+         align-items: center;
+         justify-content: center;
+         gap: 70px;
+      }
+
+      .force-track {
+         position: relative;
+         width: 400px;
+         height: 143px;
+      }
+
+      .force-track-background {
+         background-image: url("img/force-balance-track.png");
+         background-size: cover;
+         background-repeat: no-repeat;
+         width: 143px;
+         height: 400px;
+         transform: rotate(90deg);
+         transform-origin: top left;
+         left: 400px;
+         position: absolute;
+      }
+
+      .force-track-indicator {
+         position: absolute;
+         width: 30px;
+         height: 30px;
+         top: calc(50% - 15px);
+         left: calc(50% - 15px);
+         background-image: url("img/cubes.png");
+         background-size: 1000% 100%;
+         background-position-x: -501%;
+         transition: transform 0.5s ease-in-out;
+         
+         &[data-force="1"] {
+            transform: translateX(-45px);
+         }
+         &[data-force="2"] {
+            transform: translateX(-87px);
+         }
+         &[data-force="3"] {
+            transform: translateX(-142px);
+         }
+         &[data-force="-1"] {   
+            transform: translateX(45px);
+         }
+         &[data-force="-2"] {   
+            transform: translateX(87px);
+         }
+         &[data-force="-3"] {   
+            transform: translateX(142px);
+         }
+      }
+   }
+}

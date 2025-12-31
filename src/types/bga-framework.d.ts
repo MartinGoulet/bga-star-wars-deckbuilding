@@ -472,7 +472,7 @@ declare class GameGui<G = Gamedatas> {
   /**
    * Returns true during replay/archive mode if animations should be skipped.
    * 
-   * @deprecated use this.bgaAnimationsActive() instead
+   * @deprecated use this.bga.gameui.bgaAnimationsActive() instead
    */
   instantaneousMode: boolean;
 
@@ -489,7 +489,7 @@ declare class GameGui<G = Gamedatas> {
   /**
    * Flag set to true if the user at the table is a spectator (not a player). 
    * 
-   * @deprecated use this.players.isCurrentPlayerSpectator()
+   * @deprecated use this.bga.players.isCurrentPlayerSpectator()
    */  
   isSpectator: boolean;
 
@@ -584,7 +584,7 @@ declare class GameGui<G = Gamedatas> {
    * 
    * @returns {boolean} is current player active
    * 
-   * @deprecated use this.players.isCurrentPlayerActive()
+   * @deprecated use this.bga.players.isCurrentPlayerActive()
    */
   isCurrentPlayerActive(): boolean;
 
@@ -594,7 +594,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {number} player_id the player to check
    * @returns {boolean} is specified player active
    * 
-   * @deprecated use this.players.isPlayerActive
+   * @deprecated use this.bga.players.isPlayerActive
    */
   isPlayerActive(player_id: number): boolean;
 
@@ -602,7 +602,7 @@ declare class GameGui<G = Gamedatas> {
    * Get the list of current active players ids
    * @returns {number[]} the active player ids
    * 
-   * @deprecated use this.players.getActivePlayerIds
+   * @deprecated use this.bga.players.getActivePlayerIds
    */
   getActivePlayers(): number[];
 
@@ -610,7 +610,7 @@ declare class GameGui<G = Gamedatas> {
    * Return the id of the active player, or null if we are not in an ACTIVE_PLAYER type state. 
    * @returns {number | null} the active player id
    * 
-   * @deprecated use this.players.getActivePlayerId
+   * @deprecated use this.bga.players.getActivePlayerId
    */
   getActivePlayerId(): number | null;
 
@@ -622,7 +622,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {Object} params the call parameters, by default { replaceByYou: false }.
    * @return {string} the formatted player name
    * 
-   * @deprecated use this.players.getFormattedPlayerName
+   * @deprecated use this.bga.players.getFormattedPlayerName
    */
   getFormattedPlayerName(playerId: number, params?: {
     replaceByYou?: boolean;
@@ -632,22 +632,22 @@ declare class GameGui<G = Gamedatas> {
    * This function allows to update the current page title and turn description according to the game state arguments. 
    * Note: this functional also will calls this.onUpdateActionButtons.
    * 
-   * @deprecated If you just want to change the page title, use `this.statusBar.setTitle`
+   * @deprecated If you just want to change the page title, use `this.bga.statusBar.setTitle`
    */
   updatePageTitle(): void;
 
   /**
-   * @deprecated use this.statusBar.addActionButton instead
+   * @deprecated use this.bga.statusBar.addActionButton instead
    */
   addActionButton(id: string, label: string, method: string | Function, destination?: string, blinking?: boolean, color?: string): void;
 
   /**
-   * @deprecated use this.statusBar.removeActionButtons instead
+   * @deprecated use this.bga.statusBar.removeActionButtons instead
    */
   removeActionButtons(): void;
 
   /**
-   * @deprecated use the.actions.performAction
+   * @deprecated use the.bga.actions.performAction
    */
   ajaxcall(url: string, args: object, bind: GameGui, resultHandler: (result: any) => void, allHandler?: (err: any, result?: any) => void): void;
 
@@ -662,7 +662,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {boolean} nomessage if we want a silent check. default false.
    * @returns {boolean} the action is possible
    * 
-   * @deprecated use this.actions.checkAction
+   * @deprecated use this.bga.actions.checkAction
    */
   checkAction(action: string, nomessage?: boolean): boolean;
 
@@ -674,14 +674,14 @@ declare class GameGui<G = Gamedatas> {
    * @param {string} action the action to test
    * @returns {boolean} the action is possible
    * 
-   * @deprecated use this.actions.checkPossibleActions
+   * @deprecated use this.bga.actions.checkPossibleActions
    */
   checkPossibleActions(action: string): boolean;
 
   /**
    * Shows predefined user error that move is unauthorized now.
    * 
-   * @deprecated use this.dialogs.showMoveUnauthorized
+   * @deprecated use this.bga.dialogs.showMoveUnauthorized
    */
   showMoveUnauthorized(): void;
 
@@ -689,14 +689,14 @@ declare class GameGui<G = Gamedatas> {
    * Tell the interface to not preload a specific image in your img root directory. 
    * @param {string} image the filename
    * 
-   * @deprecated use this.images.dontPreloadImage / dontPreloadImages
+   * @deprecated use this.bga.images.dontPreloadImage / dontPreloadImages
    */
   dontPreloadImage(image: string): void;
 
   /**
    * Ensure some specific images are loaded.
    * 
-   * @deprecated use this.images.preloadImage / preloadImages
+   * @deprecated use this.bga.images.preloadImage / preloadImages
    */
   ensureSpecificGameImageLoading( imagelist: string[]): void;
 
@@ -730,7 +730,7 @@ declare class GameGui<G = Gamedatas> {
    * 
    * @param {Object} params the call parameters, by default { prefix: 'notif_', minDuration: 500, minDurationNoText: 1, logger: null, ignoreNotifications: [], onStart: undefined, onEnd: undefined, }.
    * 
-   * @deprecated use this.notifications.setupPromiseNotifications
+   * @deprecated use this.bga.notifications.setupPromiseNotifications
    */
   bgaSetupPromiseNotifications(params?: {
     prefix?: string;
@@ -751,12 +751,12 @@ declare class GameGui<G = Gamedatas> {
   bgaPlayDojoAnimation(anim: DojoAnimation): Promise<any>;
 
   /**
-   * @deprecated use this.userPreferences.get(pref_id)
+   * @deprecated use this.bga.userPreferences.get(pref_id)
    */
   getGameUserPreference(pref_id: number): number;
 
   /**
-   * @deprecated use this.userPreferences.set(pref_id, value)
+   * @deprecated use this.bga.userPreferences.set(pref_id, value)
    */
   setGameUserPreference(pref_id: number, value: number): void;
 
@@ -768,7 +768,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {Object} params the call parameters, by default { lock: true, checkAction: true, checkPossibleActions: false }. Must be overriden to disable interface lock, or to disable checkAction.
    * @returns Promise of the ajax call, or undefined if there is no call (prevented by checkAction/checkPossibleActions)
    * 
-   * @deprecated use the.actions.performAction, note that the result of the catch is now `{ message, args }` instead of `message`
+   * @deprecated use the.bga.actions.performAction, note that the result of the catch is now `{ message, args }` instead of `message`
    */
   bgaPerformAction(action: string, args?: any, params?: {
     lock?: boolean;
@@ -781,7 +781,7 @@ declare class GameGui<G = Gamedatas> {
    * 
    * @returns the Game Area div element
    * 
-   * @deprecated use this.gameArea.getElement()
+   * @deprecated use this.bga.gameArea.getElement()
    */
   getGameAreaElement(): HTMLDivElement;
 
@@ -791,7 +791,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {number} playerId the player id
    * @returns the div element for game specific content on player panels
    * 
-   * @deprecated use this.playerPanels.getElement
+   * @deprecated use this.bga.playerPanels.getElement
    */
   getPlayerPanelElement(playerId: number): HTMLDivElement;
 
@@ -817,7 +817,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {string} msg the string to display. It should be translated.
    * @param {string} type "info", "error", "only_to_log" If set to "info", the message will be an informative message on a white background. If set to "error", the message will be an error message on a red background and it will be added to log. If set to "only_to_log", the message will be added to the game log but will not popup at the top of the screen.
    * 
-   * @deprecated use this.dialogs.showMessage
+   * @deprecated use this.bga.dialogs.showMessage
    */
   showMessage(msg: string, type: 'info' | 'error' | 'only_to_log'): void;
 
@@ -937,7 +937,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {Function} callback callback if confirmed
    * @param {Function} callback_cancel callback if cancelled
    * 
-   * @deprecated use this.dialogs.confirmation. Note that signature changed and it now uses Promise.
+   * @deprecated use this.bga.dialogs.confirmation. Note that signature changed and it now uses Promise.
    */
   confirmationDialog(text: string, callback: Function, callback_cancel?: Function): void;
 
@@ -948,7 +948,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {Object} choices associative array "value => text to display"
    * @param {Function} callback callback returning the choice
    * 
-   * @deprecated use this.dialogs.multipleChoice. Note that signature changed and it now uses Promise.
+   * @deprecated use this.bga.dialogs.multipleChoice. Note that signature changed and it now uses Promise.
    */
   multipleChoiceDialog(text: string, choices: { [value: number]: string }, callback: Function): void;
 
@@ -1000,7 +1000,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {string} name the name of the automata
    * @param {Object} params an object with optional params: color (default black), iconClass (default unset) to set a background image (32px x 32px), score (default undefined)
    * 
-   * @deprecated use this.players.addAutomataPlayerPanel
+   * @deprecated use this.bga.players.addAutomataPlayerPanel
    */
   addAutomataPlayerPanel(id: number, name: string, params: {
       color?: string;
@@ -1014,14 +1014,14 @@ declare class GameGui<G = Gamedatas> {
    * @param {string} message the message to display. It should be translated, so surrounded by `_()`. If unset: "This is the last turn!"
    * @param {Object} args (optional) the args to replace in the message.
    * 
-   * @deprecated use this.gameArea.addLastTurnBanner
+   * @deprecated use this.bga.gameArea.addLastTurnBanner
    */
   addLastTurnBanner(message?: string, args?: any): void;
 
   /**
    * Remove the last turn banner (for example if the player cancelled a move triggering the last turn).
    * 
-   * @deprecated use this.gameArea.removeLastTurnBanner
+   * @deprecated use this.bga.gameArea.removeLastTurnBanner
    */
   removeLastTurnBanner(): void;
 
@@ -1031,7 +1031,7 @@ declare class GameGui<G = Gamedatas> {
    * @param {string} message the message to display. It should be translated, so surrounded by `_()`.
    * @param {Object} args (optional) the args to replace in the message.
    * 
-   * @deprecated use this.gameArea.addWinConditionBanner
+   * @deprecated use this.bga.gameArea.addWinConditionBanner
    */
   addWinConditionBanner(message: string, args?: any): void;
 }

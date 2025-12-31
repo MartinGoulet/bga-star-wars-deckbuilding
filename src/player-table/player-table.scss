@@ -1,0 +1,81 @@
+.swd-player-table {
+   border-radius: 8px;
+   padding: 10px;
+   margin: 10px;
+   color: #ffffff;
+   min-height: 200px;
+
+   .card[data-type="ship"] {
+      width: 168px !important;
+      height: 120px !important;
+      &[data-is-ally="true"],
+      &[data-is-enemy="true"] {
+         width: var(--bga-cards_card-height);
+         height: var(--bga-cards_card-width);
+      }
+      .bga-cards_card-sides {
+         transform: rotate(90deg);
+         transform-origin: center center;
+      }
+   }
+
+   .card[data-is-enemy="true"] .bga-cards_card-sides {
+      transform: rotate(180deg);
+      transform-origin: center center;
+   }
+}
+
+.swd-player-table-opponent {
+   .swd-player-table {
+      border-bottom: 2px solid var(--color-border);
+   }
+
+   .swd-player-base-section {
+      flex-direction: column-reverse;
+
+      .card[data-type="ship"] {
+         .bga-cards_card-sides {
+            transform: rotate(-90deg);
+         }
+      }
+   }
+}
+
+.swd-player-table-current {
+   .swd-player-table {
+      border-top: 2px solid var(--color-border);
+   }
+}
+
+.swd-player-area {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+   gap: 20px;
+
+   .swd-play-area {
+      padding: 10px;
+      .card {
+         &:not(:first-child) {
+            margin-left: -90px;
+         }
+      }
+   }
+
+   .swd-player-base-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+   }
+
+   .swd-player-decks {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px;
+   }
+}
