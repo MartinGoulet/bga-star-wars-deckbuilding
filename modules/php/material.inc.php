@@ -12,13 +12,9 @@ $this->card_types = $empire_cards + $rebel_cards + $neutral_cards +
          'img' => CardIds::OUTER_RIM_PILOT,
          'type' => CARD_TYPE_UNIT,
          'faction' => FACTION_NEUTRAL,
+         'cost' => 2,
+         'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
          'abilities' => [
-            [
-               'trigger' => TRIGGER_ON_PLAY,
-               'effects' => [
-                  ['type' => ABILITY_GAIN_RESOURCE, 'value' => 2],
-               ],
-            ],
             [
                'trigger' => TRIGGER_ACTIVATE_CARD,
                'costs' => [

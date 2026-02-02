@@ -2,19 +2,30 @@
 
 namespace Bga\Games\StarWarsDeckbuilding\Core;
 
-use Bga\GameFramework\NotificationMessage;
+use Bga\GameFramework\Db\Globals;
+use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
+use Bga\Games\StarWarsDeckbuilding\Effects\Effect;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectDefinition;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use CardInstance;
 
 final class GameContext {
-    public bool $hasChangeState = false;
+    private const GALAXY_ROW_SIZE = 6;
+    private int $activePlayerId;
 
-    public function __construct(private Game $game, private int $activePlayerId) {
+    public bool $hasChangeState = false;
+    public CardRepository $cardRepository;
+    public Globals $globals;
+
+    public function __construct(public Game $game) {
+        $this->activePlayerId = intval($game->getActivePlayerId());
+        $this->cardRepository = $this->game->cardRepository;
+        $this->globals = $this->game->globals;
     }
 
-    public function changeState(string $stateName): void {
+    public function changeState(int $stateNumber): void {
         $this->hasChangeState = true;
-        $this->game->gamestate->jumpToState($stateName);
+        $this->game->gamestate->jumpToState($stateNumber);
     }
 
     public function setGlobalVariable(string $name, mixed $value): void {
@@ -24,89 +35,117 @@ final class GameContext {
     public function currentPlayer(): PlayerContext {
         return new PlayerContext($this->game, $this->activePlayerId);
     }
-}
 
-final class PlayerContext {
-    private string $faction;
-
-    public function __construct(private Game $game, private int $playerId) {
-        $sql = "SELECT player_faction FROM player WHERE player_id = {$playerId}";
-        $this->faction = $this->game->getUniqueValueFromDB($sql);
+    public function opponentPlayer(): PlayerContext {
+        return new PlayerContext($this->game, $this->getOpponentId());
     }
 
-    public function addResources(int $amount, string $message = ""): void {
-        if ($message === "") {
-            $message = clienttranslate('${player_name} gains ${amount} Resource(s)');
-        }
-        $notif = new NotificationMessage($message, [
-            'player_id' => $this->playerId,
-            'amount' => $amount,
-        ]);
-        // $currentValue = $this->game->playerResources->get($this->playerId);
-        // $this->game->playerResources->set($this->playerId, $currentValue + $amount, $notif);
-        $this->game->playerResources->inc($this->playerId, $amount, $notif);
+    public function getOpponentId(): int {
+        $sql = "SELECT player_id FROM player WHERE player_id != {$this->activePlayerId}";
+        return intval($this->game->getUniqueValueFromDb($sql));
     }
 
-    public function gainForce(int $amount, string $message = ""): void {
-        $originalAmount = $amount;
-        $amount = $this->faction === FACTION_EMPIRE ? -$amount : $amount;
+    public function refillGalaxyRow(): void {
+        $galaxyRow = $this->game->cardRepository->getGalaxyRow();
+        $neededCards = self::GALAXY_ROW_SIZE - count($galaxyRow);
 
-        $currentValue = $this->game->forceTrack->get();
-        if (($currentValue + $amount) < -3 || ($currentValue + $amount) > 3) {
-            return;
+        if ($neededCards > 0) {
+            $newCards = $this->game->cardRepository->drawCardsFromGalaxyDeck($neededCards);
+            $this->game->notify->all(
+                'onRefillGalaxyRow',
+                clienttranslate('Refilling Galaxy Row with ${num} card(s). ${card_names}'),
+                [
+                    'num' => count($newCards),
+                    'newCards' => array_values($newCards),
+                    'card_names' => array_map(fn($card) => $card->name, $newCards),
+                    'i18n' => ['card_names'],
+                ]
+            );
         }
-
-        if ($message === "") {
-            $message = clienttranslate('${player_name} gains ${amount} Power');
-        }
-
-        $notif = new NotificationMessage($message, [
-            'player_id' => $this->playerId,
-            'amount' => $originalAmount,
-        ]);
-
-        $this->game->forceTrack->set($currentValue + $amount, $notif);
     }
 
-    public function moveCardToHand(CardInstance $card): void {
-        $this->game->cardRepository->addCardToPlayerHand($card->id, $this->playerId);
+    /** 
+     * @param int $playerId
+     * @param string[] $zone
+     * @return CardInstance[]
+     */
+    public function getSelectableCards(int $playerId, array $zone): array {
+
+        $selectableCards = [];
+        foreach ($zone as $z) {
+            switch ($z) {
+                case ZONE_HAND:
+                    $cards = $this->game->cardRepository->getPlayerHand($playerId);
+                    break;
+                case ZONE_PLAYER_PLAY_AREA:
+                    $cards = $this->game->cardRepository->getPlayerPlayArea($playerId);
+                    break;
+                case ZONE_DISCARD:
+                    $cards = $this->game->cardRepository->getPlayerDiscardPile($playerId);
+                    break;
+                default:
+                    throw new \BgaUserException("Invalid zone for selectable cards: $z");
+            }
+            foreach ($cards as $card) {
+                $selectableCards[$card->id] = $card;
+            }
+        }
+        return $selectableCards;
+    }
+
+    public function exileCard(int $cardId): void {
+        $this->game->cardRepository->addCardToExile($cardId);
+
+        $card = $this->cardRepository->getCardById($cardId);
         $this->game->notify->all(
-            'onMoveCardToHand',
-            clienttranslate('${player_name} moves ${card_name} to their hand'),
+            'onExileCard',
+            clienttranslate('${player_name} exiles card ${card_name}'),
             [
-                'player_id' => $this->playerId,
+                'player_id' => $this->activePlayerId,
                 'card' => $card,
             ]
         );
     }
 
-    public function drawCards(int $count): void {
-        $cards = $this->game->cardRepository->drawCardsForPlayer($this->playerId, $count);
-        $this->game->notify->all(
-            'onDrawCards',
-            clienttranslate('${player_name} draws ${count} card(s)'),
-            [
-                'player_id' => $this->playerId,
-                'count' => $count,
-                'cards' => array_values(array_map(fn($c) => $c->getOnlyId(), $cards)),
-                '_private' => [
-                    $this->playerId => new NotificationMessage(
-                        clienttranslate('${player_name} draws ${_private.cards_names}'),
-                        [
-                            'player_id' => $this->playerId,
-                            'cards_names' => implode(', ', array_map(fn($c) => $c->name, $cards)),
-                            'cards' => $cards,
-                            'i18n' => ['cards_names']
-                        ]
-                    )
-                ]
-            ]
-        );
+    public function getGameEngine(): GameEngine {
+        return new GameEngine($this->game, $this);
     }
 
-    public function isForceWithYou(): bool {
-        $currentValue = $this->game->forceTrack->get();
-        return ($this->faction === FACTION_REBEL && $currentValue > 0)
-            || ($this->faction === FACTION_EMPIRE && $currentValue < 0);
+    /**
+     * @param CardInstance $target
+     * @param int $amount
+     * @return int Remaining damage after applying to target
+     */
+    public function assignDamageToTarget(CardInstance $target, int $amount): int {
+        $remaining = 0;
+        $target->damage += $amount;
+        if ($target->damage > $target->health) {
+            $remaining = $target->damage - $target->health;
+            $target->damage = $target->health;
+        }
+        $damages = $this->game->globals->get(GVAR_DAMAGE_ON_CARDS, []);
+        $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $remaining);
+
+        if ($target->damage <= $target->health) {
+            $damages[$target->id] = $target->damage;
+            $this->game->globals->set(GVAR_DAMAGE_ON_CARDS, $damages);
+
+            $this->game->notify->all(
+                'onDealDamageToCard',
+                clienttranslate('${player_name} deals ${damage} damage to ${card_name} (total damage: ${total_damage}/${health})'),
+                [
+                    'player_id' => $this->game->getActivePlayerId(),
+                    'card' => $target,
+                    'damage' => ($amount - $remaining),
+                    'health' => $target->health,
+                    'total_damage' => $target->damage,
+                ]
+            );
+        } else if (isset($damages[$target->id])) {
+            unset($damages[$target->id]);
+        }
+
+
+        return $remaining;
     }
 }

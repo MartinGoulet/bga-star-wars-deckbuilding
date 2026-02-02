@@ -1,0 +1,211 @@
+.tooltip-arrow {
+   display: block;
+   width: 0px;
+   height: 0px;
+   border: 7px solid transparent;
+   border-bottom: 10px solid #659dc7;
+   margin-top: -16px;
+
+   &::before {
+      content: "";
+      position: absolute;
+      display: block;
+      width: 0px;
+      height: 0px;
+      border: 7px solid transparent;
+      border-bottom: 10px solid #ebebeb;
+      top: -5px;
+      left: -7px;
+   }
+}
+
+[data-popper-placement="top"] .tooltip-arrow {
+   border-bottom: 7px solid transparent;
+   border-top: 10px solid #659dc7;
+   bottom: -16px;
+   margin: 0px;
+
+   &::before {
+      border-bottom: 7px solid transparent;
+      border-top: 10px solid #ebebeb;
+      top: -12px;
+   }
+}
+
+[data-popper-placement="right"] .tooltip-arrow {
+   border-bottom: 7px solid transparent;
+   border-right: 10px solid #659dc7;
+   margin: 0px;
+   left: -16px;
+
+   &::before {
+      border-bottom: 7px solid transparent;
+      border-right: 10px solid #ebebeb;
+      top: -7px;
+      left: -5px;
+   }
+}
+
+[data-popper-placement="left"] .tooltip-arrow {
+   border-bottom: 7px solid transparent;
+   border-left: 10px solid #659dc7;
+   margin: 0px;
+   right: -17px;
+   left: initial;
+
+   &::before {
+      border-bottom: 7px solid transparent;
+      border-left: 10px solid #ebebeb;
+      top: -7px;
+      left: -12px;
+   }
+}
+
+.swd-tooltip {
+   animation-fill-mode: forwards;
+   animation: fadeInNoTransform 0.3s linear both;
+   pointer-events: all !important;
+
+   .card-tooltip-frame {
+      background: rgb(235, 235, 235);
+      padding: 5px;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px black;
+      border: 1px solid #7eabcd;
+
+      --width: 120px;
+      --height: 163px;
+   }
+
+   &[data-popper-placement="left"] .swd-card-tooltip {
+      .card-tooltip-frame {
+         order: 2;
+      }
+
+      .tooltip-explanation {
+         order: 1;
+         margin-left: 0px;
+         margin-right: 10px;
+      }
+   }
+}
+
+@keyframes fadeInNoTransform {
+   0% {
+      opacity: 0;
+   }
+
+   50% {
+      opacity: 0.5;
+   }
+
+   100% {
+      opacity: 1;
+   }
+}
+
+//  _____           _ _   _
+// |_   _|__   ___ | | |_(_)_ __
+//   | |/ _ \ / _ \| | __| | '_ \
+//   | | (_) | (_) | | |_| | |_) |
+//   |_|\___/ \___/|_|\__|_| .__/
+//                         |_|
+
+.mobile_version {
+   .swd-card-tooltip {
+      .card-tooltip-frame {
+         --card-width: calc(110px * 2.8);
+         --card-height: calc(154px * 2.8);
+      }
+   }
+}
+
+.swd-card-tooltip {
+   display: flex;
+   --bga-cards_card-width: calc(120px * 2);
+   --bga-cards_card-height: calc(168px * 2);
+   --bga-cards_card-effective-width: calc(120px * 2);
+   --bga-cards_card-effective-height: calc(168px * 2);
+
+   .card-tooltip-frame {
+      background: #ebebeb;
+      padding: 5px;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px black;
+      border: 1px solid #7eabcd;
+
+      .card[data-type="ship"] {
+         width: var(--bga-cards_card-height) !important;
+         height: var(--bga-cards_card-width) !important;
+
+         .bga-cards_card-sides {
+            transform: rotate(90deg);
+            transform-origin: center center;
+         }
+      }
+
+      .card[data-type="base"] {
+         width: var(--bga-cards_card-height) !important;
+         height: var(--bga-cards_card-width) !important;
+
+         .bga-cards_card-side {
+            width: var(--bga-cards_card-height) !important;
+            height: var(--bga-cards_card-width) !important;
+         }
+      }
+
+      .card {
+         &.card-log {
+            border-radius: 10px;
+         }
+
+         .front {
+            border-radius: 10px;
+         }
+      }
+   }
+
+   .tooltip-explanation {
+      &:empty {
+         display: none;
+      }
+
+      width: 250px;
+      margin-left: 10px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: white;
+
+      .explanation {
+         background: #242642;
+         display: flex;
+         align-items: center;
+         border-radius: 6px;
+         border: 1px solid #7eabcd;
+         box-shadow: 1px 1px 6px 4px black;
+         flex-direction: column;
+         padding: 8px;
+
+         .explanation-title {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #ffffff;
+         }
+
+         .explanation-gametext {
+            font-size: 1rem;
+            text-align: center;
+            font-style: italic;
+            color: #ffffff;
+            padding: 20px 10px;
+         }
+
+         p {
+            padding-right: 10px;
+            text-align: center;
+         }
+      }
+   }
+}

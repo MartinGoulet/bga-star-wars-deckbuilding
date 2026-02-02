@@ -1,4 +1,4 @@
-.card {
+.bga-cards_card {
    transition: all 0.5s ease-in-out;
    .bga-cards_card-sides {
       transition: all 0.5s ease-in-out;
@@ -9,6 +9,7 @@
       image-rendering: high-quality;
       background-image: url("img/cards.jpg");
       background-size: 800% 800%;
+      transition: all 0.5s ease-in-out;
 
       @for $row from 0 through 8 {
          @for $col from 0 through 7 {
@@ -21,7 +22,6 @@
    .back {
       background-position: -600% -700%;
    }
-
 
    &[data-type="base"] {
       width: 168px !important;
@@ -51,6 +51,22 @@
 
       &[data-faction="Rebel"] .bga-cards_card-side {
          background-image: url("img/base-rebel.jpg");
+      }
+
+      .card-damage {
+         position: absolute;
+         color: white;
+         font-weight: 800;
+         background-color: #5a1740;
+         border-radius: 50%;
+         width: 16px;
+         height: 16px;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         font-size: 12px;
+         bottom: 5px;
+         left: 48%;
       }
    }
 }

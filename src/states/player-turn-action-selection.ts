@@ -1,34 +1,44 @@
-import { Game } from "../game";
-import { Card, StateHandler } from "../types/game";
+import { Card } from "../types/game";
+import { BaseState } from "./base-state";
 
 interface PlayerTurnActionSelectionArgs {
    selectableCardIds: number[];
    selectableGalaxyCardIds: number[];
+   selectableAbilityCardIds: number[];
+   canCommitAttack: boolean;
 }
 
-export class PlayerTurnActionSelectionState implements StateHandler<PlayerTurnActionSelectionArgs> {
-   constructor(protected game: Game) {}
+export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSelectionArgs> {
    onEnteringState(args: PlayerTurnActionSelectionArgs, isCurrentPlayerActive: boolean): void {
       if (!isCurrentPlayerActive) return;
 
+      if (args.canCommitAttack) {
+         const handle = async () => await this.game.actions.performAction("actCommitAttack");
+         this.game.statusBar.addActionButton(_("Commit to an attack"), handle);
+      }
+
+      const handleEndTurn = async () => await this.game.actions.performAction("actEndTurn");
+      this.game.statusBar.addActionButton(_("End Turn"), handleEndTurn, {
+         color: "alert",
+         confirm: () => {
+            if (args.selectableCardIds.length > 0) {
+               return _("You have playable cards in your hand. Are you sure you want to end your turn?");
+            } else if (args.selectableGalaxyCardIds.length > 0) {
+               return _(
+                  "You have purchasable cards in the Galaxy Row and resources available. Are you sure you want to end your turn?",
+               );
+            } else if (args.canCommitAttack) {
+               return _("You can still commit to an attack. Are you sure you want to end your turn?");
+            }
+            return null;
+         },
+      });
+
       this.setupPlayerHandSelectableCards(args);
       this.setupGalaxyRowSelectableCards(args);
+      this.setupPlayerPlayAreaSelectableCards(args);
+      this.setupOuterRimSelectableCards(args);
    }
-   onLeavingState(isCurrentPlayerActive: boolean): void {
-      if (!isCurrentPlayerActive) return;
-      this.game.playerHand.setSelectionMode("none");
-      this.game.playerHand.onCardClick = undefined;
-   }
-   onUpdateActionButtons?(args: PlayerTurnActionSelectionArgs, isCurrentPlayerActive: boolean): void {
-      // this.addButtonPlayCard();
-   }
-   // private addButtonPlayCard() {
-   //    const handle = async () => await this.game.actions.performAction("actPlayCard");
-
-   //    this.game.statusBar.addActionButton(_("Play Card(s)"), handle, {
-   //       disabled: this.game.playerHand.getCards().length === 0,
-   //    });
-   // }
 
    private setupPlayerHandSelectableCards(args: PlayerTurnActionSelectionArgs): void {
       const selectableCards = this.game.playerHand
@@ -48,9 +58,7 @@ export class PlayerTurnActionSelectionState implements StateHandler<PlayerTurnAc
    private setupGalaxyRowSelectableCards(args: PlayerTurnActionSelectionArgs): void {
       const galaxyRow = this.game.tableCenter.galaxyRow;
 
-      const selectableCards = galaxyRow
-         .getCards()
-         .filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+      const selectableCards = galaxyRow.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
 
       galaxyRow.setSelectionMode("single");
       galaxyRow.setSelectableCards(selectableCards);
@@ -58,5 +66,33 @@ export class PlayerTurnActionSelectionState implements StateHandler<PlayerTurnAc
          galaxyRow.unselectCard(card, true);
          await this.game.actions.performAction("actPurchaseGalaxyCard", { cardId: card.id });
       };
+   }
+
+   private setupOuterRimSelectableCards(args: PlayerTurnActionSelectionArgs): void {
+      const outerRimDeck = this.game.tableCenter.outerRimDeck;
+
+      const selectableCards = outerRimDeck.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+
+      outerRimDeck.setSelectionMode("single");
+      outerRimDeck.setSelectableCards(selectableCards);
+      outerRimDeck.onCardClick = async (card: Card) => {
+         outerRimDeck.unselectCard(card, true);
+         await this.game.actions.performAction("actPurchaseGalaxyCard", { cardId: card.id });
+      };
+   }
+
+   private setupPlayerPlayAreaSelectableCards(args: PlayerTurnActionSelectionArgs): void {
+      const { playArea, ships } = this.game.getCurrentPlayerTable();
+
+      [playArea, ships].forEach((area) => {
+         const selectableCards = area.getCards().filter((card) => args.selectableAbilityCardIds.includes(card.id));
+
+         area.setSelectionMode("single");
+         area.setSelectableCards(selectableCards);
+         area.onCardClick = async (card: Card) => {
+            area.unselectCard(card, true);
+            await this.game.actions.performAction("actUseCardAbility", { cardId: card.id });
+         };
+      });
    }
 }

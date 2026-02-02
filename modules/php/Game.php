@@ -25,6 +25,7 @@ use Bga\GameFramework\Components\Counters\PlayerCounter;
 use Bga\GameFramework\Components\Counters\TableCounter;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
+use CardIds;
 use CardInstance;
 
 require_once('constants.inc.php');
@@ -168,6 +169,7 @@ class Game extends \Bga\GameFramework\Table {
         $result['galaxyDeckCount'] = $this->cardRepository->countGalaxyDeck();
         $result['galaxyDiscard'] = $this->cardRepository->getGalaxyDiscardPile();
         $result['playerHand'] = array_values($this->cardRepository->getPlayerHand($current_player_id));
+        $result['outerRimDeck'] = array_values($this->cardRepository->getOuterRimDeck());
         
         foreach($result["players"] as &$player) {
             $pId = intval($player['id']);
@@ -205,6 +207,7 @@ class Game extends \Bga\GameFramework\Table {
         shuffle($factions);
 
         foreach ($players as $player_id => &$player) {
+            $player['player_id'] = $player_id;
             $player['faction'] = array_shift($factions);
             // Now you can access both $player_id and $player array
             $query_values[] = vsprintf("('%s', '%s', '%s', '%s', '%s', '%s')", [
@@ -244,8 +247,9 @@ class Game extends \Bga\GameFramework\Table {
         // TODO: Setup the initial game situation here.
         $this->cardRepository->setup($players);
 
-        // Activate first player once everything has been initialized and ready.
-        $this->activeNextPlayer();
+        // Empire starts first
+        $player = array_find($players, fn($p) => $p['faction'] === FACTION_EMPIRE);
+        $this->gamestate->changeActivePlayer($player['player_id']);
 
         return PlayerTurn_ActionSelection::class;
     }
@@ -275,6 +279,17 @@ class Game extends \Bga\GameFramework\Table {
         $this->cardRepository->setup($players);
         $this->playerResources->setAll(0);
         $this->forceTrack->set(3);
+    }
+
+    #[Debug(reload: true)]
+    public function debug_resetAttack() {
+        $this->globals->set(GVAR_ATTACKERS_CARD_IDS, []);
+        $this->globals->set(GVAR_ALREADY_ATTACKING_CARDS_IDS, []);
+    }
+
+    #[Debug(reload: true)]
+    public function debug_shuffle() {
+        $this->cards->shuffle(ZONE_OUTER_RIM_DECK);
     }
 
     /*

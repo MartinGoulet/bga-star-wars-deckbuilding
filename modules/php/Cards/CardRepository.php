@@ -4,23 +4,45 @@ namespace Bga\Games\StarWarsDeckbuilding\Cards;
 
 use Bga\GameFramework\Components\Deck;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use CardIds;
 use CardInstance;
 
 
 final class CardRepository {
+
+    public array | null $damageOnCards = null;
+
     public function __construct(private Game $game, private Deck $deck) {
+    }
+
+    public function addCardToExile(int $cardId): void {
+        $this->deck->insertCardOnExtremePosition($cardId, ZONE_EXILE, true);
     }
 
     public function addCardToPlayArea(int $cardId, int $playerId): void {
         $this->deck->insertCardOnExtremePosition($cardId, ZONE_PLAYER_PLAY_AREA . $playerId, true);
     }
 
+    public function addCardToShipArea(int $cardId, int $playerId): void {
+        $this->deck->insertCardOnExtremePosition($cardId, 'ships_' . $playerId, true);
+    }
+
     public function addCardToPlayerDiscard(int $cardId, int $playerId): void {
         $this->deck->insertCardOnExtremePosition($cardId, 'discard_' . $playerId, true);
     }
 
+    public function addCardsToPlayerDiscard(array $cardIds, int $playerId): void {
+        foreach ($cardIds as $cardId) {
+            $this->deck->insertCardOnExtremePosition($cardId, 'discard_' . $playerId, true);
+        }
+    }
+
     public function addCardToPlayerHand(int $cardId, int $playerId): void {
         $this->deck->moveCard($cardId, 'hand', $playerId);
+    }
+
+    public function addCardToGalaxyDiscard(int $cardId): void {
+        $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_DISCARD, true);
     }
 
     public function countGalaxyDeck(): int {
@@ -36,17 +58,33 @@ final class CardRepository {
      */
     public function drawCardsForPlayer(int $playerId, int $count): array {
         $cards = $this->deck->pickCardsForLocation($count, 'deck_' . $playerId, ZONE_HAND, $playerId);
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
+    }
+
+    /**
+     * @return CardInstance[]
+     */
+    public function drawCardsFromGalaxyDeck(int $count): array {
+        $cards = $this->deck->pickCardsForLocation($count, ZONE_GALAXY_DECK, ZONE_GALAXY_ROW);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
     public function getCard(int $cardId): CardInstance {
         $row = $this->deck->getCard($cardId);
-        return self::createFromRow($row);
+        return $this->createFromRow($row);
     }
 
     public function getCardById(int $cardId): CardInstance {
         $row = $this->deck->getCard($cardId);
-        return self::createFromRow($row);
+        return $this->createFromRow($row);
+    }
+
+    /**
+     * @return CardInstance[]
+     */
+    public function getCardsByIds(array $cardIds): array {
+        $rows = $this->deck->getCards($cardIds);
+        return array_map(fn($row) => $this->createFromRow($row), $rows);
     }
 
     public function getActiveBase(int $playerId): CardInstance | null {
@@ -54,15 +92,23 @@ final class CardRepository {
         if ($card === null) {
             return null;
         }
-        return self::createFromRow($card);
+        return $this->createFromRow($card);
+    }
+
+    /**
+     * @return CardInstance[]
+     */
+    public function getPlayerBaseDeck(int $playerId): array {
+        $cards = $this->deck->getCardsInLocation('base_' . $playerId);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
     /**
      * @return CardInstance[]
      */
     public function getPlayerDiscardPile(int $playerId): array {
-        $cards = $this->deck->getCardsInLocation('discard_' . $playerId);
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        $cards = $this->deck->getCardsInLocation('discard_' . $playerId, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
     /**
@@ -70,17 +116,23 @@ final class CardRepository {
      */
     public function getPlayerPlayArea(int $playerId): array {
         $cards = $this->deck->getCardsInLocation(ZONE_PLAYER_PLAY_AREA . $playerId, null, 'card_location_arg');
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
+    /**
+     * @return CardInstance[]
+     */
     public function getPlayerShips(int $playerId): array {
-        $cards = $this->deck->getCardsInLocation('ships_' . $playerId);
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        $cards = $this->deck->getCardsInLocation('ships_' . $playerId, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
+    /**
+     * @return CardInstance[]
+     */
     public function getGalaxyDiscardPile(): array {
-        $cards = $this->deck->getCardsInLocation(ZONE_GALAXY_DISCARD);
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        $cards = $this->deck->getCardsInLocation(ZONE_GALAXY_DISCARD, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
     /**
@@ -88,22 +140,37 @@ final class CardRepository {
      */
     public function getGalaxyRow(): array {
         $cards = $this->deck->getCardsInLocation(ZONE_GALAXY_ROW, null, 'card_location_arg');
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
+    }
+
+    public function getOuterRimDeck(): array {
+        $cards = $this->deck->getCardsInLocation(ZONE_OUTER_RIM_DECK, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
     public function getPlayerHand(int $playerId): array {
         $cards = $this->deck->getCardsInLocation('hand', $playerId);
-        return array_map(fn($row) => self::createFromRow($row), $cards);
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
-    private static function createFromRow(array $row): CardInstance {
+    private function createFromRow(array $row): CardInstance {
+        if ($this->damageOnCards == null) {
+            $this->damageOnCards = $this->game->globals->get(GVAR_DAMAGE_ON_CARDS, []);
+        }
+        $damage = isset($this->damageOnCards[$row['id']]) ? $this->damageOnCards[$row['id']] : 0;
         return CardFactory::create(
             intval($row['id']),
             $row['type'],
             intval($row['type_arg']),
             $row['location'],
-            intval($row['location_arg'])
+            intval($row['location_arg']),
+            $damage
         );
+    }
+
+    public function reshufflePlayerDiscardIntoDeck(int $playerId): void {
+        $this->deck->moveAllCardsInLocation('discard_' . $playerId, 'deck_' . $playerId);
+        $this->deck->shuffle('deck_' . $playerId);
     }
 
     public function setup(array $players): void {
@@ -122,10 +189,16 @@ final class CardRepository {
         $this->deck->createCards($cards, ZONE_DECK);
         $this->deck->shuffle(ZONE_DECK);
 
-        for ($i = 0; $i < 6; $i++) {
-            $card = $this->deck->getCardOnTop(ZONE_DECK);
-            $this->deck->insertCardOnExtremePosition($card['id'], ZONE_GALAXY_ROW, true);
-        }
+        $this->drawCardsFromGalaxyDeck(6);
+
+        // Setup outer rim row
+        $cards = [];
+        $cards[] = [
+            'type' => CARD_TYPE_UNIT,
+            'type_arg' => CardIds::OUTER_RIM_PILOT,
+            'nbr' => 10,
+        ];
+        $this->deck->createCards($cards, ZONE_OUTER_RIM_DECK);
 
         // Setup player decks
         foreach ($players as $player_id => $player) {

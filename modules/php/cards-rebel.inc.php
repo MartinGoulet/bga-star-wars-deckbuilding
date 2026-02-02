@@ -19,7 +19,7 @@ $rebel_cards = [
       'cost' => 4,
       'unique' => true,
       'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
-      'abilities' => []
+      'abilities' => [],
    ],
 
    CardIds::U_WING => [
@@ -29,7 +29,26 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 4,
       'stats' => ['power' => 0, 'resource' => 3, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                  ],
+                  'value' => 3,
+               ]
+            ],
+         ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'count' => 4,
+         ]
+      ]
    ],
 
    CardIds::HAMMERHEAD_CORVETTE => [
@@ -50,7 +69,27 @@ $rebel_cards = [
       'cost' => 5,
       'unique' => true,
       'stats' => ['power' => 3, 'resource' => 2, 'force' => 0],
-      'abilities' => []
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_DRAW_CARD,
+                  'value' => 1,
+               ],
+               [
+                  'type' => EFFECT_DRAW_CARD,
+                  'value' => 1,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_IN_PLAY,
+                        'cardIds' => [CardIds::MILLENNIUM_FALCON],
+                     ],
+                  ],
+               ],
+            ],
+         ]
+      ]
    ],
 
    CardIds::CASSIAN_ANDOR => [
@@ -61,7 +100,17 @@ $rebel_cards = [
       'cost' => 5,
       'unique' => true,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
-      'abilities' => []
+      'abilities' => [],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'count' => 3,
+         ],
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'count' => 2,
+         ]
+      ]
    ],
 
    CardIds::B_WING => [
@@ -71,7 +120,40 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 5,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_CHOICE,
+                  'target' => TARGET_OPPONENT,
+                  'options' => [
+                     [
+                        'type' => CHOICE_OPTION_DISCARD_CARD,
+                        'target' => TARGET_OPPONENT,
+                        'zones' => [ZONE_HAND],
+                        'count' => 1,
+                        'label' => clienttranslate('Discard a card'),
+                     ],
+                     [
+                        'type' => CHOICE_OPTION_GAIN_ATTACK,
+                        'label' => clienttranslate('Gain 2 Attack'),
+                        'value' => 2,
+                     ],
+                  ],
+
+               ]
+            ],
+         ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_EXILE_CARD,
+            'target' => TARGET_SELF,
+            'zones' => [ZONE_DISCARD, ZONE_HAND],
+            'count' => 2,
+         ]
+      ]
    ],
 
    CardIds::PRINCESS_LEIA => [
@@ -155,7 +237,28 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            "trigger" => TRIGGER_ACTIVATE_CARD,
+            "effects" => [
+               [
+                  "type" => EFFECT_CHOICE,
+                  "options" => [
+                     [
+                        'label' => clienttranslate('Repair 2 damage from your Base '),
+                        'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                        'count' => 2
+                     ],
+                     [
+                        'label' => clienttranslate('Gain 1 Resource'),
+                        'type' => EFFECT_GAIN_RESOURCE,
+                        'count' => 1
+                     ],
+                  ],
+               ]
+            ],
+         ]
+      ],
    ],
 
    CardIds::CHIRRUT_IMWE => [
@@ -166,7 +269,13 @@ $rebel_cards = [
       'cost' => 3,
       'unique' => true,
       'stats' => ['power' => 0, 'resource' => 0, 'force' => 2],
-      'abilities' => []
+      'abilities' => [],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'count' => 2,
+         ]
+      ]
    ],
 
    CardIds::REBEL_COMMANDO => [
@@ -176,7 +285,27 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 3,
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_DISCARD_CARD,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                  ],
+                  'target' => TARGET_OPPONENT,
+                  'count' => 1,
+               ]
+            ],
+         ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'count' => 2,
+         ]
+      ]
    ],
 
    CardIds::X_WING => [
@@ -201,7 +330,7 @@ $rebel_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'condition' => [
+            'conditions' => [
                ['type' => CONDITION_ANOTHER_UNIQUE_UNIT_IN_PLAY],
             ],
             'effects' => [
@@ -247,19 +376,19 @@ $rebel_cards = [
                   "type" => EFFECT_CHOICE,
                   'options' => [
                      [
-                        'type' => CHOICE_OPTION_GAIN_POWER,
-                        'label' => clienttranslate('Gain 1 Power'),
-                        'value' => 1
+                        'label' => clienttranslate('Gain 1 Attack'),
+                        'type' => EFFECT_GAIN_ATTACK,
+                        'count' => 1
                      ],
                      [
-                        'type' => CHOICE_OPTION_GAIN_RESOURCE,
                         'label' => clienttranslate('Gain 1 Resource'),
-                        'value' => 1
+                        'type' => EFFECT_GAIN_RESOURCE,
+                        'count' => 1
                      ],
                      [
-                        'type' => CHOICE_OPTION_GAIN_FORCE,
                         'label' => clienttranslate('Gain 1 Force'),
-                        'value' => 1
+                        'type' => EFFECT_GAIN_FORCE,
+                        'count' => 1
                      ],
                   ],
                ]

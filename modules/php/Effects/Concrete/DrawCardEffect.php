@@ -3,24 +3,16 @@
 namespace Bga\Games\StarWarsDeckbuilding\Effects\Concrete;
 
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
-use CardInstance;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 
-use Bga\Games\StarWarsDeckbuilding\Effects\Effect;
-
-final class DrawCardEffect extends Effect
-{
+final class DrawCardEffect extends EffectInstance {
     private int $value;
 
-    public function __construct(int $value, array $conditions)
-    {
-        parent::__construct($conditions);
+    public function __construct(int $value) {
         $this->value = $value;
     }
 
-    public function resolve(
-        GameContext $ctx,
-        CardInstance $source
-    ): void {
+    public function resolve(GameContext $ctx): void {
         $ctx->currentPlayer()->drawCards($this->value);
     }
 }

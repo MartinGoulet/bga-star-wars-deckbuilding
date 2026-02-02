@@ -1,46 +1,41 @@
-@use 'card-manager/card-manager';
-@use 'table-center/table-center';
-@use 'player-table/player-table';
-@use 'player-hand/player-hand';
+@use "card-manager/card-manager";
+@use "table-center/table-center";
+@use "player-table/player-table";
+@use "player-hand/player-hand";
+@use "tooltip-manager/tooltip-manager";
 
 html {
-  background: black;
-  background-image: none;
+   background: black;
+   background-image: none;
 }
-
 
 /* Couche d’étoiles */
 html::before,
 html::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-repeat: repeat;
-  // animation: starsMove 120s linear infinite;
-  z-index: -1;
+   content: "";
+   position: fixed;
+   inset: 0;
+   background-repeat: repeat;
+   // animation: starsMove 120s linear infinite;
+   z-index: -1;
 }
 
 /* Étoiles fines */
 html::before {
-  background-image:
-    radial-gradient(1px 1px at 20% 30%, white, transparent),
-    radial-gradient(1px 1px at 80% 40%, white, transparent),
-    radial-gradient(1px 1px at 50% 80%, white, transparent),
-    radial-gradient(1px 1px at 10% 60%, white, transparent),
-    radial-gradient(1px 1px at 90% 90%, white, transparent);
-  background-size: 200px 200px;
-  opacity: 0.8;
+   background-image: radial-gradient(1px 1px at 20% 30%, white, transparent),
+      radial-gradient(1px 1px at 80% 40%, white, transparent), radial-gradient(1px 1px at 50% 80%, white, transparent),
+      radial-gradient(1px 1px at 10% 60%, white, transparent), radial-gradient(1px 1px at 90% 90%, white, transparent);
+   background-size: 200px 200px;
+   opacity: 0.8;
 }
 
 /* Étoiles plus grosses */
 html::after {
-  background-image:
-    radial-gradient(2px 2px at 25% 25%, #ddd, transparent),
-    radial-gradient(2px 2px at 75% 50%, #ddd, transparent),
-    radial-gradient(2px 2px at 60% 75%, #ddd, transparent);
-  background-size: 400px 400px;
-  animation-duration: 180s;
-  opacity: 0.6;
+   background-image: radial-gradient(2px 2px at 25% 25%, #ddd, transparent),
+      radial-gradient(2px 2px at 75% 50%, #ddd, transparent), radial-gradient(2px 2px at 60% 75%, #ddd, transparent);
+   background-size: 400px 400px;
+   animation-duration: 180s;
+   opacity: 0.6;
 }
 
 // @keyframes starsMove {
@@ -53,5 +48,22 @@ html::after {
 // }
 
 .bga-cards_card-counter.round {
-  transform: translate(-10px, -10px);
+   transform: translate(-10px, -10px);
+}
+
+.card-tooltip-wrapper {
+   display: flex;
+   flex-direction: row;
+   gap: 10px;
+   justify-content: center;
+   align-items: center;
+
+   --bga-cards_card-width: calc(120px * 2);
+   --bga-cards_card-height: calc(168px * 2);
+   --bga-cards_card-effective-width: calc(120px * 2);
+   --bga-cards_card-effective-height: calc(168px * 2);
+
+   .card-tooltip-left-pane {
+      margin: -14px 0 -12px -26px;
+   }
 }

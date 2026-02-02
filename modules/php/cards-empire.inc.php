@@ -7,7 +7,7 @@ $empire_cards = [
       'img' => CardIds::TIE_FIGHTER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_FIGHTER],
+      'traits' => [TRAIT_FIGHTER],
       'cost' => 1,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -21,6 +21,12 @@ $empire_cards = [
             ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'count' => 1,
+         ]
+      ]
    ],
 
    CardIds::AT_ST => [
@@ -28,7 +34,7 @@ $empire_cards = [
       'img' => CardIds::AT_ST,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_VEHICLE],
+      'traits' => [TRAIT_VEHICLE],
       'cost' => 4,
       'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -47,7 +53,7 @@ $empire_cards = [
       'img' => CardIds::LANDING_CRAFT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_TRANSPORT],
+      'traits' => [TRAIT_TRANSPORT],
       'cost' => 4,
       'stats' => ['power' => 0, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -71,7 +77,7 @@ $empire_cards = [
       'img' => CardIds::DIRECTOR_KRENNIC,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_OFFICER],
+      'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 5,
       'stats' => ['power' => 3, 'resource' => 2, 'force' => 0],
@@ -99,7 +105,7 @@ $empire_cards = [
       'img' => CardIds::BOBA_FETT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_BOUNTER_HUNTER],
+      'traits' => [TRAIT_BOUNTER_HUNTER],
       'unique' => true,
       'cost' => 5,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
@@ -125,14 +131,14 @@ $empire_cards = [
             'trigger' => TRIGGER_WHILE_IN_PLAY,
             'effects' => [
                [
-                  'type' => EFFECT_MODIFY_POWER,
+                  'type' => EFFECT_MODIFY_ATTACK,
                   'value' => 1,
                   'target' => [
                      'scope' => TARGET_YOUR_UNITS,
                      'filter' => [
                         [
                            'type' => FILTER_HAS_TRAIT,
-                           'trait' => TRAIT_FIGHTER
+                           'traits' => TRAIT_FIGHTER
                         ]
                      ],
                   ],
@@ -147,7 +153,7 @@ $empire_cards = [
       'img' => CardIds::AT_AT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_VEHICLE],
+      'traits' => [TRAIT_VEHICLE],
       'cost' => 6,
       'stats' => ['power' => 6, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -163,7 +169,7 @@ $empire_cards = [
                      'filter' => [
                         [
                            'type' => FILTER_HAS_TRAIT,
-                           'trait' => TRAIT_TROOPER
+                           'traits' => TRAIT_TROOPER
                         ]
                      ],
                      'count' => 1,
@@ -180,7 +186,7 @@ $empire_cards = [
       'img' => CardIds::GRAND_MOFF_TARKIN,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_OFFICER],
+      'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 6,
       'stats' => ['power' => 2, 'resource' => 2, 'force' => 2],
@@ -236,7 +242,7 @@ $empire_cards = [
       'img' => CardIds::DARTH_VADER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_SITH],
+      'traits' => [TRAIT_SITH],
       'unique' => true,
       'cost' => 8,
       'stats' => ['power' => 6, 'resource' => 0, 'force' => 2],
@@ -248,7 +254,7 @@ $empire_cards = [
             ],
             'effects' => [
                [
-                  'type' => EFFECT_MODIFY_POWER,
+                  'type' => EFFECT_MODIFY_ATTACK,
                   'value' => 4,
                   'target' => [
                      'reference' => 'self',
@@ -264,7 +270,7 @@ $empire_cards = [
       'img' => CardIds::ADMIRAL_PIETT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_OFFICER],
+      'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
@@ -273,7 +279,7 @@ $empire_cards = [
             'trigger' => TRIGGER_WHILE_IN_PLAY,
             'effects' => [
                [
-                  'type' => EFFECT_MODIFY_POWER,
+                  'type' => EFFECT_MODIFY_ATTACK,
                   'value' => 1,
                   'target' => [
                      'scope' => TARGET_YOUR_SHIPS,
@@ -289,7 +295,7 @@ $empire_cards = [
       'img' => CardIds::TIE_BOMBER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_FIGHTER],
+      'traits' => [TRAIT_FIGHTER],
       'cost' => 2,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -300,6 +306,14 @@ $empire_cards = [
             ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_EXILE_CARD,
+            'target' => TARGET_SELF,
+            'zones' => [ZONE_DISCARD, ZONE_HAND],
+            'count' => 1,
+         ]
+      ]
    ],
 
    CardIds::SCOUT_TROOPER => [
@@ -307,7 +321,7 @@ $empire_cards = [
       'img' => CardIds::SCOUT_TROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_TROOPER],
+      'traits' => [TRAIT_TROOPER],
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
       'abilities' => [
@@ -325,7 +339,7 @@ $empire_cards = [
             'condition' => [
                'type' => CONDITION_HAS_TRAIT,
                'card' => 'revealedCard',
-               'trait' => TRAIT_EMPIRE,
+               'traits' => TRAIT_EMPIRE,
             ],
             'effects' => [
                'type' => ABILITY_GAIN_FORCE,
@@ -351,7 +365,7 @@ $empire_cards = [
       'img' => CardIds::DEATH_TROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_TROOPER],
+      'traits' => [TRAIT_TROOPER],
       'cost' => 3,
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -361,7 +375,7 @@ $empire_cards = [
                ['type' => CONDITION_FORCE_IS_WITH_YOU],
             ],
             'effects' => [
-               ['type' => ABILITY_GAIN_POWER, 'value' => 2],
+               ['type' => ABILITY_GAIN_ATTACK, 'value' => 2],
             ],
          ]
       ],
@@ -372,7 +386,7 @@ $empire_cards = [
       'img' => CardIds::TIE_INTERCEPTOR,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_FIGHTER],
+      'traits' => [TRAIT_FIGHTER],
       'cost' => 3,
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
       'abilities' => [
@@ -390,7 +404,7 @@ $empire_cards = [
             'condition' => [
                'type' => CONDITION_HAS_TRAIT,
                'card' => 'revealedCard',
-               'trait' => TRAIT_EMPIRE,
+               'traits' => TRAIT_EMPIRE,
             ],
             'effects' => [
                'type' => ABILITY_DRAW_CARD,
@@ -440,7 +454,7 @@ $empire_cards = [
       'img' => CardIds::MOFF_JERJERROD,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_OFFICER],
+      'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 4,
       'stats' => ['power' => 1, 'resource' => 3, 'force' => 0],
@@ -468,22 +482,25 @@ $empire_cards = [
       'img' => CardIds::GENERAL_VEERS,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_OFFICER],
+      'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 4,
       'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'condition' => [
-               [
-                  'type' => CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT,
-                  'trait' => [TRAIT_TROOPER, TRAIT_VEHICLE],
-                  'operator' => CONDITION_OPERATOR_OR
-               ],
-            ],
             'effects' => [
-               ['type' => ABILITY_GAIN_POWER, 'value' => 2],
+               [
+                  'type' => EFFECT_DRAW_CARD,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT,
+                        'traits' => [TRAIT_TROOPER, TRAIT_VEHICLE],
+                        'operator' => CONDITION_OPERATOR_OR
+                     ],
+                  ],
+                  'value' => 1
+               ],
             ],
          ]
       ],
@@ -495,7 +512,7 @@ $empire_cards = [
       'img' => CardIds::IMPERIAL_SHUTTLE,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_TRANSPORT],
+      'traits' => [TRAIT_TRANSPORT],
       'cost' => 0,
       'stats' => ['power' => 0, 'resource' => 1, 'force' => 0],
       'abilities' => [],
@@ -506,7 +523,7 @@ $empire_cards = [
       'img' => CardIds::STORMTROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'trait' => [TRAIT_TROOPER],
+      'traits' => [TRAIT_TROOPER],
       'cost' => 0,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
       'abilities' => [],
@@ -527,19 +544,19 @@ $empire_cards = [
                   "type" => EFFECT_CHOICE,
                   'options' => [
                      [
-                        'type' => CHOICE_OPTION_GAIN_POWER,
-                        'label' => clienttranslate('Gain 1 Power'),
-                        'value' => 1
+                        'label' => clienttranslate('Gain 1 Attack'),
+                        'type' => EFFECT_GAIN_ATTACK,
+                        'count' => 1
                      ],
                      [
-                        'type' => CHOICE_OPTION_GAIN_RESOURCE,
                         'label' => clienttranslate('Gain 1 Resource'),
-                        'value' => 1
+                        'type' => EFFECT_GAIN_RESOURCE,
+                        'count' => 1
                      ],
                      [
-                        'type' => CHOICE_OPTION_GAIN_FORCE,
                         'label' => clienttranslate('Gain 1 Force'),
-                        'value' => 1
+                        'type' => EFFECT_GAIN_FORCE,
+                        'count' => 1
                      ],
                   ],
                ]

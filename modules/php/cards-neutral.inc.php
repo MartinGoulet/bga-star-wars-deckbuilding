@@ -81,7 +81,25 @@ $neutral_cards = [
         'cost' => 6,
         'unique' => true,
         'stats' => ['power' => 3, 'resource' => 3, 'force' => 0],
-        'abilities' => []
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'effects' => [
+                    [
+                        'type' => EFFECT_DRAW_CARD,
+                        'value' => 1,
+                    ],
+                    [
+                        'type' => EFFECT_DISCARD_CARD,
+                        'conditions' => [
+                            ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                        ],
+                        'target' => TARGET_OPPONENT,
+                        'count' => 1,
+                    ],
+                ],
+            ]
+        ]
     ],
 
     CardIds::JABBA_SAIL_BARGE => [
@@ -174,7 +192,7 @@ $neutral_cards = [
                         'destination' => ZONE_HAND
                     ],
                     [
-                        'type' => EFFECT_DRAW,
+                        'type' => EFFECT_DRAW_CARD,
                         'conditions' => [
                             ['type' => CONDITION_FORCE_IS_WITH_YOU],
                         ],

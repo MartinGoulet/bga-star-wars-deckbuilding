@@ -1,5 +1,6 @@
 import { Game } from "../game";
 import { BgaCards } from "../libs";
+import { DiscardWithPopup } from "../stocks/discard-with-popup";
 import { Card, StarWarsPlayer } from "../types/game";
 // import { createCounter } from "../utils";
 
@@ -10,7 +11,7 @@ export class PlayerTable {
    // @ts-ignore
    public resourceCounter: ebg.counter;
    // @ts-ignore
-   public discard: InstanceType<typeof BgaCards.Deck<Card>>;
+   public discard: DiscardWithPopup;
    // @ts-ignore
    public deck: InstanceType<typeof BgaCards.Deck<Card>>;
    // @ts-ignore
@@ -18,7 +19,12 @@ export class PlayerTable {
    // @ts-ignore
    public ships: InstanceType<typeof BgaCards.LineStock<Card>>;
 
-   constructor(private game: Game, public player: StarWarsPlayer, public isCurrentPlayer: boolean) {
+   constructor(
+      private game: Game,
+      public player: StarWarsPlayer,
+      public isCurrentPlayer: boolean,
+      public index: number
+   ) {
       this.playerId = Number(player.id);
 
       const color: string = `#${player.color}`; // player.faction === "Rebel" ? "#2a9d8f" : "#ff2a2b";
@@ -35,8 +41,8 @@ export class PlayerTable {
                   <div class="swd-player-ships"></div>
                   <div class="swd-player-active-base"></div>
                </div>
-               <div class="swd-player-deck"></div>
-               <div class="swd-player-discard"></div>
+               <div class="swd-player-deck" id="player-deck-${this.playerId}"></div>
+               <div class="swd-player-discard" id="player-discard-${this.playerId}"></div>
             </div>
          </div>
       </div>`;
@@ -51,6 +57,17 @@ export class PlayerTable {
       this.setupPlayArea(player);
       this.setupDeckAndDiscard(player);
       this.setupBaseAndShips(player);
+   }
+
+   public onLeaveState(): void {
+      [this.activeBase, this.ships, this.playArea, this.discard].forEach((stock) => {
+         stock.setSelectionMode("none");
+         stock.onCardClick = undefined;
+         stock.onSelectionChange = undefined;
+      });
+      if (this.game.players.isCurrentPlayerActive()) {
+         this.discard.closePopup();
+      }
    }
 
    private setupBaseAndShips(player: StarWarsPlayer): void {
@@ -85,12 +102,10 @@ export class PlayerTable {
                size: 6,
                position: "bottom-right",
             },
-            fakeCardGenerator: (deckId: string) => {
-               return { id: this.playerId } as Card;
-            },
          }
       );
-      this.discard = new BgaCards.Deck<Card>(
+      this.discard = new DiscardWithPopup( //new BgaCards.Deck<Card>(
+         this.game,
          this.game.cardManager,
          document.querySelector(`#player-table-${this.playerId} .swd-player-discard`)!,
          {

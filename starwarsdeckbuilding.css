@@ -1,283 +1,299 @@
 @charset "UTF-8";
-.card {
+.bga-cards_card {
   transition: all 0.5s ease-in-out;
 }
-.card .bga-cards_card-sides {
+.bga-cards_card .bga-cards_card-sides {
   transition: all 0.5s ease-in-out;
 }
-.card .bga-cards_card-side {
+.bga-cards_card .bga-cards_card-side {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
   background-image: url("img/cards.jpg");
   background-size: 800% 800%;
+  transition: all 0.5s ease-in-out;
 }
-.card .bga-cards_card-side[data-img="1"] {
+.bga-cards_card .bga-cards_card-side[data-img="1"] {
   background-position: 0% 0%;
 }
-.card .bga-cards_card-side[data-img="2"] {
+.bga-cards_card .bga-cards_card-side[data-img="2"] {
   background-position: -100% 0%;
 }
-.card .bga-cards_card-side[data-img="3"] {
+.bga-cards_card .bga-cards_card-side[data-img="3"] {
   background-position: -200% 0%;
 }
-.card .bga-cards_card-side[data-img="4"] {
+.bga-cards_card .bga-cards_card-side[data-img="4"] {
   background-position: -300% 0%;
 }
-.card .bga-cards_card-side[data-img="5"] {
+.bga-cards_card .bga-cards_card-side[data-img="5"] {
   background-position: -400% 0%;
 }
-.card .bga-cards_card-side[data-img="6"] {
+.bga-cards_card .bga-cards_card-side[data-img="6"] {
   background-position: -500% 0%;
 }
-.card .bga-cards_card-side[data-img="7"] {
+.bga-cards_card .bga-cards_card-side[data-img="7"] {
   background-position: -600% 0%;
 }
-.card .bga-cards_card-side[data-img="8"] {
+.bga-cards_card .bga-cards_card-side[data-img="8"] {
   background-position: -700% 0%;
 }
-.card .bga-cards_card-side[data-img="9"] {
+.bga-cards_card .bga-cards_card-side[data-img="9"] {
   background-position: 0% -100%;
 }
-.card .bga-cards_card-side[data-img="10"] {
+.bga-cards_card .bga-cards_card-side[data-img="10"] {
   background-position: -100% -100%;
 }
-.card .bga-cards_card-side[data-img="11"] {
+.bga-cards_card .bga-cards_card-side[data-img="11"] {
   background-position: -200% -100%;
 }
-.card .bga-cards_card-side[data-img="12"] {
+.bga-cards_card .bga-cards_card-side[data-img="12"] {
   background-position: -300% -100%;
 }
-.card .bga-cards_card-side[data-img="13"] {
+.bga-cards_card .bga-cards_card-side[data-img="13"] {
   background-position: -400% -100%;
 }
-.card .bga-cards_card-side[data-img="14"] {
+.bga-cards_card .bga-cards_card-side[data-img="14"] {
   background-position: -500% -100%;
 }
-.card .bga-cards_card-side[data-img="15"] {
+.bga-cards_card .bga-cards_card-side[data-img="15"] {
   background-position: -600% -100%;
 }
-.card .bga-cards_card-side[data-img="16"] {
+.bga-cards_card .bga-cards_card-side[data-img="16"] {
   background-position: -700% -100%;
 }
-.card .bga-cards_card-side[data-img="17"] {
+.bga-cards_card .bga-cards_card-side[data-img="17"] {
   background-position: 0% -200%;
 }
-.card .bga-cards_card-side[data-img="18"] {
+.bga-cards_card .bga-cards_card-side[data-img="18"] {
   background-position: -100% -200%;
 }
-.card .bga-cards_card-side[data-img="19"] {
+.bga-cards_card .bga-cards_card-side[data-img="19"] {
   background-position: -200% -200%;
 }
-.card .bga-cards_card-side[data-img="20"] {
+.bga-cards_card .bga-cards_card-side[data-img="20"] {
   background-position: -300% -200%;
 }
-.card .bga-cards_card-side[data-img="21"] {
+.bga-cards_card .bga-cards_card-side[data-img="21"] {
   background-position: -400% -200%;
 }
-.card .bga-cards_card-side[data-img="22"] {
+.bga-cards_card .bga-cards_card-side[data-img="22"] {
   background-position: -500% -200%;
 }
-.card .bga-cards_card-side[data-img="23"] {
+.bga-cards_card .bga-cards_card-side[data-img="23"] {
   background-position: -600% -200%;
 }
-.card .bga-cards_card-side[data-img="24"] {
+.bga-cards_card .bga-cards_card-side[data-img="24"] {
   background-position: -700% -200%;
 }
-.card .bga-cards_card-side[data-img="25"] {
+.bga-cards_card .bga-cards_card-side[data-img="25"] {
   background-position: 0% -300%;
 }
-.card .bga-cards_card-side[data-img="26"] {
+.bga-cards_card .bga-cards_card-side[data-img="26"] {
   background-position: -100% -300%;
 }
-.card .bga-cards_card-side[data-img="27"] {
+.bga-cards_card .bga-cards_card-side[data-img="27"] {
   background-position: -200% -300%;
 }
-.card .bga-cards_card-side[data-img="28"] {
+.bga-cards_card .bga-cards_card-side[data-img="28"] {
   background-position: -300% -300%;
 }
-.card .bga-cards_card-side[data-img="29"] {
+.bga-cards_card .bga-cards_card-side[data-img="29"] {
   background-position: -400% -300%;
 }
-.card .bga-cards_card-side[data-img="30"] {
+.bga-cards_card .bga-cards_card-side[data-img="30"] {
   background-position: -500% -300%;
 }
-.card .bga-cards_card-side[data-img="31"] {
+.bga-cards_card .bga-cards_card-side[data-img="31"] {
   background-position: -600% -300%;
 }
-.card .bga-cards_card-side[data-img="32"] {
+.bga-cards_card .bga-cards_card-side[data-img="32"] {
   background-position: -700% -300%;
 }
-.card .bga-cards_card-side[data-img="33"] {
+.bga-cards_card .bga-cards_card-side[data-img="33"] {
   background-position: 0% -400%;
 }
-.card .bga-cards_card-side[data-img="34"] {
+.bga-cards_card .bga-cards_card-side[data-img="34"] {
   background-position: -100% -400%;
 }
-.card .bga-cards_card-side[data-img="35"] {
+.bga-cards_card .bga-cards_card-side[data-img="35"] {
   background-position: -200% -400%;
 }
-.card .bga-cards_card-side[data-img="36"] {
+.bga-cards_card .bga-cards_card-side[data-img="36"] {
   background-position: -300% -400%;
 }
-.card .bga-cards_card-side[data-img="37"] {
+.bga-cards_card .bga-cards_card-side[data-img="37"] {
   background-position: -400% -400%;
 }
-.card .bga-cards_card-side[data-img="38"] {
+.bga-cards_card .bga-cards_card-side[data-img="38"] {
   background-position: -500% -400%;
 }
-.card .bga-cards_card-side[data-img="39"] {
+.bga-cards_card .bga-cards_card-side[data-img="39"] {
   background-position: -600% -400%;
 }
-.card .bga-cards_card-side[data-img="40"] {
+.bga-cards_card .bga-cards_card-side[data-img="40"] {
   background-position: -700% -400%;
 }
-.card .bga-cards_card-side[data-img="41"] {
+.bga-cards_card .bga-cards_card-side[data-img="41"] {
   background-position: 0% -500%;
 }
-.card .bga-cards_card-side[data-img="42"] {
+.bga-cards_card .bga-cards_card-side[data-img="42"] {
   background-position: -100% -500%;
 }
-.card .bga-cards_card-side[data-img="43"] {
+.bga-cards_card .bga-cards_card-side[data-img="43"] {
   background-position: -200% -500%;
 }
-.card .bga-cards_card-side[data-img="44"] {
+.bga-cards_card .bga-cards_card-side[data-img="44"] {
   background-position: -300% -500%;
 }
-.card .bga-cards_card-side[data-img="45"] {
+.bga-cards_card .bga-cards_card-side[data-img="45"] {
   background-position: -400% -500%;
 }
-.card .bga-cards_card-side[data-img="46"] {
+.bga-cards_card .bga-cards_card-side[data-img="46"] {
   background-position: -500% -500%;
 }
-.card .bga-cards_card-side[data-img="47"] {
+.bga-cards_card .bga-cards_card-side[data-img="47"] {
   background-position: -600% -500%;
 }
-.card .bga-cards_card-side[data-img="48"] {
+.bga-cards_card .bga-cards_card-side[data-img="48"] {
   background-position: -700% -500%;
 }
-.card .bga-cards_card-side[data-img="49"] {
+.bga-cards_card .bga-cards_card-side[data-img="49"] {
   background-position: 0% -600%;
 }
-.card .bga-cards_card-side[data-img="50"] {
+.bga-cards_card .bga-cards_card-side[data-img="50"] {
   background-position: -100% -600%;
 }
-.card .bga-cards_card-side[data-img="51"] {
+.bga-cards_card .bga-cards_card-side[data-img="51"] {
   background-position: -200% -600%;
 }
-.card .bga-cards_card-side[data-img="52"] {
+.bga-cards_card .bga-cards_card-side[data-img="52"] {
   background-position: -300% -600%;
 }
-.card .bga-cards_card-side[data-img="53"] {
+.bga-cards_card .bga-cards_card-side[data-img="53"] {
   background-position: -400% -600%;
 }
-.card .bga-cards_card-side[data-img="54"] {
+.bga-cards_card .bga-cards_card-side[data-img="54"] {
   background-position: -500% -600%;
 }
-.card .bga-cards_card-side[data-img="55"] {
+.bga-cards_card .bga-cards_card-side[data-img="55"] {
   background-position: -600% -600%;
 }
-.card .bga-cards_card-side[data-img="56"] {
+.bga-cards_card .bga-cards_card-side[data-img="56"] {
   background-position: -700% -600%;
 }
-.card .bga-cards_card-side[data-img="57"] {
+.bga-cards_card .bga-cards_card-side[data-img="57"] {
   background-position: 0% -700%;
 }
-.card .bga-cards_card-side[data-img="58"] {
+.bga-cards_card .bga-cards_card-side[data-img="58"] {
   background-position: -100% -700%;
 }
-.card .bga-cards_card-side[data-img="59"] {
+.bga-cards_card .bga-cards_card-side[data-img="59"] {
   background-position: -200% -700%;
 }
-.card .bga-cards_card-side[data-img="60"] {
+.bga-cards_card .bga-cards_card-side[data-img="60"] {
   background-position: -300% -700%;
 }
-.card .bga-cards_card-side[data-img="61"] {
+.bga-cards_card .bga-cards_card-side[data-img="61"] {
   background-position: -400% -700%;
 }
-.card .bga-cards_card-side[data-img="62"] {
+.bga-cards_card .bga-cards_card-side[data-img="62"] {
   background-position: -500% -700%;
 }
-.card .bga-cards_card-side[data-img="63"] {
+.bga-cards_card .bga-cards_card-side[data-img="63"] {
   background-position: -600% -700%;
 }
-.card .bga-cards_card-side[data-img="64"] {
+.bga-cards_card .bga-cards_card-side[data-img="64"] {
   background-position: -700% -700%;
 }
-.card .bga-cards_card-side[data-img="65"] {
+.bga-cards_card .bga-cards_card-side[data-img="65"] {
   background-position: 0% -800%;
 }
-.card .bga-cards_card-side[data-img="66"] {
+.bga-cards_card .bga-cards_card-side[data-img="66"] {
   background-position: -100% -800%;
 }
-.card .bga-cards_card-side[data-img="67"] {
+.bga-cards_card .bga-cards_card-side[data-img="67"] {
   background-position: -200% -800%;
 }
-.card .bga-cards_card-side[data-img="68"] {
+.bga-cards_card .bga-cards_card-side[data-img="68"] {
   background-position: -300% -800%;
 }
-.card .bga-cards_card-side[data-img="69"] {
+.bga-cards_card .bga-cards_card-side[data-img="69"] {
   background-position: -400% -800%;
 }
-.card .bga-cards_card-side[data-img="70"] {
+.bga-cards_card .bga-cards_card-side[data-img="70"] {
   background-position: -500% -800%;
 }
-.card .bga-cards_card-side[data-img="71"] {
+.bga-cards_card .bga-cards_card-side[data-img="71"] {
   background-position: -600% -800%;
 }
-.card .bga-cards_card-side[data-img="72"] {
+.bga-cards_card .bga-cards_card-side[data-img="72"] {
   background-position: -700% -800%;
 }
-.card .back {
+.bga-cards_card .back {
   background-position: -600% -700%;
 }
-.card[data-type=base] {
+.bga-cards_card[data-type=base] {
   width: 168px !important;
   height: 120px !important;
 }
-.card[data-type=base] .bga-cards_card-side {
+.bga-cards_card[data-type=base] .bga-cards_card-side {
   background-size: 500% 200%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="1"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="1"] {
   background-position: 0% 0%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="2"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="2"] {
   background-position: -100% 0%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="3"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="3"] {
   background-position: -200% 0%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="4"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="4"] {
   background-position: -300% 0%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="5"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="5"] {
   background-position: -400% 0%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="6"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="6"] {
   background-position: 0% -100%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="7"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="7"] {
   background-position: -100% -100%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="8"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="8"] {
   background-position: -200% -100%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="9"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="9"] {
   background-position: -300% -100%;
 }
-.card[data-type=base] .bga-cards_card-side[data-img="10"] {
+.bga-cards_card[data-type=base] .bga-cards_card-side[data-img="10"] {
   background-position: -400% -100%;
 }
-.card[data-type=base] .bga-cards_card-sides {
+.bga-cards_card[data-type=base] .bga-cards_card-sides {
   width: 168px !important;
   height: 120px !important;
   left: 0;
   top: 0;
 }
-.card[data-type=base][data-faction=Empire] .bga-cards_card-side {
+.bga-cards_card[data-type=base][data-faction=Empire] .bga-cards_card-side {
   background-image: url("img/base-empire.jpg");
 }
-.card[data-type=base][data-faction=Rebel] .bga-cards_card-side {
+.bga-cards_card[data-type=base][data-faction=Rebel] .bga-cards_card-side {
   background-image: url("img/base-rebel.jpg");
+}
+.bga-cards_card[data-type=base] .card-damage {
+  position: absolute;
+  color: white;
+  font-weight: 800;
+  background-color: #5a1740;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  bottom: 5px;
+  left: 48%;
 }
 
 .swd-table-center {
@@ -289,19 +305,19 @@
   text-transform: uppercase;
   padding-bottom: 10px;
 }
-.swd-table-center .card[data-type=ship][data-is-ally=true], .swd-table-center .card[data-type=ship][data-is-enemy=true] {
+.swd-table-center .galaxy-row .card[data-type=ship][data-is-ally=true], .swd-table-center .galaxy-row .card[data-type=ship][data-is-enemy=true] {
   width: var(--bga-cards_card-height);
   height: var(--bga-cards_card-width);
 }
-.swd-table-center .card[data-type=ship][data-is-ally=true] .bga-cards_card-sides {
+.swd-table-center .galaxy-row .card[data-type=ship][data-is-ally=true] .bga-cards_card-sides {
   transform: rotate(90deg);
   transform-origin: center center;
 }
-.swd-table-center .card[data-type=ship][data-is-enemy=true] .bga-cards_card-sides {
+.swd-table-center .galaxy-row .card[data-type=ship][data-is-enemy=true] .bga-cards_card-sides {
   transform: rotate(-90deg);
   transform-origin: center center;
 }
-.swd-table-center .card[data-is-enemy=true] .bga-cards_card-sides {
+.swd-table-center .galaxy-row .card[data-is-enemy=true] .bga-cards_card-sides {
   transform: rotate(180deg);
   transform-origin: center center;
 }
@@ -320,8 +336,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 70px;
+  justify-content: space-between;
+  width: 820px;
 }
 .swd-table-center .galaxy-row-wrapper .force-track {
   position: relative;
@@ -369,6 +385,64 @@
   transform: translateX(142px);
 }
 
+/* Discard overlay */
+.swd-discard-overlay {
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
+  display: none; /* shown by adding a class or toggling display */
+  align-items: flex-start;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+.swd-discard-overlay.visible {
+  display: flex;
+}
+.swd-discard-overlay .swd-discard-overlay-content {
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0.9333333333) 0%, rgba(34, 34, 34, 0.9333333333) 100%);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(225, 225, 225, 0.5);
+  max-width: 98%;
+  min-width: 75%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  margin-top: 225px;
+  min-height: 395px;
+}
+.swd-discard-overlay .swd-discard-overlay-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+.swd-discard-overlay .swd-discard-overlay-title {
+  color: #f3ae25;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.swd-discard-overlay .swd-discard-overlay-close {
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  color: #ffffff;
+  background: #000000;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.5);
+  transition: background 0.3s ease;
+}
+
 .swd-player-table {
   border-radius: 8px;
   padding: 10px;
@@ -376,31 +450,17 @@
   color: #ffffff;
   min-height: 200px;
 }
-.swd-player-table .card[data-type=ship] {
+.swd-player-table .swd-player-base-section .card[data-type=ship] {
   width: 168px !important;
   height: 120px !important;
 }
-.swd-player-table .card[data-type=ship][data-is-ally=true], .swd-player-table .card[data-type=ship][data-is-enemy=true] {
+.swd-player-table .swd-player-base-section .card[data-type=ship][data-is-ally=true], .swd-player-table .swd-player-base-section .card[data-type=ship][data-is-enemy=true] {
   width: var(--bga-cards_card-height);
   height: var(--bga-cards_card-width);
 }
-.swd-player-table .card[data-type=ship] .bga-cards_card-sides {
+.swd-player-table .swd-player-base-section .card[data-type=ship] .bga-cards_card-sides {
   transform: rotate(90deg);
   transform-origin: center center;
-}
-.swd-player-table .card[data-is-enemy=true] .bga-cards_card-sides {
-  transform: rotate(180deg);
-  transform-origin: center center;
-}
-
-.swd-player-table-opponent .swd-player-table {
-  border-bottom: 2px solid var(--color-border);
-}
-.swd-player-table-opponent .swd-player-base-section {
-  flex-direction: column-reverse;
-}
-.swd-player-table-opponent .swd-player-base-section .card[data-type=ship] .bga-cards_card-sides {
-  transform: rotate(-90deg);
 }
 
 .swd-player-table-current .swd-player-table {
@@ -435,12 +495,219 @@
   gap: 20px;
 }
 
+.discard-with-popup .swd-special-discard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  z-index: 1;
+  display: none;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  color: #ffffff;
+}
+.discard-with-popup[data-empty=false]:hover .swd-special-discard {
+  display: flex;
+}
+
+.swd-player-table-opponent .swd-player-table {
+  border-bottom: 2px solid var(--color-border);
+}
+.swd-player-table-opponent .swd-player-base-section {
+  flex-direction: column-reverse;
+}
+.swd-player-table-opponent .swd-player-base-section .swd-player-base-section .card[data-type=ship] .bga-cards_card-sides {
+  transform: rotate(-90deg);
+}
+.swd-player-table-opponent .swd-player-base-section {
+  flex-direction: column-reverse;
+}
+
 .wiz-player-hand {
   flex-basis: 100%;
   min-height: 108px;
 }
 .wiz-player-hand .card-stock.hand-stock.floating {
   --bga-cards_hand-stock-floating-z-index: 10;
+}
+
+.tooltip-arrow {
+  display: block;
+  width: 0px;
+  height: 0px;
+  border: 7px solid transparent;
+  border-bottom: 10px solid #659dc7;
+  margin-top: -16px;
+}
+.tooltip-arrow::before {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 0px;
+  height: 0px;
+  border: 7px solid transparent;
+  border-bottom: 10px solid #ebebeb;
+  top: -5px;
+  left: -7px;
+}
+
+[data-popper-placement=top] .tooltip-arrow {
+  border-bottom: 7px solid transparent;
+  border-top: 10px solid #659dc7;
+  bottom: -16px;
+  margin: 0px;
+}
+[data-popper-placement=top] .tooltip-arrow::before {
+  border-bottom: 7px solid transparent;
+  border-top: 10px solid #ebebeb;
+  top: -12px;
+}
+
+[data-popper-placement=right] .tooltip-arrow {
+  border-bottom: 7px solid transparent;
+  border-right: 10px solid #659dc7;
+  margin: 0px;
+  left: -16px;
+}
+[data-popper-placement=right] .tooltip-arrow::before {
+  border-bottom: 7px solid transparent;
+  border-right: 10px solid #ebebeb;
+  top: -7px;
+  left: -5px;
+}
+
+[data-popper-placement=left] .tooltip-arrow {
+  border-bottom: 7px solid transparent;
+  border-left: 10px solid #659dc7;
+  margin: 0px;
+  right: -17px;
+  left: initial;
+}
+[data-popper-placement=left] .tooltip-arrow::before {
+  border-bottom: 7px solid transparent;
+  border-left: 10px solid #ebebeb;
+  top: -7px;
+  left: -12px;
+}
+
+.swd-tooltip {
+  animation-fill-mode: forwards;
+  animation: fadeInNoTransform 0.3s linear both;
+  pointer-events: all !important;
+}
+.swd-tooltip .card-tooltip-frame {
+  background: rgb(235, 235, 235);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px black;
+  border: 1px solid #7eabcd;
+  --width: 120px;
+  --height: 163px;
+}
+.swd-tooltip[data-popper-placement=left] .swd-card-tooltip .card-tooltip-frame {
+  order: 2;
+}
+.swd-tooltip[data-popper-placement=left] .swd-card-tooltip .tooltip-explanation {
+  order: 1;
+  margin-left: 0px;
+  margin-right: 10px;
+}
+
+@keyframes fadeInNoTransform {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.mobile_version .swd-card-tooltip .card-tooltip-frame {
+  --card-width: calc(110px * 2.8);
+  --card-height: calc(154px * 2.8);
+}
+
+.swd-card-tooltip {
+  display: flex;
+  --bga-cards_card-width: calc(120px * 2);
+  --bga-cards_card-height: calc(168px * 2);
+  --bga-cards_card-effective-width: calc(120px * 2);
+  --bga-cards_card-effective-height: calc(168px * 2);
+}
+.swd-card-tooltip .card-tooltip-frame {
+  background: #ebebeb;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px black;
+  border: 1px solid #7eabcd;
+}
+.swd-card-tooltip .card-tooltip-frame .card[data-type=ship] {
+  width: var(--bga-cards_card-height) !important;
+  height: var(--bga-cards_card-width) !important;
+}
+.swd-card-tooltip .card-tooltip-frame .card[data-type=ship] .bga-cards_card-sides {
+  transform: rotate(90deg);
+  transform-origin: center center;
+}
+.swd-card-tooltip .card-tooltip-frame .card[data-type=base] {
+  width: var(--bga-cards_card-height) !important;
+  height: var(--bga-cards_card-width) !important;
+}
+.swd-card-tooltip .card-tooltip-frame .card[data-type=base] .bga-cards_card-side {
+  width: var(--bga-cards_card-height) !important;
+  height: var(--bga-cards_card-width) !important;
+}
+.swd-card-tooltip .card-tooltip-frame .card.card-log {
+  border-radius: 10px;
+}
+.swd-card-tooltip .card-tooltip-frame .card .front {
+  border-radius: 10px;
+}
+.swd-card-tooltip .tooltip-explanation {
+  width: 250px;
+  margin-left: 10px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: white;
+}
+.swd-card-tooltip .tooltip-explanation:empty {
+  display: none;
+}
+.swd-card-tooltip .tooltip-explanation .explanation {
+  background: #242642;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  border: 1px solid #7eabcd;
+  box-shadow: 1px 1px 6px 4px black;
+  flex-direction: column;
+  padding: 8px;
+}
+.swd-card-tooltip .tooltip-explanation .explanation .explanation-title {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #ffffff;
+}
+.swd-card-tooltip .tooltip-explanation .explanation .explanation-gametext {
+  font-size: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: #ffffff;
+  padding: 20px 10px;
+}
+.swd-card-tooltip .tooltip-explanation .explanation p {
+  padding-right: 10px;
+  text-align: center;
 }
 
 html {
@@ -475,6 +742,21 @@ html::after {
 
 .bga-cards_card-counter.round {
   transform: translate(-10px, -10px);
+}
+
+.card-tooltip-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  --bga-cards_card-width: calc(120px * 2);
+  --bga-cards_card-height: calc(168px * 2);
+  --bga-cards_card-effective-width: calc(120px * 2);
+  --bga-cards_card-effective-height: calc(168px * 2);
+}
+.card-tooltip-wrapper .card-tooltip-left-pane {
+  margin: -14px 0 -12px -26px;
 }
 
 /*# sourceMappingURL=starwarsdeckbuilding.css.map */

@@ -6,20 +6,18 @@ use Bga\Games\StarWarsDeckbuilding\Condition\ConditionFactory;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use CardInstance;
 
-abstract class Effect {
-    public function __construct(public array $conditions) {
-    }
+abstract class EffectInstance {
+    public array $definition;
+    public array $conditions;
+    public CardInstance $sourceCard;
 
-    public function canResolve(
-        GameContext $ctx,
-        CardInstance $source
-    ): bool {
+    public function canResolve(GameContext $ctx): bool {
 
         /** @var Condition[] $conditions */
         $conditions = ConditionFactory::createConditions($this->conditions);
 
         foreach ($conditions as $condition) {
-            if (!$condition->isSatisfied($ctx, $source)) {
+            if (!$condition->isSatisfied($ctx)) {
                 return false;
             }
         }
@@ -27,8 +25,5 @@ abstract class Effect {
         return true;
     }
 
-    public abstract function resolve(
-        GameContext $ctx,
-        CardInstance $source
-    ): void;
+    public abstract function resolve(GameContext $ctx): void;
 }

@@ -3,28 +3,22 @@
 namespace Bga\Games\StarWarsDeckbuilding\Effects\Concrete;
 
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
-use CardInstance;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 
-use Bga\Games\StarWarsDeckbuilding\Effects\Effect;
-
-final class MoveCardEffect extends Effect
+final class MoveCardEffect extends EffectInstance
 {
     private string $target;
     private string $destination;
 
-    public function __construct(string $target, string $destination, array $conditions)
+    public function __construct(string $target, string $destination)
     {
-        parent::__construct($conditions);
         $this->target = $target;
         $this->destination = $destination;
     }
 
-    public function resolve(
-        GameContext $ctx,
-        CardInstance $source
-    ): void {
+    public function resolve(GameContext $ctx): void {
         if ($this->target === TARGET_SELF) {
-            $cardToMove = $source;
+            $cardToMove = $this->sourceCard;
         } else {
             throw new \InvalidArgumentException("Unknown target for MoveCardEffect: " . $this->target);
         }

@@ -827,7 +827,7 @@ declare class AllVisibleDeck<T> extends CardStock<T> {
     protected cardNumberUpdated(): void;
 }
 
-interface DeckSettings<T> extends CardStockSettings<T> {
+export interface DeckSettings<T> extends CardStockSettings<T> {
     /**
      * Indicate the current top card.
      */
@@ -867,7 +867,7 @@ interface AddCardToDeckSettings extends AddCardSettings {
      */
     autoRemovePreviousCards?: boolean;
 }
-interface RemoveCardFromDeckSettings extends RemoveCardSettings {
+export interface RemoveCardFromDeckSettings extends RemoveCardSettings {
     /**
      * Indicate if the card count is automatically updated when a card is added or removed.
      */
