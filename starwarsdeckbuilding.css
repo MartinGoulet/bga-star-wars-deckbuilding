@@ -759,4 +759,11 @@ html::after {
   margin: -14px 0 -12px -26px;
 }
 
+.swd-base-selection {
+  padding: 10px;
+}
+.swd-base-selection:empty {
+  display: none;
+}
+
 /*# sourceMappingURL=starwarsdeckbuilding.css.map */

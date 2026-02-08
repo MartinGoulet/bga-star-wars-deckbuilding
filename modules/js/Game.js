@@ -234,6 +234,11 @@ class NotificationManager {
             await stock.removeCard(args.card, { slideTo });
         }
     }
+    async notif_onNewBase(args) {
+        const table = this.game.getPlayerTable(args.player_id);
+        await table.activeBase.addCard(args.card);
+        await this.game.gameui.wait(350);
+    }
 }
 
 class PlayerHand extends BgaCards.HandStock {
@@ -659,9 +664,26 @@ class PlayerTurnAttackDeclarationState extends BaseState {
 }
 
 class PlayerTurnStartTurnBaseState extends BaseState {
+    constructor(game) {
+        super(game);
+        this.bases = new BgaCards.LineStock(this.game.cardManager, document.querySelector(".swd-base-selection"), {
+            gap: '20px',
+        });
+    }
     onEnteringState(args, isCurrentPlayerActive) {
+        this.bases.addCards(args.selectableBases, { animationsActive: false });
         if (!isCurrentPlayerActive)
             return;
+        this.bases.setSelectionMode("single");
+        this.bases.setSelectableCards(args.selectableBases);
+        this.bases.onCardClick = (card) => {
+            this.game.actions.performAction("actSelectBase", { cardId: card.id });
+        };
+    }
+    onLeavingState(isCurrentPlayerActive) {
+        this.bases.removeAll();
+        this.bases.onCardClick = undefined;
+        super.onLeavingState(isCurrentPlayerActive);
     }
 }
 
@@ -745,6 +767,7 @@ class Game {
         Object.assign(this, bga);
         Object.assign(this.gameui, { game: this });
         this.gameArea.getElement().insertAdjacentHTML("beforeend", `<div class="swd-table-wrapper" id="swd-table-wrapper">
+            <div class="swd-base-selection"></div>
             <div class="swd-player-table-opponent"></div>
             <div class="swd-table-center"></div>
             <div class="swd-player-table-current"></div>

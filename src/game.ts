@@ -42,6 +42,7 @@ class Game implements Game {
       this.gameArea.getElement().insertAdjacentHTML(
          "beforeend",
          `<div class="swd-table-wrapper" id="swd-table-wrapper">
+            <div class="swd-base-selection"></div>
             <div class="swd-player-table-opponent"></div>
             <div class="swd-table-center"></div>
             <div class="swd-player-table-current"></div>

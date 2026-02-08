@@ -15,6 +15,10 @@ final class CardRepository {
     public function __construct(private Game $game, private Deck $deck) {
     }
 
+    public function addBaseCardToPlayer(int $cardId, int $playerId): void {
+        $this->deck->moveCard($cardId, 'ab_' . $playerId);
+    }
+
     public function addCardToExile(int $cardId): void {
         $this->deck->insertCardOnExtremePosition($cardId, ZONE_EXILE, true);
     }

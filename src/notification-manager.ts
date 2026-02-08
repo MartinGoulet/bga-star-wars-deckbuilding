@@ -108,6 +108,11 @@ export class NotificationManager {
          await stock.removeCard(args.card, { slideTo });
       }
    }
+   private async notif_onNewBase(args: { player_id: number; card: Card }) {
+      const table = this.game.getPlayerTable(args.player_id);
+      await table.activeBase.addCard(args.card);
+      await this.game.gameui.wait(350);
+   }
 }
 
 interface TableCounterNotificationArgs {

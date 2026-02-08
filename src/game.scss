@@ -67,3 +67,10 @@ html::after {
       margin: -14px 0 -12px -26px;
    }
 }
+
+.swd-base-selection {
+   &:empty {
+      display: none;
+   }
+   padding: 10px;
+}
