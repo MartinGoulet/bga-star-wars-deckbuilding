@@ -76,10 +76,19 @@ const CONDITION_ANOTHER_UNIQUE_UNIT_IN_PLAY = 'another_unique_unit_in_play';
 const CONDITION_CAPITAL_STARSHIP_IN_PLAY = 'capital_starship_in_play';
 const CONDITION_BASE_IS_DEATH_STAR = 'base_is_death_star';
 const CONDITION_FORCE_IS_WITH_YOU = 'force_is_with_you';
+const CONDITION_FORCE_IS_NOT_WITH_YOU = 'force_is_not_with_you';
 const CONDITION_IS_ENEMY_CARD = 'is_enemy_card';
 const CONDITION_HAS_TRAIT = 'has_trait';
 const CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT = 'has_unit_in_play_with_trait';
+const CONDITION_HAS_DAMAGE_ON_BASE = 'has_damage_on_base';
+const CONDITION_HAS_CARD_IN_HAND = 'has_card_in_hand';
+const CONDITION_HAS_CARD_IN_ZONE_WITH_TRAIT = 'has_card_in_zone_with_trait';
 const CONDITION_CARD_IN_PLAY = 'card_in_play';
+const CONDITION_FIRST_PURCHASE_THIS_TURN = 'first_purchase_this_turn';
+const CONDITION_CARD_FACTION_IS = 'card_faction_is';
+const CONDITION_CARD_IS_ENEMY = 'card_is_enemy';
+const CONDITION_HAS_RESOURCES = 'has_resources';
+const CONDITION_HAS_VALID_TARGET = 'has_valid_target';
 
 const CONDITION_OPERATOR_OR = 'operator_or';
 const CONDITION_OPERATOR_AND = 'operator_and';
@@ -103,7 +112,11 @@ const EFFECT_GAIN_RESOURCE = 'gain_resource';
 const EFFECT_GAIN_ATTACK = 'gain_attack';
 const EFFECT_GAIN_FORCE = 'gain_force';
 const EFFECT_REPAIR_DAMAGE_BASE = 'repair_damage_base';
-
+const EFFECT_PURCHASE_CARD_FREE = 'purchase_card_free';
+const EFFECT_SELECT_CARDS = 'select_cards';
+const EFFECT_MOVE_SELECTED_CARDS = 'move_selected_cards';
+const EFFECT_REVEAL_TOP_CARD = 'reveal_top_card';
+const EFFECT_PAY_RESOURCE = 'pay_resource';
 /**
  * Choice Options
  */
@@ -145,13 +158,14 @@ const TARGET_YOUR_SHIPS = 'your_ships';
 const TARGET_OPPONENT = 'opponent';
 const TARGET_SELF = 'self';
 const TARGET_ANY_CARD = 'any_card';
+const TARGET_GALAXY = 'galaxy';
 
 /**
  * Filters
  */
 const FILTER_HAS_TRAIT = 'has_trait';
 const FILTER_FACTION = 'faction';
-
+const FILTER_HAS_CARD_TYPE = 'has_card_type';
 /**
  * Traits
  */
@@ -178,11 +192,14 @@ const ZONE_HAND = 'hand';
 const ZONE_DECK = 'deck';
 const ZONE_DISCARD = 'discard';
 const ZONE_PLAYER_PLAY_AREA = 'inplay_';
+const ZONE_PLAYER_SHIP_AREA = 'ship_area';
 const ZONE_GALAXY_ROW = 'galaxy_row';
 const ZONE_GALAXY_DECK = 'deck';
 const ZONE_GALAXY_DISCARD = 'galaxy_discard';
 const ZONE_EXILE = 'exile';
 const ZONE_OUTER_RIM_DECK = 'outer_rim_deck';
+const ZONE_TOP_DECK = 'top_deck';
+const ZONE_CONDITIONAL = 'conditional';
 
 final class CardIds {
 

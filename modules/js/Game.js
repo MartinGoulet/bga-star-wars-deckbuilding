@@ -59,9 +59,19 @@ class TooltipManager {
          </div>`;
     }
     getExplanation(card) {
+        let gametext = '';
+        if (card.gametext) {
+            gametext = bga_format(_(card.gametext), {
+                '*': (t) => '<b>' + t + '</b>',
+            });
+            gametext = `<div class="explanation">
+            <div class="explanation-gametext">${gametext}</div>
+         </div>`;
+        }
         return `<div class="explanation">
          <div class="explanation-title">${_(card.name)}</div>
-      </div>`;
+      </div>
+      ${gametext}`;
     }
 }
 
@@ -167,7 +177,14 @@ class NotificationManager {
     }
     async notif_onPlayCardToShipArea(args) {
         const table = this.game.getPlayerTable(args.player_id);
-        await table.ships.addCard(args.card);
+        await table.ships.addCard(args.card, {
+            parallelAnimations: [
+                {
+                    keyframes: [{ transform: "rotate(90deg)" }],
+                },
+            ],
+            duration: 500,
+        });
     }
     async notif_setPlayerCounter(args) {
     }
@@ -191,7 +208,7 @@ class NotificationManager {
         const table = this.game.getPlayerTable(args.player_id);
         const addedCards = args._private?.cards ?? args.cards;
         if (args.player_id === this.game.players.getCurrentPlayerId()) {
-            await this.game.playerHand.addCards(addedCards, { fromStock: table.deck });
+            await this.game.playerHand.addCards(addedCards, { fromStock: table.deck }, true);
         }
         else {
             await table.deck.removeCards(addedCards, {
@@ -239,6 +256,42 @@ class NotificationManager {
         await table.activeBase.addCard(args.card);
         await this.game.gameui.wait(350);
     }
+    async notif_onMoveCardToTopOfDeck(args) {
+        const table = this.game.getPlayerTable(args.player_id);
+        const card = { ...args.card };
+        delete card.img;
+        await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
+        await this.game.gameui.wait(350);
+    }
+    async notif_onMoveCardToDiscard(args) {
+        const table = this.game.getPlayerTable(args.player_id);
+        await table.discard.addCard(args.card);
+        await this.game.gameui.wait(350);
+    }
+    async notif_onMoveCardToGalaxyDiscard(args) {
+        await this.game.tableCenter.galaxyDiscard.addCard(args.card);
+        await this.game.gameui.wait(350);
+    }
+    async notif_onRevealTopCard(args) {
+        switch (args.from) {
+            case "deck":
+                const deck = this.game.tableCenter.galaxyDeck;
+                deck.setCardNumber(deck.getCardCount(), args.card);
+                deck.setCardVisible(args.card, false);
+                await this.game.gameui.wait(500);
+                deck.flipCard(args.card);
+                await this.game.gameui.wait(500);
+                this.game.gameui.wait(2500).then(() => {
+                    if (deck.contains(args.card)) {
+                        deck.flipCard(args.card);
+                    }
+                });
+                break;
+            default:
+                this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
+                break;
+        }
+    }
 }
 
 class PlayerHand extends BgaCards.HandStock {
@@ -246,6 +299,7 @@ class PlayerHand extends BgaCards.HandStock {
         super(game.cardManager, document.querySelector(".swd-player-hand"), {
             cardOverlap: 50,
             emptyHandMessage: _("You have no cards in your hand"),
+            floatZIndex: 5,
         });
     }
 }
@@ -451,6 +505,7 @@ class EffectCardSelectionState extends BaseState {
         this.displayDescription(args, isCurrentPlayerActive);
         if (!isCurrentPlayerActive)
             return;
+        this.addConfirmButton(args);
         const stocks = this.getStocks(args);
         stocks.forEach((stock) => {
             stock.setSelectionMode(args.nbr > 1 ? "multiple" : "single");
@@ -468,10 +523,7 @@ class EffectCardSelectionState extends BaseState {
         });
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) {
-        if (!isCurrentPlayerActive)
-            return;
-        this.displayDescription(args, isCurrentPlayerActive);
-        this.addConfirmButton(args);
+        this.onEnteringState(args, isCurrentPlayerActive);
     }
     addConfirmButton(args) {
         const handleConfirm = async () => {
@@ -575,9 +627,11 @@ class PlayerTurnActionSelectionState extends BaseState {
         };
     }
     setupPlayerPlayAreaSelectableCards(args) {
-        const { playArea, ships } = this.game.getCurrentPlayerTable();
-        [playArea, ships].forEach((area) => {
+        const { playArea, ships, activeBase } = this.game.getCurrentPlayerTable();
+        [playArea, ships, activeBase].forEach((area) => {
             const selectableCards = area.getCards().filter((card) => args.selectableAbilityCardIds.includes(card.id));
+            if (selectableCards.length === 0)
+                return;
             area.setSelectionMode("single");
             area.setSelectableCards(selectableCards);
             area.onCardClick = async (card) => {
@@ -590,8 +644,6 @@ class PlayerTurnActionSelectionState extends BaseState {
 
 class PlayerTurnAskChoiceState extends BaseState {
     onEnteringState(args, isCurrentPlayerActive) {
-        if (!isCurrentPlayerActive)
-            return;
         this.game.cardManager.setCardAsSelected(args.card);
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) {
@@ -601,7 +653,8 @@ class PlayerTurnAskChoiceState extends BaseState {
             const handle = async () => {
                 await this.game.actions.performAction("actMakeChoice", { choiceId: Number(optionId) });
             };
-            this.game.statusBar.addActionButton(_(option), handle);
+            const label = this.game.gameui.format_string(option.label, option.labelArgs ?? {});
+            this.game.statusBar.addActionButton(label, handle);
         });
     }
 }
@@ -745,7 +798,7 @@ class TableCenter {
         this.outerRimDeck.addCards(game.gamedatas.outerRimDeck);
     }
     onLeaveState() {
-        [this.galaxyRow, this.galaxyDeck, this.galaxyDiscard].forEach((stock) => {
+        [this.galaxyRow, this.galaxyDeck, this.galaxyDiscard, this.outerRimDeck].forEach((stock) => {
             stock.setSelectionMode("none");
             stock.onCardClick = undefined;
             stock.onSelectionChange = undefined;

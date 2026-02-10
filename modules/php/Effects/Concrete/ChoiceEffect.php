@@ -34,7 +34,7 @@ final class ChoiceEffect extends EffectInstance implements NeedsPlayerInput {
 
     public function getArgs(GameContext $context): array {
 
-        $options = array_map(fn($o) => $o['label'], $this->options);
+        $options = array_map(fn($o) => ['label' => $o['label'], 'labelArgs' => $o['labelArgs'] ?? []], $this->options);
         
         $target = $this->target === TARGET_SELF
             ? $context->currentPlayer()->playerId

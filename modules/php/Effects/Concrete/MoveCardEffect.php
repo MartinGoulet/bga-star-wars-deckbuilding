@@ -27,6 +27,12 @@ final class MoveCardEffect extends EffectInstance
             case ZONE_HAND:
                 $ctx->currentPlayer()->moveCardToHand($cardToMove);
                 break;
+            case ZONE_DISCARD:
+                $ctx->currentPlayer()->moveCardToDiscard($cardToMove);
+                break;
+            case ZONE_TOP_DECK:
+                $ctx->currentPlayer()->moveCardToTopOfDeck($cardToMove);
+                break;
             default:
                 throw new \InvalidArgumentException("Unknown destination for MoveCardEffect: " . $this->destination);
         }

@@ -1,4 +1,4 @@
-import { Card } from "../types/game";
+import { Card, MultipleActiveStateHandler } from "../types/game";
 import { BaseState } from "./base-state";
 import { BgaCards } from "../libs";
 
@@ -12,13 +12,17 @@ interface EffectCardSelectionArgs {
    descriptionMyTurn: string;
 }
 
-export class EffectCardSelectionState extends BaseState<EffectCardSelectionArgs> {
+export class EffectCardSelectionState
+   extends BaseState<EffectCardSelectionArgs>
+   implements MultipleActiveStateHandler<EffectCardSelectionArgs>
+{
    onEnteringState(args: EffectCardSelectionArgs, isCurrentPlayerActive: boolean): void {
       this.game.cardManager.setCardAsSelected(args.card);
-
       this.displayDescription(args, isCurrentPlayerActive);
 
       if (!isCurrentPlayerActive) return;
+
+      this.addConfirmButton(args);
 
       const stocks = this.getStocks(args);
 
@@ -28,7 +32,7 @@ export class EffectCardSelectionState extends BaseState<EffectCardSelectionArgs>
          stock.onSelectionChange = () => {
             const selectedCards = this.getSelectedCards(args);
             const btnConfirm = document.getElementById("btn-confirm")! as HTMLButtonElement;
-            if(args.optional) {
+            if (args.optional) {
                btnConfirm.disabled = selectedCards.length > args.nbr;
             } else {
                btnConfirm.disabled = selectedCards.length !== args.nbr;
@@ -38,13 +42,10 @@ export class EffectCardSelectionState extends BaseState<EffectCardSelectionArgs>
    }
 
    onPlayerActivationChange(args: EffectCardSelectionArgs, isCurrentPlayerActive: boolean): void {
-      if (!isCurrentPlayerActive) return;
-      this.displayDescription(args, isCurrentPlayerActive);
-      this.addConfirmButton(args);
+      this.onEnteringState(args, isCurrentPlayerActive);
    }
 
    private addConfirmButton(args: EffectCardSelectionArgs): void {
-
       const handleConfirm = async () => {
          const selectedCards = this.getSelectedCards(args);
          await this.game.actions.performAction("actCardSelection", {
@@ -59,9 +60,9 @@ export class EffectCardSelectionState extends BaseState<EffectCardSelectionArgs>
 
    private displayDescription(args: EffectCardSelectionArgs, isCurrentPlayerActive: boolean): void {
       if (isCurrentPlayerActive) {
-         this.game.statusBar.setTitle(args.descriptionMyTurn, args)
+         this.game.statusBar.setTitle(args.descriptionMyTurn, args);
       } else {
-         this.game.statusBar.setTitle(args.description, args)
+         this.game.statusBar.setTitle(args.description, args);
       }
    }
 

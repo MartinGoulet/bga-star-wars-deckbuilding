@@ -25,7 +25,6 @@ use Bga\GameFramework\Components\Counters\PlayerCounter;
 use Bga\GameFramework\Components\Counters\TableCounter;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
-use CardIds;
 use CardInstance;
 
 require_once('constants.inc.php');
@@ -40,6 +39,7 @@ class Game extends \Bga\GameFramework\Table {
 
     public TableCounter $forceTrack;
     public PlayerCounter $playerResources;
+    public TableCounter $nbrPurchasesThisRound;
 
     private \Bga\GameFramework\Components\Deck $cards;
     public CardRepository $cardRepository;
@@ -61,13 +61,14 @@ class Game extends \Bga\GameFramework\Table {
 
         $this->playerResources = $this->counterFactory->createPlayerCounter('resources', 0);
         $this->forceTrack = $this->counterFactory->createTableCounter('force', -3, 3);
+        $this->nbrPurchasesThisRound = $this->counterFactory->createTableCounter('nbrPurchasesThisRound', 0);
 
         require('material.inc.php');
 
         // automatically complete notification args when needed
         $this->notify->addDecorator(function (string $message, array $args) {
             if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
-                $args['player_name'] = $this->getPlayerNameById($args['player_id']);
+                $args['player_name'] = $this->getPlayerNameById(intval($args['player_id']));
             }
 
             if (isset($args['card']) && !isset($args['card_name']) && str_contains($message, '${card_name}')) {
@@ -197,6 +198,7 @@ class Game extends \Bga\GameFramework\Table {
     protected function setupNewGame($players, $options = []) {
         $this->playerResources->initDb(array_keys($players), initialValue: 0);
         $this->forceTrack->initDb(initialValue: 3); // Rebel side
+        $this->nbrPurchasesThisRound->initDb(initialValue: 0);
 
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
         // number of colors defined here must correspond to the maximum number of players allowed for the gams.
@@ -287,9 +289,13 @@ class Game extends \Bga\GameFramework\Table {
         $this->globals->set(GVAR_ALREADY_ATTACKING_CARDS_IDS, []);
     }
 
-    #[Debug(reload: true)]
+    #[Debug(reload: false)]
     public function debug_shuffle() {
-        $this->cards->shuffle(ZONE_OUTER_RIM_DECK);
+        $this->cards->shuffle(ZONE_GALAXY_DECK);
+    }
+
+    public function debug_initCounter() {
+        $this->nbrPurchasesThisRound->initDb(initialValue: 0);
     }
 
     /*

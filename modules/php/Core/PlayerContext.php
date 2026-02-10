@@ -64,6 +64,18 @@ final class PlayerContext {
         );
     }
 
+    public function moveCardToDiscard(CardInstance $card): void {
+        $this->game->cardRepository->addCardToPlayerDiscard($card->id, $this->playerId);
+        $this->game->notify->all(
+            'onMoveCardToDiscard',
+            clienttranslate('${player_name} moves ${card_name} to their discard pile'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
+            ]
+        );
+    }
+
     public function drawCards(int $count): void {
         $playerDeckCount = $this->game->cardRepository->countPlayerDeck($this->playerId);
         if ($playerDeckCount < $count) {
@@ -148,6 +160,32 @@ final class PlayerContext {
                 'player_id' => $this->playerId,
                 'card_names' => array_values(array_map(fn($c) => $c->name, $cards)),
                 'cards' => array_values($cards),
+            ]
+        );
+    }
+
+    public function moveCardToTopOfDeck(CardInstance $card): void {
+        $this->game->cardRepository->addCardToTopOfDeck($card->id, $this->playerId);
+        $card = $this->game->cardRepository->getCard($card->id);
+        $this->game->notify->all(
+            'onMoveCardToTopOfDeck',
+            clienttranslate('${player_name} moves ${card_name} to the top of their deck'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
+            ]
+        );
+    }
+
+    public function moveCardToGalaxyDiscard(CardInstance $card): void {
+        $this->game->cardRepository->addCardToGalaxyDiscard($card->id);
+        $card = $this->game->cardRepository->getCard($card->id);
+        $this->game->notify->all(
+            'onMoveCardToGalaxyDiscard',
+            clienttranslate('${player_name} moves ${card_name} to the galaxy discard pile'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
             ]
         );
     }

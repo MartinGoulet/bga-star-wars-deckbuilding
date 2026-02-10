@@ -36,6 +36,9 @@ class PlayerTurn_EndTurn extends GameState {
         // Return any resources counters in your resource pool to the supply
         $this->game->playerResources->set($activePlayerId, 0);
 
+        // Reset the number of purchases this round
+        $this->game->nbrPurchasesThisRound->set(0);
+
         // Finally, draw five cards from your deck.
         $ctx = new GameContext($this->game, $activePlayerId);
         $ctx->currentPlayer()->drawCards(5);

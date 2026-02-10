@@ -1,7 +1,7 @@
 /**
  * Global settings to apply as a default to all animations. Can be overriden in each animation.
  */
-interface AnimationManagerSettings {
+export interface AnimationManagerSettings {
     /**
      * The default animation duration, in ms (default: 500).
      */
@@ -43,7 +43,7 @@ interface AnimationManagerSettings {
 /**
  * Extra animation to apply to another element while main animation is played. Will have the same duration.
  */
-interface ParallelAnimation {
+export interface ParallelAnimation {
     /**
      * Element to apply the animation to. If not set, will use `applyTo`.
      */
@@ -66,7 +66,7 @@ interface ParallelAnimation {
 /**
  * Settings to apply to an animation. Other animations can be run in parallel, using the same duration.
  */
-interface AnimationSettings extends AnimationManagerSettings {
+export interface AnimationSettings extends AnimationManagerSettings {
     /**
      * Animations to play at the same time as the main animation
      */
@@ -78,7 +78,7 @@ interface AnimationSettings extends AnimationManagerSettings {
     preserveScale?: boolean;
 }
 
-interface SlideAnimationSettings extends AnimationSettings {
+export interface SlideAnimationSettings extends AnimationSettings {
     /**
      * The scale bump to use in the middle of a slide animation, to fake an item grabbed from one place to the other. Default 1.2
      */
@@ -90,7 +90,7 @@ declare function sort<T>(...sortedFields: string[]): SortFunction<T>;
 
 type SideOrAngle = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top' | 'bottom' | 'left' | 'right';
 type SideOrAngleOrCenter = SideOrAngle | 'center';
-interface CardCounterSettings {
+export interface CardCounterSettings {
     /**
      * Show a card counter on the deck. Default true.
      */
@@ -116,6 +116,9 @@ interface CardCounterSettings {
      */
     size?: number;
 }
+/**
+ * A card counter for card stocks, visible if the card stock defines the counter property.
+ */
 declare class CardCounter<T> {
     protected manager: CardManager<T>;
     protected element: HTMLElement;
@@ -126,7 +129,7 @@ declare class CardCounter<T> {
     setCardCount(cardCount: number): void;
 }
 
-interface SelectionStyle {
+export interface SelectionStyle {
     /**
      * The class to apply to this selection style. Use class from manager is unset in the card stock.
      */
@@ -140,13 +143,17 @@ interface SelectionStyle {
      */
     outlineColor?: string;
 }
-interface CardStockSettings<T> {
+export interface CardStockSettings<T> {
     /**
      * Indicate the card sorting (unset means no sorting, new cards will be added at the end).
      * For example, use `sort: sortFunction('type', '-type_arg')` to sort by type then type_arg (in reversed order if prefixed with `-`).
      * Be sure you typed the values correctly! Else '11' will be before '2'.
      */
     sort?: SortFunction<T>;
+    /**
+     * The filter on card click event. Use setting from manager is unset.
+     */
+    cardClickEventFilter?: CardClickEventFilter;
     /**
      * The style to apply to selectable cards. Use style from manager is unset.
      */
@@ -177,7 +184,7 @@ interface CardStockSettings<T> {
      */
     autoPlace?: (card: T) => boolean;
 }
-interface AddCardSettings extends SlideAnimationSettings {
+export interface AddCardSettings extends SlideAnimationSettings {
     /**
      * The stock to take the card. It will automatically remove the card from the other stock.
      */
@@ -213,7 +220,7 @@ interface AddCardSettings extends SlideAnimationSettings {
      */
     autoUpdateCardNumber?: boolean;
 }
-interface RemoveCardSettings {
+export interface RemoveCardSettings {
     slideTo?: HTMLElement;
     fadeOut?: boolean;
     /**
@@ -256,13 +263,26 @@ declare class CardStock<T> {
      */
     onCardCountChange?: (cardCount: number) => void;
     /**
+     * Called when a card is added to the stock. Returns the added card.
+     *
+     * card: the added card
+     */
+    onCardAdded?: (card: T) => void;
+    /**
+     * Called when a card is removed from the stock. Returns the removed card.
+     *
+     * card: the removed card
+     */
+    onCardRemoved?: (card: T) => void;
+    /**
      * Creates the stock and register it on the manager.
      *
      * @param manager the card manager
      * @param element the stock element (should be an empty HTML Element)
+     * @param settings the optional stock settings
      */
     constructor(manager: CardManager<T>, element: HTMLElement, settings?: CardStockSettings<T>);
-    protected setSelectionStyleOverrides(element: HTMLElement, settings?: CardStockSettings<T>): void;
+    protected setSelectionStyleOverrides(element: HTMLElement): void;
     /**
      * Removes the stock and unregister it on the manager.
      */
@@ -407,19 +427,23 @@ declare class CardStock<T> {
      */
     flipCard(card: T, settings?: FlipCardSettings): void;
     /**
-     * @returns the style to apply to selectable cards. Use style from manager is unset.
+     * @returns the filtering to apply on card click events. Use setting from manager if unset.
+     */
+    getCardClickEventFilter(): CardClickEventFilter;
+    /**
+     * @returns the style to apply to selectable cards. Use style from manager if unset.
      */
     getSelectableCardStyle(): SelectionStyle;
     /**
-     * @returns the style to apply to selectable cards. Use style from manager is unset.
+     * @returns the style to apply to selectable cards. Use style from manager if unset.
      */
     getUnselectableCardStyle(): SelectionStyle;
     /**
-     * @returns the style to apply to selected cards. Use style from manager is unset.
+     * @returns the style to apply to selected cards. Use style from manager if unset.
      */
     getSelectedCardStyle(): SelectionStyle;
     /**
-     * @returns the style to apply to last play cards. Use style from manager is unset.
+     * @returns the style to apply to last play cards. Use style from manager if unset.
      */
     getLastPlayedCardStyle(): SelectionStyle;
     removeSelectionClasses(card: T): void;
@@ -431,6 +455,10 @@ declare class CardStock<T> {
      */
     setSort(sort?: SortFunction<T>): void;
     /**
+     * Triggered after card order is changed, when setting a new sort function.
+     */
+    protected cardOrderChanged(): void;
+    /**
      * Returns the card count in the deck (what the player think there is, for decks, the real number of cards for all visible card stocks).
      *
      * @returns the number of card in the stock
@@ -440,6 +468,9 @@ declare class CardStock<T> {
      * Updates the cards number, if the counter is visible.
      */
     protected cardNumberUpdated(): void;
+    /**
+     * Returns if a card should be placed on this stock (with the autoPlace setting).
+     */
     shouldPlaceCard(card: T): boolean;
     /**
      * Remove the mark of the last play cards.
@@ -455,7 +486,15 @@ declare class CardStock<T> {
     setLastPlayedCards(cards: T[] | null, color?: string, cardClass?: string): void;
 }
 
-interface AutoPlaceSettings<T> {
+type AnimationManager = any;
+/**
+ * selectable: only send card click event when the card is selectable.
+ * stock-selectable: only send card click event when the stock is selectable (but the card might be disabled).
+ * all: send card click events even if the stock is not selectable.
+ */
+type CardClickEventFilter = 'selectable' | 'stock-selectable' | 'all';
+
+export interface AutoPlaceSettings<T> {
     /**
      * The add cards settings, for example if you want to set an animation from an invisible point (can be the player mini panel)
      * Will only be called if the card match a stock with the "autoPlace" setting.
@@ -472,7 +511,7 @@ interface AutoPlaceSettings<T> {
      */
     removeSettings?: (card: T) => RemoveCardSettings | undefined;
 }
-interface CardManagerSettings<T> {
+export interface CardManagerSettings<T> {
     /**
      * The type of cards, if you game has multiple cards types (each card manager should have a different type).
      * Default `${yourgamename}-card`.
@@ -547,15 +586,19 @@ interface CardManagerSettings<T> {
     /**
      * Indicate the width of a card (in px).
      */
-    cardWidth?: number;
+    cardWidth: number;
     /**
      * Indicate the height of a card (in px).
      */
-    cardHeight?: number;
+    cardHeight: number;
     /**
      * Indicate the width of a card border radius (example : '10px', '50%').
      */
     cardBorderRadius?: string;
+    /**
+     * The filter on card click event. Default 'selectable'.
+     */
+    cardClickEventFilter?: CardClickEventFilter;
     /**
      * The style to apply to selectable cards. Default to class 'bga-cards_selectable-card'.
      */
@@ -589,7 +632,7 @@ interface CardManagerSettings<T> {
      */
     autoPlace?: AutoPlaceSettings<T>;
 }
-interface FlipCardSettings {
+export interface FlipCardSettings {
     /**
      * Updates the data of the flipped card, so the stock containing it will return the new data when using getCards().
      * The new data is the card passed as the first argument of the `setCardVisible` / `flipCard` method.
@@ -640,8 +683,7 @@ declare class CardManager<T> {
     private updateFrontTimeoutId;
     private updateBackTimeoutId;
     /**
-     * @param game the BGA game class, usually it will be `this`
-     * @param settings: a `CardManagerSettings` object
+     * @param settings a `CardManagerSettings` object
      */
     constructor(settings: CardManagerSettings<T>);
     addStock(stock: CardStock<T>): void;
@@ -743,6 +785,10 @@ declare class CardManager<T> {
      */
     getCardBorderRadius(): string | undefined;
     /**
+     * @returns the filtering to apply on card click events. Default 'selectable'.
+     */
+    getCardClickEventFilter(): CardClickEventFilter;
+    /**
      * @returns the style to apply to selectable cards. Default to class 'bga-cards_selectable-card'.
      */
     getSelectableCardStyle(): SelectionStyle;
@@ -787,11 +833,17 @@ declare class CardManager<T> {
      * @param cardClass a class applied on this type of cards, to limit removal to these type of cards.
      */
     setLastPlayedCards(cards: T[] | null, color?: string, cardClass?: string): void;
+    /**
+     * Place a card based on the autoPlace settings of each stock.
+     */
     placeCard(card: T): Promise<boolean>;
+    /**
+     * Place some cards based on the autoPlace settings of each stock.
+     */
     placeCards(cards: T[]): Promise<Promise<boolean>[]>;
 }
 
-interface AllVisibleDeckSettings<T> extends CardStockSettings<T> {
+export interface AllVisibleDeckSettings<T> extends CardStockSettings<T> {
     /**
      * The shift between each card (default 3). Will be ignored if verticalShift and horizontalShift are set.
      */
@@ -809,6 +861,9 @@ interface AllVisibleDeckSettings<T> extends CardStockSettings<T> {
      */
     direction?: 'vertical' | 'horizontal';
 }
+/**
+ * Stock to represent a deck, where the player can see all cards by hovering or pressing it.
+ */
 declare class AllVisibleDeck<T> extends CardStock<T> {
     protected manager: CardManager<T>;
     protected element: HTMLElement;
@@ -861,7 +916,7 @@ export interface DeckSettings<T> extends CardStockSettings<T> {
      */
     fakeCardGenerator?: (deckId: string) => T;
 }
-interface AddCardToDeckSettings extends AddCardSettings {
+export interface AddCardToDeckSettings extends AddCardSettings {
     /**
      * Indicate if the cards under the new top card must be removed (to forbid players to check the content of the deck with Inspect). Default true.
      */
@@ -873,7 +928,7 @@ export interface RemoveCardFromDeckSettings extends RemoveCardSettings {
      */
     autoUpdateCardNumber?: boolean;
 }
-interface ShuffleAnimationSettings<T> {
+export interface ShuffleAnimationSettings<T> {
     /**
      * Number of cards used for the animation (will use cardNumber is inferior to this number).
      * Default: 10.
@@ -891,8 +946,7 @@ interface ShuffleAnimationSettings<T> {
     pauseDelayAfterAnimation?: number;
 }
 /**
- * Abstract stock to represent a deck. (pile of cards, with a fake 3d effect of thickness). *
- * Needs cardWidth and cardHeight to be set in the card manager.
+ * Stock to represent a deck. (pile of cards, with a fake 3d effect of thickness).
  */
 declare class Deck<T> extends CardStock<T> {
     protected manager: CardManager<T>;
@@ -923,8 +977,7 @@ declare class Deck<T> extends CardStock<T> {
     /**
      * Shows a shuffle animation on the deck
      *
-     * @param animatedCardsMax number of animated cards for shuffle animation.
-     * @param fakeCardSetter a function to generate a fake card for animation. Required if the card id is not based on a numeric `id` field, or if you want to set custom card back
+     * @param settings a `ShuffleAnimationSettings` object
      * @returns promise when animation ends
      */
     shuffle(settings?: ShuffleAnimationSettings<T>): Promise<boolean>;
@@ -937,7 +990,7 @@ declare class Deck<T> extends CardStock<T> {
     getCardCount(): number;
 }
 
-interface DiscardDeckSettings<T> extends CardStockSettings<T> {
+export interface DiscardDeckSettings<T> extends CardStockSettings<T> {
     /**
      * Max horizontal shift from the center (in % of the card width). Default 5.
      */
@@ -951,6 +1004,11 @@ interface DiscardDeckSettings<T> extends CardStockSettings<T> {
      */
     maxRotation?: number;
 }
+/**
+ * Stock to represent a discard deck. The cards are not perfectly aligned to represent the discard state.
+ *
+ * you can control the disalignment by setting the values of the `DiscardDeckSettings`.
+ */
 declare class DiscardDeck<T> extends CardStock<T> {
     protected manager: CardManager<T>;
     protected element: HTMLElement;
@@ -966,7 +1024,7 @@ declare class DiscardDeck<T> extends CardStock<T> {
     addCard(card: T, settings?: AddCardSettings): Promise<boolean>;
 }
 
-interface LineStockSettings<T> extends CardStockSettings<T> {
+export interface LineStockSettings<T> extends CardStockSettings<T> {
     /**
      * Indicate if the line should wrap when needed (default wrap)
      */
@@ -998,7 +1056,7 @@ declare class LineStock<T> extends CardStock<T> {
     constructor(manager: CardManager<T>, element: HTMLElement, settings?: LineStockSettings<T>);
 }
 
-interface SlotStockSettings<T> extends LineStockSettings<T> {
+export interface SlotStockSettings<T> extends LineStockSettings<T> {
     /**
      * The ids for the slots (can be number or string)
      */
@@ -1025,7 +1083,7 @@ interface SlotStockSettings<T> extends LineStockSettings<T> {
     selectedSlotStyle?: SelectionStyle;
 }
 type SlotId = number | string;
-interface AddCardToSlotSettings extends AddCardSettings {
+export interface AddCardToSlotSettings extends AddCardSettings {
     /**
      * The slot to place the card on.
      */
@@ -1062,6 +1120,7 @@ declare class SlotStock<T> extends LineStock<T> {
      * @param settings a `SlotStockSettings` object
      */
     constructor(manager: CardManager<T>, element: HTMLElement, settings: SlotStockSettings<T>);
+    protected setSlotSelectionStyleOverrides(element: HTMLElement): void;
     protected createSlot(slotId: SlotId): void;
     /**
      * Add a card to the stock.
@@ -1082,7 +1141,7 @@ declare class SlotStock<T> extends LineStock<T> {
     /**
      * Add new slots ids. Will not change nor empty the existing ones.
      *
-     * @param slotsIds the new slotsIds. Will be merged with the old ones.
+     * @param newSlotsIds the new slotsIds. Will be merged with the old ones.
      */
     addSlotsIds(newSlotsIds: SlotId[]): void;
     /**
@@ -1119,7 +1178,7 @@ declare class SlotStock<T> extends LineStock<T> {
     /**
      * Set the selectable class for each slot.
      *
-     * @param selectableSlots the selectable slots. If unset, all slots are marked selectable. Default unset.
+     * @param slotIds the selectable slots. If unset, all slots are marked selectable. Default unset.
      */
     setSelectableSlots(slotIds?: SlotId[]): void;
     /**
@@ -1131,7 +1190,7 @@ declare class SlotStock<T> extends LineStock<T> {
     /**
      * Set unselected state to a slot.
      *
-     * @param slot the slot to unselect
+     * @param slotId the slot to unselect
      */
     unselectSlot(slotId: SlotId): void;
     /**
@@ -1156,7 +1215,7 @@ type GridStockCoordinates = {
     x: number;
     y: number;
 };
-interface GridStockSettings<T> extends SlotStockSettings<T> {
+export interface GridStockSettings<T> extends Omit<SlotStockSettings<T>, 'slotsIds' | 'mapCardToSlot'> {
     /**
      * How to place the card on a slot automatically
      */
@@ -1178,7 +1237,7 @@ interface GridStockSettings<T> extends SlotStockSettings<T> {
      */
     maxY?: number;
 }
-interface AddCardToGridSettings extends AddCardToSlotSettings {
+export interface AddCardToGridSettings extends AddCardToSlotSettings {
     /**
      * The coordinates to place the card on.
      */
@@ -1277,7 +1336,7 @@ declare class GridStock<T> extends SlotStock<T> {
     removeEmptySurroundingSlots(): void;
 }
 
-interface HandStockSettings<T> extends CardStockSettings<T> {
+export interface HandStockSettings<T> extends CardStockSettings<T> {
     /**
      * Card overlap, % of the card width. Default 25.
      */
@@ -1298,7 +1357,16 @@ interface HandStockSettings<T> extends CardStockSettings<T> {
      * A margin to add to the right of the floating hand.
      */
     floatRightMargin?: number;
+    /**
+     * A z-index to add to the floating hand.
+     */
+    floatZIndex?: number;
 }
+/**
+ * A stock representing the player hand.
+ *
+ * If the stock is not visible because it is under the viewport, it will be floating at the bottom of the viewport.
+ */
 declare class HandStock<T> extends CardStock<T> {
     protected manager: CardManager<T>;
     protected settings: HandStockSettings<T>;
@@ -1310,7 +1378,12 @@ declare class HandStock<T> extends CardStock<T> {
     protected height: number;
     protected maxY: number;
     protected lastHandWidth: number;
+    protected emptyHandDiv: HTMLElement | null;
     constructor(manager: CardManager<T>, element: HTMLElement, settings: HandStockSettings<T>);
+    /**
+     * Triggered after card order is changed, when setting a new sort function.
+     */
+    protected cardOrderChanged(): void;
     /**
      * Create an IntersectionObserver, detecting if the holder is below the screen frame.
      * If it's the case, the hand is made floating, else it's reattached to the holder.
@@ -1356,7 +1429,7 @@ declare class ManualPositionStock<T> extends CardStock<T> {
     cardRemoved(card: T, settings?: RemoveCardSettings): void;
 }
 
-interface ScrollableStockButtonSettings {
+export interface ScrollableStockButtonSettings {
     /**
      * The HTML applied in the button
      */
@@ -1366,7 +1439,7 @@ interface ScrollableStockButtonSettings {
      */
     classes?: string[];
 }
-interface ScrollableStockSettings<T> extends CardStockSettings<T> {
+export interface ScrollableStockSettings<T> extends CardStockSettings<T> {
     /**
      * Setting for the left button
      */
@@ -1405,7 +1478,7 @@ declare class ScrollableStock<T> extends CardStock<T> {
     protected element: HTMLElement;
     /**
      * @param manager the card manager
-     * @param element the stock element (should be an empty HTML Element)
+     * @param elementWrapper the stock element (should be an empty HTML Element)
      * @param settings a `SlotStockSettings` object
      */
     constructor(manager: CardManager<T>, elementWrapper: HTMLElement, settings: ScrollableStockSettings<T>);
@@ -1413,7 +1486,7 @@ declare class ScrollableStock<T> extends CardStock<T> {
     protected scroll(side: 'left' | 'right'): void;
 }
 
-interface AddCardToVoidStockSettings extends AddCardSettings {
+export interface AddCardToVoidStockSettings extends AddCardSettings {
     /**
      * Removes the card after adding.
      * Set to false if you want to add the card to the void to stock to animate it to another stock just after.
@@ -1427,11 +1500,13 @@ interface AddCardToVoidStockSettings extends AddCardSettings {
 declare class VoidStock<T> extends CardStock<T> {
     protected manager: CardManager<T>;
     protected element: HTMLElement;
+    protected settings?: CardStockSettings<T>;
     /**
      * @param manager the card manager
      * @param element the stock element (should be an empty HTML Element)
+     * @param settings the optional stock settings
      */
-    constructor(manager: CardManager<T>, element: HTMLElement);
+    constructor(manager: CardManager<T>, element: HTMLElement, settings?: CardStockSettings<T>);
     /**
      * Add a card to the stock.
      *
@@ -1440,6 +1515,14 @@ declare class VoidStock<T> extends CardStock<T> {
      * @returns the promise when the animation is done (true if it was animated, false if it wasn't)
      */
     addCard(card: T, settings?: AddCardToVoidStockSettings): Promise<boolean>;
+    /**
+     * Add an array of cards to the stock.
+     *
+     * @param cards the cards to add
+     * @param settings a `AddCardToVoidStockSettings` object
+     * @param shift if number, the number of milliseconds between each card. if true, chain animations
+     */
+    addCards(cards: T[], settings?: AddCardToVoidStockSettings, shift?: number | boolean): Promise<boolean>;
 }
 
 declare const BgaCards: {
@@ -1458,4 +1541,4 @@ declare const BgaCards: {
     VoidStock: typeof VoidStock;
 };
 
-export { BgaCards };
+export { AllVisibleDeck, BgaCards, CardStock, Deck, DiscardDeck, GridStock, HandStock, LineStock, CardManager as Manager, ManualPositionStock, ScrollableStock, SlotStock, VoidStock, sort };

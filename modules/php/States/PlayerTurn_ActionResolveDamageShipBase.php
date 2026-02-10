@@ -26,7 +26,7 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     public function getArgs(): array {
         $ctx = new GameContext($this->game);
-        $ships = $ctx->currentPlayer()->getCardsInShipArea();
+        $ships = $ctx->opponentPlayer()->getCardsInShipArea();
         return [
             'ships' => $ships,
             '_no_notify' => count($ships) < 2,
@@ -35,7 +35,7 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     function onEnteringState() {
         $ctx = new GameContext($this->game);
-        $ships = $ctx->currentPlayer()->getCardsInShipArea();
+        $ships = $ctx->opponentPlayer()->getCardsInShipArea();
         $remainingDamage = $this->game->globals->get(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
 
         // If only one ship, auto assign damage

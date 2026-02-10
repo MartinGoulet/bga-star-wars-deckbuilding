@@ -82,10 +82,12 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
    }
 
    private setupPlayerPlayAreaSelectableCards(args: PlayerTurnActionSelectionArgs): void {
-      const { playArea, ships } = this.game.getCurrentPlayerTable();
+      const { playArea, ships, activeBase } = this.game.getCurrentPlayerTable();
 
-      [playArea, ships].forEach((area) => {
+      [playArea, ships, activeBase].forEach((area) => {
          const selectableCards = area.getCards().filter((card) => args.selectableAbilityCardIds.includes(card.id));
+
+         if(selectableCards.length === 0) return;
 
          area.setSelectionMode("single");
          area.setSelectableCards(selectableCards);

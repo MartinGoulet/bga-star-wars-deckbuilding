@@ -150,6 +150,7 @@ $empire_cards = [
 
    CardIds::AT_AT => [
       'name' => clienttranslate('AT-AT'),
+      'gametext' => clienttranslate('Add a *Trooper* from your discard pile to your hand'),
       'img' => CardIds::AT_AT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -159,22 +160,31 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARD_IN_ZONE_WITH_TRAIT,
+                  'traits' => [TRAIT_TROOPER],
+                  'target' => TARGET_SELF,
+                  'zone' => ZONE_DISCARD
+               ],
+            ],
             'effects' => [
                [
-                  'type' => EFFECT_MOVE_CARD,
+                  'type' => EFFECT_SELECT_CARDS,
                   'from' => ZONE_DISCARD,
-                  'to' => ZONE_HAND,
-                  'target' => [
-                     'scope' => TARGET_YOUR_CARDS,
-                     'filter' => [
-                        [
-                           'type' => FILTER_HAS_TRAIT,
-                           'traits' => TRAIT_TROOPER
-                        ]
+                  'count' => 1,
+                  'filters' => [
+                     [
+                        'type' => FILTER_HAS_TRAIT,
+                        'traits' => [TRAIT_TROOPER],
                      ],
-                     'count' => 1,
-                     'selection' => SELECTION_PLAYER_CHOICE,
-                  ]
+                  ],
+                  'storeAs' => 'atat_selected_trooper',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'storeRef' => 'atat_selected_trooper',
+                  'to' => ZONE_HAND,
                ],
             ],
          ]
@@ -318,6 +328,7 @@ $empire_cards = [
 
    CardIds::SCOUT_TROOPER => [
       'name' => clienttranslate('Scout Trooper'),
+      'gametext' => clienttranslate("Reveal the top card of the Galaxy deck. If it's an Empire card, gain 1 force. If it's an enemy card, discard it"),
       'img' => CardIds::SCOUT_TROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -329,34 +340,42 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  'type' => ABILITY_REVEAL_GALAXY_ROW_CARD,
-                  'storeAs' => 'revealedCard'
+                  'type' => EFFECT_REVEAL_TOP_CARD,
+                  'from' => ZONE_GALAXY_DECK,
+                  'storeAs' => 'scout_revealed_card'
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_FACTION_IS,
+                        'factions' => [FACTION_EMPIRE],
+                        'cardRef' => 'scout_revealed_card',
+                     ]
+                  ],
+                  'effects' => [
+                     ['type' => EFFECT_GAIN_FORCE, 'count' => 1]
+                  ],
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_IS_ENEMY,
+                        'factions' => [FACTION_EMPIRE],
+                        'cardRef' => 'scout_revealed_card',
+                     ]
+                  ],
+                  'effects' => [
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'to' => ZONE_GALAXY_DISCARD,
+                        'cardRef' => 'scout_revealed_card',
+                     ]
+                  ],
                ],
             ],
          ],
-         [
-            'trigger' => TRIGGER_CONDITIONAL_EFFECT,
-            'condition' => [
-               'type' => CONDITION_HAS_TRAIT,
-               'card' => 'revealedCard',
-               'traits' => TRAIT_EMPIRE,
-            ],
-            'effects' => [
-               'type' => ABILITY_GAIN_FORCE,
-               'value' => 1,
-            ],
-         ],
-         [
-            'trigger' => TRIGGER_CONDITIONAL_EFFECT,
-            'condition' => [
-               'type' => CONDITION_IS_ENEMY_CARD,
-               'card' => 'revealedCard',
-            ],
-            'effects' => [
-               'type' => EFFECT_DISCARD_CARD,
-               'card' => 'revealedCard',
-            ],
-         ]
       ],
    ],
 
@@ -622,11 +641,54 @@ $empire_bases = [
    ],
    CardIds::DEATH_STAR => [
       'name' => clienttranslate('Death Star'),
+      'gametext' => clienttranslate("Spend 4 resources to destroy a capital ship your opponent has in play or a capital ship in the galaxy row"),
       'img' => 8,
       'faction' => FACTION_EMPIRE,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_HAS_RESOURCES, 'count' => 4],
+               [
+                  'type' => CONDITION_HAS_VALID_TARGET,
+                  'count' => 1,
+                  'zones' => [
+                     ['target' => TARGET_OPPONENT, 'from' => ZONE_PLAYER_SHIP_AREA],
+                     ['target' => TARGET_GALAXY, 'from' => ZONE_GALAXY_ROW],
+                  ],
+                  'filters' => [
+                     [
+                        'type' => FILTER_HAS_CARD_TYPE,
+                        'cardTypes' => [CARD_TYPE_SHIP],
+                     ],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_PAY_RESOURCE,
+                  'amount' => 4,
+               ],
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'count' => 1,
+                  'zones' => [
+                     ['target' => TARGET_OPPONENT, 'from' => ZONE_PLAYER_SHIP_AREA],
+                     ['target' => TARGET_GALAXY, 'from' => ZONE_GALAXY_ROW],
+                  ],
+                  'filters' => [
+                     [
+                        'type' => FILTER_HAS_CARD_TYPE,
+                        'cardTypes' => [CARD_TYPE_SHIP],
+                     ],
+                  ],
+                  'storeAs' => 'death_star_target',
+               ]
+            ]
+         ]
+      ],
    ],
    CardIds::ENDOR => [
       'name' => clienttranslate('Endor'),

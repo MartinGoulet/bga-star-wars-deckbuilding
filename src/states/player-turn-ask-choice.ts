@@ -3,7 +3,12 @@ import { BaseState } from "./base-state";
 
 interface PlayerTurnAskChoiceArgs {
    card: Card;
-   options: Record<number, string>;
+   options: Record<number, LabelOption>;
+}
+
+interface LabelOption {
+   label: string;
+   labelArgs?: Record<string, any>;
 }
 
 export class PlayerTurnAskChoiceState
@@ -11,7 +16,6 @@ export class PlayerTurnAskChoiceState
    implements MultipleActiveStateHandler<PlayerTurnAskChoiceArgs>
 {
    onEnteringState(args: PlayerTurnAskChoiceArgs, isCurrentPlayerActive: boolean): void {
-      if (!isCurrentPlayerActive) return;
       this.game.cardManager.setCardAsSelected(args.card);
    }
 
@@ -23,7 +27,8 @@ export class PlayerTurnAskChoiceState
             await this.game.actions.performAction("actMakeChoice", { choiceId: Number(optionId) });
          };
 
-         this.game.statusBar.addActionButton(_(option), handle);
+         const label = this.game.gameui.format_string(option.label, option.labelArgs ?? {});
+         this.game.statusBar.addActionButton(label, handle);
       });
    }
 }

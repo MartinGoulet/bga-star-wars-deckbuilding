@@ -152,7 +152,7 @@ declare class StatusBar {
     disabled?: boolean;
     tooltip?: string;
     confirm?: string | (() => string | undefined | null); 
-    autoclick?: boolean;
+    autoclick?: boolean | { abortSignal?: AbortSignal };
   }): HTMLButtonElement;
 
   /**
@@ -174,7 +174,7 @@ declare class Images {
    * 
    * @param {string[]} images the filenames
    */
-  dontPreloadImages(images: string): void;
+  dontPreloadImages(images: string[]): void;
 
   /**
    * Tell the interface to preload a specific image in your img directory.
@@ -188,7 +188,7 @@ declare class Images {
    * 
    * @param {string[]} images the filenames
    */
-  preloadImages(images: string): void;
+  preloadImages(images: string[]): void;
 }
 
 declare class Sounds {
@@ -220,6 +220,11 @@ declare class UserPreferences {
    * Method to programmatically change a game-specific user preference.
    */
   set(prefId: number, value: number): void;
+
+  /**
+   * Hide or show a game-specific user preference.
+   */
+  toggleVisibility(prefId: number, visible?: boolean): void;
 }
 
 declare class Players {
@@ -297,6 +302,15 @@ declare class Players {
    * @returns {number[]} the active player ids
    */
   getActivePlayerIds(): number[];
+
+  /**
+   * Get the avatar url of a player.
+   * 
+   * @param {number} playerId the player id to get the avatar from (or 0 to get the default avatar)
+   * @param {32 | 50 | 92 | 184} size the size of the avatar, can be 32, 50, 92 or 184 (default)
+   * @returns the avatar url
+   */
+  getPlayerAvatarUrl(playerId: number, size?: number): string;
 }
 
 declare class Actions {
@@ -405,6 +419,14 @@ declare class PlayerPanels {
   getElement(playerId: number): HTMLDivElement;
 
   /**
+   * Return the score counter of a player.
+   *
+   * @param {number} playerId the player id
+   * @returns the score counter
+   */
+  getScoreCounter(playerId: number): Counter;
+
+  /**
    * Add a player panel for an automata.
    *
    * @param {number} id the automata id, used to setup scoreCtrl and playerPanels.getElement. 0 or negative value is recommended, to avoid conflict with real player ids.
@@ -449,6 +471,87 @@ declare class Dialogs {
   multipleChoice(text: string, choices: { [value: number]: string }): Promise<string | null>;
 }
 
+declare class States {
+    /**
+     * Set a logger to log entering/leaving state.
+     * 
+     * Typical usage would be: `this.bga.states.logger = console.log;`
+     */
+    logger: Function | null;
+
+    /**
+     * Associate a state class with a state name (or id).
+     * 
+     * Typical usage would be: `this.bga.states.register('chooseAction', new ChooseActionState(this, this.bga));`.
+     * 
+     * The state instance can declare `onEnteringState` / `onLeavingState` / `onPlayerActivationChange` and can access a property called `args` that is automatically filled.
+     * 
+     * @param {string|number} stateIdOrName the name (or id) of the state
+     * @param {Object} stateClass the instanciated state class
+     */
+    register(stateIdOrName: string|number, stateClass: Object): void;
+
+    /**
+     * Get a state class by state name
+     * 
+     * @param {string} stateName state name
+     * @returns {Object} the instanciated state class
+     */
+    getStateClass(stateName: string): Object;
+
+    /**
+     * Get the current main state name (ignore private states)
+     * 
+     * @returns {string} the current main state name
+     */
+    getCurrentMainStateName(): string;
+
+    /**
+     * Get the current player state name (private state name if there is one)
+     * 
+     * @returns {string} the current player state name
+     */
+    getCurrentPlayerStateName(): string;
+
+    /**
+     * Get the current main state class (ignore private states)
+     * 
+     * @returns {Object} the current main state class (instance)
+     */
+    getCurrentMainStateClass(): Object;
+
+    /**
+     * Get the current player state class (private state if there is one)
+     * 
+     * @returns {Object} the current player state class (instance)
+     */
+    getCurrentPlayerStateClass(): Object;
+
+    /**
+     * @returns {Object[]} the registered state classes (instances)
+     */
+    getStateClasses(): Object[];
+
+    /**
+     * Client state is an override of a real server game state, useful in some situations where several steps  must be done on client side without any server interaction.
+     * Client state acts like a server game state. Real current server game state can be restored with "restoreServerGameState" method.
+     *
+     * @param {string} stateName the name of the state
+     * @param {Object} args the state args
+     */
+    setClientState(stateName: string, args: Object): void;
+
+    /**
+     * Restore the current server state (when you are in client state).
+     */
+    restoreServerGameState(): void;
+    
+    /**
+     * @returns if the current state is a client state
+     */
+    isOnClientState(): boolean;
+}
+
 interface Bga<G = Gamedatas> {
   gameui: GameGui<G>;
   statusBar: StatusBar;
@@ -461,6 +564,7 @@ interface Bga<G = Gamedatas> {
   gameArea: GameArea;
   playerPanels: PlayerPanels;
   dialogs: Dialogs;
+  states: States;
 }
 
 declare class GameGui<G = Gamedatas> {
@@ -494,12 +598,14 @@ declare class GameGui<G = Gamedatas> {
   isSpectator: boolean;
 
   /**
-   * Boolean indicating that we are in client state 
+   * @deprecated use this.bga.states.isOnClientState();
    */  
   on_client_state: boolean;
 
   /**
    * The player panel score counters.
+   * 
+   * @deprecated use this.bga.playerPanels.getScoreCounter
    */
   scoreCtrl: {[player_id: number]: Counter};
 
@@ -545,16 +651,12 @@ declare class GameGui<G = Gamedatas> {
   onUpdateActionButtons(stateName: string, args: {[key: string]: any} | null): void;
 
   /**
-   * Client state is an override of a real server game state, useful in some situations where several steps  must be done on client side without any server interaction.
-   * Client state acts like a server game state. Real current server game state can be restored with "restoreServerGameState" method.
-   * 
-   * @param {string} stateName the name of the state
-   * @param {Object} args the state args
+   * @deprecated use this.bga.states.setClientState
    */
   setClientState(stateName: string, args: {[key: string]: any}): void;
 
   /**
-   * If you are in client state it will restore the current server state (cheap undo).
+   * @deprecated use this.bga.states.restoreServerGameState
    */
   restoreServerGameState(): void;
 

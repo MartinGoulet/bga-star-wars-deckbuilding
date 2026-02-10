@@ -32,12 +32,12 @@ $rebel_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_FORCE_IS_WITH_YOU],
+            ],
             'effects' => [
                [
                   'type' => EFFECT_REPAIR_DAMAGE_BASE,
-                  'conditions' => [
-                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
-                  ],
                   'value' => 3,
                ]
             ],
@@ -164,7 +164,21 @@ $rebel_cards = [
       'cost' => 6,
       'unique' => true,
       'stats' => ['power' => 2, 'resource' => 2, 'force' => 2],
-      'abilities' => []
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'factions' => [FACTION_REBEL],
+                  'destination' => ZONE_CONDITIONAL,
+                  'destinationMap' => [
+                     ZONE_TOP_DECK => [['type' => CONDITION_FORCE_IS_WITH_YOU]],
+                  ]
+               ],
+            ],
+         ]
+      ]
    ],
 
    CardIds::MON_CALAMARI_CRUISER => [
@@ -280,6 +294,7 @@ $rebel_cards = [
 
    CardIds::REBEL_COMMANDO => [
       'name' => clienttranslate('Rebel Commando'),
+      'gametext' => clienttranslate('Your opponent discards 1 card from their hand (at random if the Force is with you)'),
       'img' => CardIds::REBEL_COMMANDO,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -289,14 +304,52 @@ $rebel_cards = [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
+               // Force WITH you → random discard
                [
-                  'type' => EFFECT_DISCARD_CARD,
+                  'type' => EFFECT_CONDITIONAL,
                   'conditions' => [
                      ['type' => CONDITION_FORCE_IS_WITH_YOU],
                   ],
-                  'target' => TARGET_OPPONENT,
-                  'count' => 1,
-               ]
+                  'effects' => [
+                     [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => TARGET_OPPONENT,
+                        'from' => ZONE_HAND,
+                        'count' => 1,
+                        'random' => true,
+                        'storeAs' => 'rebel_commando_card',
+                     ],
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'to' => ZONE_DISCARD,
+                        'target' => TARGET_OPPONENT,
+                        'cardRef' => 'rebel_commando_card',
+                     ],
+                  ],
+               ],
+
+               // Force NOT with you → opponent chooses
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU],
+                  ],
+                  'effects' => [
+                     [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => TARGET_OPPONENT,
+                        'from' => ZONE_HAND,
+                        'count' => 1,
+                        'storeAs' => 'rebel_commando_card',
+                     ],
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'to' => ZONE_DISCARD,
+                        'target' => TARGET_OPPONENT,
+                        'cardRef' => 'rebel_commando_card',
+                     ],
+                  ],
+               ],
             ],
          ]
       ],
@@ -315,7 +368,21 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 3,
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_FORCE_IS_WITH_YOU],
+               ['type' => CONDITION_HAS_DAMAGE_ON_BASE]
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                  'value' => 3,
+               ]
+            ]
+         ]
+      ],
    ],
 
    // Rebels
@@ -465,7 +532,21 @@ $rebel_bases = [
       'faction' => FACTION_REBEL,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_WHEN_PURCHASED,
+            'effects' => [
+               [
+                  'type' => EFFECT_MOVE_CARD,
+                  'target' => TARGET_SELF,
+                  'destination' => ZONE_TOP_DECK,
+                  'conditions' => [
+                     ['type' => CONDITION_FIRST_PURCHASE_THIS_TURN]
+                  ]
+               ]
+            ]
+         ]
+      ],
    ],
    CardIds::YAVIN_4 => [
       'name' => clienttranslate('Yavin 4'),

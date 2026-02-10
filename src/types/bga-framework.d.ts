@@ -152,7 +152,7 @@ declare class StatusBar {
     disabled?: boolean;
     tooltip?: string;
     confirm?: string | (() => string | undefined | null); 
-    autoclick?: boolean;
+    autoclick?: boolean | { abortSignal?: AbortSignal };
   }): HTMLButtonElement;
 
   /**
@@ -302,6 +302,15 @@ declare class Players {
    * @returns {number[]} the active player ids
    */
   getActivePlayerIds(): number[];
+
+  /**
+   * Get the avatar url of a player.
+   * 
+   * @param {number} playerId the player id to get the avatar from (or 0 to get the default avatar)
+   * @param {32 | 50 | 92 | 184} size the size of the avatar, can be 32, 50, 92 or 184 (default)
+   * @returns the avatar url
+   */
+  getPlayerAvatarUrl(playerId: number, size?: number): string;
 }
 
 declare class Actions {

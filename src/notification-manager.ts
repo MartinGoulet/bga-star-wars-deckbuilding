@@ -29,7 +29,14 @@ export class NotificationManager {
 
    private async notif_onPlayCardToShipArea(args: { player_id: number; card: Card }) {
       const table = this.game.getPlayerTable(args.player_id);
-      await table.ships.addCard(args.card);
+      await table.ships.addCard(args.card, {
+         parallelAnimations: [
+            {
+               keyframes: [{ transform: "rotate(90deg)" }],
+            },
+         ],
+         duration: 500,
+      });
    }
 
    private async notif_setPlayerCounter(args: any) {
@@ -58,7 +65,7 @@ export class NotificationManager {
       const table = this.game.getPlayerTable(args.player_id);
       const addedCards = args._private?.cards ?? args.cards;
       if (args.player_id === this.game.players.getCurrentPlayerId()) {
-         await this.game.playerHand.addCards(addedCards, { fromStock: table.deck });
+         await this.game.playerHand.addCards(addedCards, { fromStock: table.deck }, true);
       } else {
          await table.deck.removeCards(addedCards, {
             slideTo: this.game.playerPanels.getElement(args.player_id),
@@ -68,11 +75,11 @@ export class NotificationManager {
       await this.game.gameui.wait(350);
    }
 
-   public notif_onDealDamageToCard(args: { player_id: number; card: Card }) {
+   private notif_onDealDamageToCard(args: { player_id: number; card: Card }) {
       this.game.cardManager.setDamageOnCard(args.card);
    }
 
-   public notif_onRepairDamageBase(args: { player_id: number; card: Card }) {
+   private notif_onRepairDamageBase(args: { player_id: number; card: Card }) {
       this.game.cardManager.setDamageOnCard(args.card);
    }
 
@@ -86,7 +93,7 @@ export class NotificationManager {
 
    private async notif_onShuffleDiscardIntoDeck(args: { player_id: number }) {
       const table = this.game.getPlayerTable(args.player_id);
-      const cards = table.discard.getCards().map((card) => ({ id: card.id } as Card));
+      const cards = table.discard.getCards().map((card) => ({ id: card.id }) as Card);
       await table.deck.addCards(cards);
       await table.deck.shuffle();
    }
@@ -104,7 +111,7 @@ export class NotificationManager {
    private async notif_onExileCard(args: { player_id: number; card: Card }) {
       const stock = this.game.cardManager.getCardStock(args.card);
       if (stock) {
-         const slideTo = (this.game.tableCenter.galaxyDiscard as any).element as HTMLElement
+         const slideTo = (this.game.tableCenter.galaxyDiscard as any).element as HTMLElement;
          await stock.removeCard(args.card, { slideTo });
       }
    }
@@ -112,6 +119,45 @@ export class NotificationManager {
       const table = this.game.getPlayerTable(args.player_id);
       await table.activeBase.addCard(args.card);
       await this.game.gameui.wait(350);
+   }
+   private async notif_onMoveCardToTopOfDeck(args: { player_id: number; card: Card }) {
+      const table = this.game.getPlayerTable(args.player_id);
+      const card = { ...args.card };
+      delete (card as any).img;
+      await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
+      await this.game.gameui.wait(350);
+   }
+
+   private async notif_onMoveCardToDiscard(args: { player_id: number; card: Card }) {
+      const table = this.game.getPlayerTable(args.player_id);
+      await table.discard.addCard(args.card);
+      await this.game.gameui.wait(350);
+   }
+
+   private async notif_onMoveCardToGalaxyDiscard(args: { player_id: number; card: Card }) {
+      await this.game.tableCenter.galaxyDiscard.addCard(args.card);
+      await this.game.gameui.wait(350);
+   }
+
+   private async notif_onRevealTopCard(args: { player_id: number; card: Card; from: string }) {
+      switch (args.from) {
+         case "deck":
+            const deck = this.game.tableCenter.galaxyDeck;
+            deck.setCardNumber(deck.getCardCount(), args.card);
+            deck.setCardVisible(args.card, false);
+            await this.game.gameui.wait(500);
+            deck.flipCard(args.card);
+            await this.game.gameui.wait(500);
+            this.game.gameui.wait(2500).then(() => {
+               if(deck.contains(args.card)) {
+                  deck.flipCard(args.card);
+               }
+            });
+            break;
+         default:
+            this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
+            break;
+      }
    }
 }
 

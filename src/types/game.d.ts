@@ -26,6 +26,7 @@ export interface Card {
    location: string;
    locationArg: number;
    name: string;
+   gametext?: string
    faction: string;
    type: string;
    img: string;

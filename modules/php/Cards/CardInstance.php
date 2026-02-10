@@ -1,5 +1,7 @@
 <?php
 
+use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
+use Bga\Games\StarWarsDeckbuilding\Condition\ConditionFactory;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 
 class CardInstance {
@@ -9,6 +11,7 @@ class CardInstance {
         public string $location,
         public int $locationArg,
         public string $name,
+        public string $gametext,
         public string $type,
         public string $faction,
         public bool $unique,
@@ -26,18 +29,38 @@ class CardInstance {
     }
 
     public function hasPlayableAbility(GameContext $ctx): bool {
+        $effects = $this->getEffect(TRIGGER_ACTIVATE_CARD, $ctx);
+        return !empty($effects);
+    }
+
+    public function getEffect(string $trigger, GameContext $ctx): array {
         $abilities = $this->abilities;
 
         if (empty($abilities)) {
-            return false;
+            return [];
         }
 
-        $abilityWhenPlayed = array_filter(
-            $abilities,
-            fn($ability) => $ability['trigger'] === TRIGGER_ACTIVATE_CARD
-        );
+        $trigger= array_find($abilities, fn($ability) => $ability['trigger'] === $trigger);
 
-        return !empty($abilityWhenPlayed);
+        if ($trigger === null) {
+            return [];
+        }
+
+        $conditions = $trigger['conditions'] ?? [];
+        $conditions = ConditionFactory::createConditions($conditions);
+        $canResolve = true;
+        foreach ($conditions as $abilityConditions) {
+            if(!$abilityConditions->isSatisfied($ctx)) {
+                $canResolve = false;
+                break;
+            }
+        }
+
+        if (!$canResolve) {
+            return [];
+        }
+
+        return $trigger['effects'] ?? [];
     }
 
     public function getOnlyId(): CardInstance {
@@ -47,6 +70,7 @@ class CardInstance {
             location: '',
             locationArg: 0,
             name: '',
+            gametext: '',
             type: '',
             faction: '',
             unique: false,

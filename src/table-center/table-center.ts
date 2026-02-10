@@ -72,7 +72,7 @@ export class TableCenter {
    }
 
    public onLeaveState(): void {
-      [this.galaxyRow, this.galaxyDeck, this.galaxyDiscard].forEach((stock) => {
+      [this.galaxyRow, this.galaxyDeck, this.galaxyDiscard, this.outerRimDeck].forEach((stock) => {
          stock.setSelectionMode("none");
          stock.onCardClick = undefined;
          stock.onSelectionChange = undefined;

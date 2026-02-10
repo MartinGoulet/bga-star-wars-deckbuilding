@@ -35,21 +35,58 @@ final class GameEngine {
          );
          if (empty($trigger)) return;
       }
-      
+
 
       $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
       foreach ($trigger['effects'] as $effect) {
          $effects[] = array_merge(
-            $effect, 
+            $effect,
             ['sourceCardId' => $cardInstance->id]
          );
       }
       $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
    }
 
+   public function insertEffectsAfterCurrentEffect(CardInstance $card, array $effectsToInsert): void {
+      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+      $currentEffect = array_shift($effects);
+      $effectsToInsert = array_map(
+         fn($effect) => array_merge($effect, ['sourceCardId' => $card->id]),
+         $effectsToInsert
+      );
+      $effects = array_merge(
+         [$currentEffect],
+         $effectsToInsert,
+         $effects
+      );
+      $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
+   }
+
    public function addEffect(EffectInstance $effectInstance): void {
       $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
       $effects[] = $effectInstance->definition;
+      $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
+   }
+
+   public function addChoiceEffect(CardInstance $cardInstance, string $target, array $options): void {
+      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+      $effects[] = [
+         'type' => EFFECT_CHOICE,
+         'sourceCardId' => $cardInstance->id,
+         'target' => $target,
+         'options' => $options
+      ];
+      $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
+   }
+
+   public function addMoveCardEffect(CardInstance $cardInstance, string $target, string $destination): void {
+      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+      $effects[] = [
+         'type' => EFFECT_MOVE_CARD,
+         'sourceCardId' => $cardInstance->id,
+         'target' => $target,
+         'destination' => $destination
+      ];
       $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
    }
 
@@ -63,7 +100,7 @@ final class GameEngine {
          $effectDef = current($effects);
          /** @var EffectInstance $effectInstance */
          $effectInstance = EffectFactory::createEffectInstance($effectDef);
-         
+
          if ($effectInstance->canResolve($this->context) === false) {
             array_shift($effects);
             $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
@@ -75,6 +112,7 @@ final class GameEngine {
          if ($effectInstance instanceof NeedsPlayerInput) {
             return $effectInstance->getNextState();
          } else {
+            $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
             array_shift($effects);
             $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
          }

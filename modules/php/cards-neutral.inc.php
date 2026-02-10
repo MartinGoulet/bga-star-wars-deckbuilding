@@ -120,7 +120,29 @@ $neutral_cards = [
         'cost' => 8,
         'unique' => true,
         'stats' => ['power' => 2, 'resource' => 2, 'force' => 2],
-        'abilities' => []
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'conditions' => [
+                    ['type' => CONDITION_HAS_CARD_IN_HAND],
+                ],
+                'effects' => [
+                    [
+                        'type' => EFFECT_EXILE_CARD,
+                        'target' => TARGET_SELF,
+                        'zones' => [ZONE_HAND],
+                        'count' => 1,
+                    ],
+                    [
+                        'type' => EFFECT_DRAW_CARD,
+                        'value' => 1,
+                        'overrideValue' => [
+                            2 => [['type' => CONDITION_FORCE_IS_WITH_YOU]],
+                        ]
+                    ],
+                ],
+            ]
+        ]
     ],
 
     CardIds::JAWA_SCAVENGER => [

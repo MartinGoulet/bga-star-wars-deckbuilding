@@ -4,14 +4,11 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition\Concrete;
 
 use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
+use CardInstance;
 
-final class ForceIsWithYouCondition implements Condition
+final class FirstPurchaseThisRound implements Condition
 {
-    public function __construct(private bool $negate = false)
-    {
-        
-    }
     public function isSatisfied(GameContext $ctx): bool {
-        return $ctx->currentPlayer()->hasForceWithYou() !== $this->negate;
+        return $ctx->game->nbrPurchasesThisRound->get() === 1;
     }
 }

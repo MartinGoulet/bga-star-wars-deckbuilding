@@ -39,8 +39,6 @@ final class ExileCardEffect extends EffectInstance implements NeedsPlayerInput {
     public function getArgs(GameContext $ctx): array {
         $player_id = $this->getTargetPlayer($ctx)->playerId;
 
-        $player_id = $this->getTargetPlayer($ctx)->playerId;
-
         return [
             'nbr' => $this->count,
             'optional' => true,

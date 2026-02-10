@@ -9,6 +9,10 @@ use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\States\PossibleAction;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Core\PowerResolver;
+use Bga\Games\StarWarsDeckbuilding\Core\PurchaseResolver;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectFactory;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use CardInstance;
 
@@ -52,6 +56,12 @@ class PlayerTurn_ActionSelection extends GameState {
             $ctx->currentPlayer()->getCardsInPlayArea(),
             $ctx->currentPlayer()->getCardsInShipArea(),
         );
+
+        $activeBase = $ctx->cardRepository->getActiveBase($activePlayerId);
+        if ($activeBase !== null) {
+            $playArea[] = $activeBase;
+        }
+
         $selectableAbilityCardIds = array_filter($playArea, fn($card) => !in_array($card->id, $abilityUsedCardIds));
         $selectableAbilityCardIds = array_filter($selectableAbilityCardIds, fn($card) => $card->hasPlayableAbility($ctx));
         $selectableAbilityCardIds = array_map(fn($card) => $card->id, $selectableAbilityCardIds);
@@ -70,7 +80,6 @@ class PlayerTurn_ActionSelection extends GameState {
     }
 
     function onEnteringState(int $activePlayerId) {
-        
     }
 
     #[PossibleAction]
@@ -92,7 +101,7 @@ class PlayerTurn_ActionSelection extends GameState {
         $card = $this->game->cardRepository->getCard($cardId);
 
         // Play the card to the play area
-        if($card->type === CARD_TYPE_SHIP) {
+        if ($card->type === CARD_TYPE_SHIP) {
             $this->playCardOnShipArea($card, $activePlayerId);
         } else {
             $this->playCardOnPlayArea($card, $activePlayerId);
@@ -117,34 +126,9 @@ class PlayerTurn_ActionSelection extends GameState {
             throw new \BgaUserException("This card is not available for purchase.");
         }
 
-        $card = $this->game->cardRepository->getCard($cardId);
-
-        // Deduct resources
-        $this->game->playerResources->inc($activePlayerId, -$card->cost);
-
-        // Add card to discard
-        $this->game->cardRepository->addCardToPlayerDiscard($cardId, $activePlayerId);
-
-        // Notify players
-        $this->game->notify->all(
-            'onPurchaseGalaxyCard',
-            clienttranslate('${player_name} purchases ${card_name} from the Galaxy Row'),
-            [
-                'player_id' => $activePlayerId,
-                'card' => $card,
-            ]
-        );
-
-        // Resolve abilities
         $ctx = new GameContext($this->game, $activePlayerId);
-        $engine = $ctx->getGameEngine();
-        $engine->addCardEffect($card, TRIGGER_WHEN_PURCHASED);
-        $result = $engine->run();
-
-        // Refill Galaxy Row
-        $ctx->refillGalaxyRow();
-
-        return $result;
+        $resolver = new PurchaseResolver($ctx);
+        return $resolver->resolvePurchase($cardId);
     }
 
     #[PossibleAction]

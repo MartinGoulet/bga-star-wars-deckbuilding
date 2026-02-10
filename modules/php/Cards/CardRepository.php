@@ -27,6 +27,10 @@ final class CardRepository {
         $this->deck->insertCardOnExtremePosition($cardId, ZONE_PLAYER_PLAY_AREA . $playerId, true);
     }
 
+    public function addCardToTopOfDeck(int $cardId, int $playerId): void {
+        $this->deck->insertCardOnExtremePosition($cardId, 'deck_' . $playerId, true);
+    }
+
     public function addCardToShipArea(int $cardId, int $playerId): void {
         $this->deck->insertCardOnExtremePosition($cardId, 'ships_' . $playerId, true);
     }
@@ -155,6 +159,14 @@ final class CardRepository {
     public function getPlayerHand(int $playerId): array {
         $cards = $this->deck->getCardsInLocation('hand', $playerId);
         return array_map(fn($row) => $this->createFromRow($row), $cards);
+    }
+
+    public function getCardOnTopOfGalaxyDeck(): CardInstance | null {
+        $card = $this->deck->getCardOnTop(ZONE_GALAXY_DECK);
+        if ($card === null) {
+            return null;
+        }
+        return $this->createFromRow($card);
     }
 
     private function createFromRow(array $row): CardInstance {

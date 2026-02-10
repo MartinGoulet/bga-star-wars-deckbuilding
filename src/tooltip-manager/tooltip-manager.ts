@@ -2,6 +2,8 @@ import { Game } from "../game";
 import { tippy } from "../libs";
 import { Card } from "../types/game";
 
+declare function bga_format(str: string, formatters: { [key: string]: (text: string) => string | string }): string;
+
 export class TooltipManager {
    private tooltips: Record<string, any> = {};
 
@@ -83,8 +85,19 @@ export class TooltipManager {
       //    </div>`;
       // }
 
+      let gametext = '';
+      if (card.gametext) {
+         gametext = bga_format(_(card.gametext), {
+            '*': (t) => '<b>' + t + '</b>',
+         });
+         gametext = `<div class="explanation">
+            <div class="explanation-gametext">${gametext}</div>
+         </div>`;
+      }
+
       return `<div class="explanation">
          <div class="explanation-title">${_(card.name)}</div>
-      </div>`;
+      </div>
+      ${gametext}`;
    }
 }

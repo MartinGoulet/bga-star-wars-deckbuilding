@@ -30,15 +30,22 @@ class Effect_Choice extends GameState
         $ctx = new GameContext($this->game);
         /** @var ChoiceEffect $currentEffect */
         $currentEffect = $ctx->getGameEngine()->getCurrentEffect();
-        return $currentEffect->getArgs($ctx);
+        $args = $currentEffect->getArgs($ctx);
+        if (count($args['options']) === 1) {
+            $args['_no_notify'] = true;
+        }
+        return $args;
     }
 
-    function onEnteringState(array $args) {
+    function onEnteringState(array $args, int $activePlayerId) {
+        if(count($args['options']) === 1) {
+            return $this->actMakeChoice(0, $activePlayerId, $args);
+        }
         $this->gamestate->setPlayersMultiactive([$args['target']], '', true);
     }
 
     #[PossibleAction]
-    public function actMakeChoice(int $choiceId, int $activePlayerId, array $args)
+    public function actMakeChoice(int $choiceId, int $activePlayerId, array $args): string
     {
         // Validate choice
         $this->assertChoice($choiceId, $args['options']);
