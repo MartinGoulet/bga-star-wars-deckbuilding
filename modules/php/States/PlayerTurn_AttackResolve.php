@@ -109,9 +109,8 @@ class PlayerTurn_AttackResolve extends GameState {
                 clienttranslate('${player_name} destroys ${card_names} in their Ship Area'),
                 [
                     'player_id' => $ctx->opponentPlayer()->playerId,
-                    'player_name' => $this->game->getPlayerNameById($ctx->currentPlayer()->playerId),
                     'cards' => [$target],
-                    'card_names' => [$target->name],
+                    'destination' => ZONE_PLAYER_DISCARD,
                 ]
             );
         }

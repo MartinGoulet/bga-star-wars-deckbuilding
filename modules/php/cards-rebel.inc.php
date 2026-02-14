@@ -24,6 +24,8 @@ $rebel_cards = [
 
    CardIds::U_WING => [
       'name' => clienttranslate('U-Wing'),
+      'gametext' => clienttranslate('If the Force is with you, repair 3 damage from your base'),
+      'rewardText' => clienttranslate('Gain 4 Resources'),
       'img' => CardIds::U_WING,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -46,19 +48,50 @@ $rebel_cards = [
       'rewards' => [
          [
             'type' => EFFECT_GAIN_RESOURCE,
-            'count' => 4,
+            'amount' => 4,
          ]
       ]
    ],
 
    CardIds::HAMMERHEAD_CORVETTE => [
       'name' => clienttranslate('Hammerhead Corvette'),
+      'gametext' => clienttranslate('Exile this capital ship to destroy a capital ship your opponent has in play, or an ennemy capital ship in the galaxy row'),
       'img' => CardIds::HAMMERHEAD_CORVETTE,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_REBEL,
       'cost' => 4,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA, TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL], 'negate' => true],
+                     ]
+                  ],
+                  'storeAs' => 'hammerhead_target',
+               ],
+               [
+                  'type' => EFFECT_DESTROY_SELECTED_CARD,
+                  'cardRef' => 'hammerhead_target',
+               ],
+               [
+                  'type' => EFFECT_SELECT_CURRENT_CARD,
+                  'storeAs' => 'hammerhead_self',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'hammerhead_self',
+               ],
+            ],
+         ]
+      ],
    ],
 
    CardIds::HAN_SOLO => [
@@ -104,11 +137,11 @@ $rebel_cards = [
       'rewards' => [
          [
             'type' => EFFECT_GAIN_RESOURCE,
-            'count' => 3,
+            'amount' => 3,
          ],
          [
             'type' => EFFECT_GAIN_FORCE,
-            'count' => 2,
+            'amount' => 2,
          ]
       ]
    ],
@@ -125,24 +158,37 @@ $rebel_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  'type' => EFFECT_CHOICE,
+                  'type' => EFFECT_CHOICE_OPTION,
                   'target' => TARGET_OPPONENT,
                   'options' => [
                      [
-                        'type' => CHOICE_OPTION_DISCARD_CARD,
-                        'target' => TARGET_OPPONENT,
-                        'zones' => [ZONE_HAND],
-                        'count' => 1,
                         'label' => clienttranslate('Discard a card'),
+                        'type' => EFFECT_CONDITIONAL,
+                        'conditions' => [],
+                        'effects' => [
+                           [
+                              'type' => EFFECT_SELECT_CARDS,
+                              'target' => [
+                                 'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                                 'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE,
+                              ],
+                              'storeAs' => 'b_wing_discard_card',
+                           ],
+                           [
+                              'type' => EFFECT_MOVE_SELECTED_CARDS,
+                              'destination' => ZONE_PLAYER_DISCARD,
+                              'target' => TARGET_OPPONENT,
+                              'cardRef' => 'b_wing_discard_card',
+                           ],
+                        ]
                      ],
                      [
-                        'type' => CHOICE_OPTION_GAIN_ATTACK,
-                        'label' => clienttranslate('Gain 2 Attack'),
-                        'value' => 2,
+                        'label' => clienttranslate('Gain 1 Force'),
+                        'type' => EFFECT_GAIN_FORCE,
+                        'amount' => 1,
                      ],
                   ],
-
-               ]
+               ],
             ],
          ]
       ],
@@ -226,22 +272,81 @@ $rebel_cards = [
 
    CardIds::SNOWSPEEDER => [
       'name' => clienttranslate('Snowspeeder'),
+      'gametext' => clienttranslate('Your opponent discards 1 card from their hand'),
+      'rewardText' => clienttranslate('Exile 1 card from your hand or discard pile'),
       'img' => CardIds::SNOWSPEEDER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 2,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
       'abilities' => [],
+      'rewards' => [
+         [
+            'type' => EFFECT_SELECT_CARDS,
+            'target' => [
+               'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+               'min' => 1,
+            ],
+            'storeAs' => 'snowspeeder_exile_card',
+         ],
+         [
+            'type' => EFFECT_MOVE_SELECTED_CARDS,
+            'destination' => ZONE_EXILE,
+            'cardRef' => 'snowspeeder_exile_card',
+         ]
+      ]
    ],
 
    CardIds::DUROS_SPY => [
       'name' => clienttranslate('Duros Spy'),
+      'gametext' => clienttranslate("Your opponent must choose: Either they discard 1 card from their hand, or you gain 1 force"),
+      'rewardText' => clienttranslate('Exile 1 card from your hand or discard pile'),
       'img' => CardIds::DUROS_SPY,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'effects' => [
+               [
+                  'type' => EFFECT_CHOICE_OPTION,
+                  'target' => TARGET_OPPONENT,
+                  'options' => [
+                     [
+                        'type' => EFFECT_CONDITIONAL,
+                        'label' => clienttranslate('Discard a card from hand'),
+                        'conditions' => [],
+                        'effects' => [
+                           [
+                              'type' => EFFECT_SELECT_CARDS,
+                              'target' => [
+                                 'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                                 'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE,
+                              ],
+                              'storeAs' => 'duros_spy_discard_card',
+                           ],
+                           [
+                              'type' => EFFECT_MOVE_SELECTED_CARDS,
+                              'destination' => ZONE_PLAYER_DISCARD,
+                              'target' => TARGET_OPPONENT,
+                              'cardRef' => 'duros_spy_discard_card',
+                           ]
+                        ]
+                     ],
+                     [
+                        'type' => EFFECT_GAIN_FORCE,
+                        'target'=> TARGET_SELF,
+                        'amount' => 1,
+                        'label' => clienttranslate('Opponent gains 1 Force'),
+                     ],
+                  ],
+
+               ],
+            ],
+         ]
+      ],
    ],
 
    CardIds::REBEL_TRANSPORT => [
@@ -266,7 +371,7 @@ $rebel_cards = [
                      [
                         'label' => clienttranslate('Gain 1 Resource'),
                         'type' => EFFECT_GAIN_RESOURCE,
-                        'count' => 1
+                        'amount' => 1
                      ],
                   ],
                ]
@@ -287,7 +392,7 @@ $rebel_cards = [
       'rewards' => [
          [
             'type' => EFFECT_GAIN_FORCE,
-            'count' => 2,
+            'amount' => 2,
          ]
       ]
    ],
@@ -321,7 +426,7 @@ $rebel_cards = [
                      ],
                      [
                         'type' => EFFECT_MOVE_SELECTED_CARDS,
-                        'to' => ZONE_DISCARD,
+                        'destination' => ZONE_DISCARD,
                         'target' => TARGET_OPPONENT,
                         'cardRef' => 'rebel_commando_card',
                      ],
@@ -344,7 +449,7 @@ $rebel_cards = [
                      ],
                      [
                         'type' => EFFECT_MOVE_SELECTED_CARDS,
-                        'to' => ZONE_DISCARD,
+                        'destination' => ZONE_DISCARD,
                         'target' => TARGET_OPPONENT,
                         'cardRef' => 'rebel_commando_card',
                      ],
@@ -356,7 +461,7 @@ $rebel_cards = [
       'rewards' => [
          [
             'type' => EFFECT_GAIN_FORCE,
-            'count' => 2,
+            'amount' => 2,
          ]
       ]
    ],
@@ -445,17 +550,17 @@ $rebel_cards = [
                      [
                         'label' => clienttranslate('Gain 1 Attack'),
                         'type' => EFFECT_GAIN_ATTACK,
-                        'count' => 1
+                        'amount' => 1
                      ],
                      [
                         'label' => clienttranslate('Gain 1 Resource'),
                         'type' => EFFECT_GAIN_RESOURCE,
-                        'count' => 1
+                        'amount' => 1
                      ],
                      [
                         'label' => clienttranslate('Gain 1 Force'),
                         'type' => EFFECT_GAIN_FORCE,
-                        'count' => 1
+                        'amount' => 1
                      ],
                   ],
                ]

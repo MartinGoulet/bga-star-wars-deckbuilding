@@ -31,6 +31,7 @@ final class MoveSelectedCardEffect extends EffectInstance {
                     $player->moveCardToHand($cardToMove);
                     break;
                 case ZONE_DISCARD:
+                case ZONE_PLAYER_DISCARD:
                     $player->moveCardToDiscard($cardToMove);
                     break;
                 case ZONE_TOP_DECK:
@@ -39,8 +40,17 @@ final class MoveSelectedCardEffect extends EffectInstance {
                 case ZONE_GALAXY_DISCARD:
                     $player->moveCardToGalaxyDiscard($cardToMove);
                     break;
+                case ZONE_GALAXY_ROW:
+                    $player->moveCardToGalaxyRow($cardToMove);
+                    break;
+                case ZONE_GALAXY_DECK:
+                    $player->moveCardToGalaxyDeck($cardToMove);
+                    break;
+                case ZONE_EXILE:
+                    $player->moveCardToExile($cardToMove->id);
+                    break;
                 default:
-                    throw new \InvalidArgumentException("Unknown destination for MoveCardEffect: " . $this->destination);
+                    throw new \InvalidArgumentException("Unknown destination for MoveSelectedCardEffect: " . $this->destination);
             }
         }
     }

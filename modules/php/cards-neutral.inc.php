@@ -65,12 +65,37 @@ $neutral_cards = [
 
     CardIds::NEBULON_B_FRIGATE => [
         'name' => clienttranslate('Nebulon-B Frigate'),
+        'gametext' => clienttranslate("Choose: Repair 3 daamage from your base, or gain 3 resources"),
         'img' => CardIds::NEBULON_B_FRIGATE,
         'type' => CARD_TYPE_SHIP,
         'faction' => FACTION_NEUTRAL,
         'cost' => 5,
         'stats' => ['power' => 0, 'resource' => 0, 'force' => 0],
-        'abilities' => [],
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'effects' => [
+                    [
+                        'type' => EFFECT_CHOICE_OPTION,
+                        'options' => [
+                            [
+                                'label' => clienttranslate('Repair 3 damage from your base'),
+                                'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                                'conditions' => [
+                                    ['type' => CONDITION_HAS_DAMAGE_ON_BASE],
+                                ],
+                                'value' => 3,
+                            ],
+                            [
+                                'label' => clienttranslate('Gain 3 resources'),
+                                'type' => EFFECT_GAIN_RESOURCE,
+                                'amount' => 3,
+                            ]
+                        ]
+                    ]
+                ],
+            ],
+        ],
     ],
 
     CardIds::LANDO_CALRISSIAN => [
@@ -90,12 +115,26 @@ $neutral_cards = [
                         'value' => 1,
                     ],
                     [
-                        'type' => EFFECT_DISCARD_CARD,
+                        'type' => EFFECT_CONDITIONAL,
                         'conditions' => [
                             ['type' => CONDITION_FORCE_IS_WITH_YOU],
                         ],
-                        'target' => TARGET_OPPONENT,
-                        'count' => 1,
+                        'effects' => [
+                            [
+                                'type' => EFFECT_SELECT_CARDS,
+                                'target' => [
+                                    'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                                    'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE
+                                ],
+                                'storeAs' => 'lando_discard',
+                            ],
+                            [
+                                'type' => EFFECT_MOVE_SELECTED_CARDS,
+                                'target' => TARGET_OPPONENT,
+                                'destination' => ZONE_DISCARD,
+                                'cardRef' => 'lando_discard',
+                            ]
+                        ]
                     ],
                 ],
             ]
@@ -114,6 +153,7 @@ $neutral_cards = [
 
     CardIds::JABBA_THE_HUTT => [
         'name' => clienttranslate('Jabba the Hutt'),
+        'gametext' => clienttranslate("Exile 1 card from your hand to draw 1 card (2 cards instead if the Force is with you)"),
         'img' => CardIds::JABBA_THE_HUTT,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
@@ -124,21 +164,38 @@ $neutral_cards = [
             [
                 'trigger' => TRIGGER_ACTIVATE_CARD,
                 'conditions' => [
-                    ['type' => CONDITION_HAS_CARD_IN_HAND],
+                    [
+                        'type' => CONDITION_HAS_CARDS,
+                        'target' => ['zones' => [TARGET_SCOPE_SELF_HAND]]
+                    ],
                 ],
                 'effects' => [
                     [
-                        'type' => EFFECT_EXILE_CARD,
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_HAND],
+                        ],
+                        'storeAs' => 'jabba_exile',
+                    ],
+                    [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
                         'target' => TARGET_SELF,
-                        'zones' => [ZONE_HAND],
-                        'count' => 1,
+                        'destination' => ZONE_EXILE,
+                        'cardRef' => 'jabba_exile',
                     ],
                     [
                         'type' => EFFECT_DRAW_CARD,
+                        'conditions' => [
+                            ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                        ],
+                        'value' => 2,
+                    ],
+                    [
+                        'type' => EFFECT_DRAW_CARD,
+                        'conditions' => [
+                            ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU]
+                        ],
                         'value' => 1,
-                        'overrideValue' => [
-                            2 => [['type' => CONDITION_FORCE_IS_WITH_YOU]],
-                        ]
                     ],
                 ],
             ]

@@ -32,6 +32,7 @@ export class RewardCardSelectionState extends BaseState<RewardCardSelectionArgs>
          this.game.closeDiscardPopupIfNeeded();
          await this.game.actions.performAction("actCardSelection", { cardIds });
       };
+
       this.game.statusBar.addActionButton(_("Confirm"), handleConfirm, {
          disabled: true,
          id: "btn-confirm",

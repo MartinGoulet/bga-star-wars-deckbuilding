@@ -1,5 +1,7 @@
 <?php
 
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetScope;
+
 $empire_cards = [
    // Imperials
    CardIds::TIE_FIGHTER => [
@@ -24,7 +26,7 @@ $empire_cards = [
       'rewards' => [
          [
             'type' => EFFECT_GAIN_RESOURCE,
-            'count' => 1,
+            'amount' => 1,
          ]
       ]
    ],
@@ -184,7 +186,7 @@ $empire_cards = [
                [
                   'type' => EFFECT_MOVE_SELECTED_CARDS,
                   'storeRef' => 'atat_selected_trooper',
-                  'to' => ZONE_HAND,
+                  'destination' => ZONE_HAND,
                ],
             ],
          ]
@@ -354,7 +356,7 @@ $empire_cards = [
                      ]
                   ],
                   'effects' => [
-                     ['type' => EFFECT_GAIN_FORCE, 'count' => 1]
+                     ['type' => EFFECT_GAIN_FORCE, 'amount' => 1]
                   ],
                ],
                [
@@ -369,7 +371,7 @@ $empire_cards = [
                   'effects' => [
                      [
                         'type' => EFFECT_MOVE_SELECTED_CARDS,
-                        'to' => ZONE_GALAXY_DISCARD,
+                        'destination' => ZONE_GALAXY_DISCARD,
                         'cardRef' => 'scout_revealed_card',
                      ]
                   ],
@@ -454,15 +456,29 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'cost' => [
-               'type' => COST_DISCARD_FROM_HAND,
-               'amount' => 1,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => ['zones' => [TARGET_SCOPE_SELF_HAND]],
+               ],
             ],
             'effects' => [
                [
-                  'type' => ABILITY_DRAW_CARD,
-                  'amount' => 1,
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND],
+                  ],
+                  'storeAs' => 'gozanti_selected_card',
                ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'gozanti_selected_card',
+                  'destination' => ZONE_DISCARD,
+               ],
+               [
+                  'type' => EFFECT_DRAW_CARD,
+                  'value' => 1,
+               ]
             ],
          ]
       ],
@@ -470,6 +486,8 @@ $empire_cards = [
 
    CardIds::MOFF_JERJERROD => [
       'name' => clienttranslate('Moff Jerjerrod'),
+      'gametext' => clienttranslate("Look at the top card of the galaxy deck. If the Force is with you, you may swap that card with a card from the galaxy row"),
+      'rewardText' => clienttranslate("Gain 3 Force"),
       'img' => CardIds::MOFF_JERJERROD,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -482,18 +500,73 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  'type' => ABILITY_LOOK_AT_TOP_CARD,
-                  'target' => ZONE_GALAXY_DECK,
-                  'count' => 1,
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_DECK],
+                  ],
+                  'storeAs' => GVAR_GALAXY_DECK_REVEALED_CARD,
                ],
                [
-                  'type' => ABILITY_SWAP_TOP_DECK_WITH_ROW,
-                  'deck' => ZONE_GALAXY_DECK,
-                  'row' => ZONE_GALAXY_ROW,
-               ]
+                  'type' => EFFECT_REVEAL_CARDS,
+                  'cardRef' => GVAR_GALAXY_DECK_REVEALED_CARD,
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                  ],
+                  'effects' =>
+                  [
+                     [
+                        'type' => EFFECT_CHOICE_OPTION,
+                        'options' => [
+                           [
+                              'label' => clienttranslate('Keep the card on top of the galaxy deck'),
+                              'type' => EFFECT_CONDITIONAL,
+                              'effects' => [
+                                 [
+                                    'type' => EFFECT_HIDE_CARDS,
+                                    'cardRef' => GVAR_GALAXY_DECK_REVEALED_CARD,
+                                 ],
+                              ],
+                           ],
+                           [
+                              'label' => clienttranslate('Swap the card with a card from the galaxy row'),
+                              'type' => EFFECT_CONDITIONAL,
+                              'effects' => [
+                                 [
+                                    'type' => EFFECT_SELECT_CARDS,
+                                    'target' => [
+                                       'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                                    ],
+                                    'storeAs' => 'moff_swap_target',
+                                 ],
+                                 [
+                                    'type' => EFFECT_MOVE_SELECTED_CARDS,
+                                    'destination' => ZONE_GALAXY_ROW,
+                                    'cardRef' => GVAR_GALAXY_DECK_REVEALED_CARD,
+                                 ],
+                                 [
+                                    'type' => EFFECT_MOVE_SELECTED_CARDS,
+                                    'destination' => ZONE_GALAXY_DECK,
+                                    'cardRef' => 'moff_swap_target',
+                                 ],
+                              ],
+                           ],
+                        ]
+                     ],
+                  ]
+               ],
             ]
          ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'amount' => 3,
+         ]
       ]
+
    ],
 
    CardIds::GENERAL_VEERS => [
@@ -565,17 +638,17 @@ $empire_cards = [
                      [
                         'label' => clienttranslate('Gain 1 Attack'),
                         'type' => EFFECT_GAIN_ATTACK,
-                        'count' => 1
+                        'amount' => 1
                      ],
                      [
                         'label' => clienttranslate('Gain 1 Resource'),
                         'type' => EFFECT_GAIN_RESOURCE,
-                        'count' => 1
+                        'amount' => 1
                      ],
                      [
                         'label' => clienttranslate('Gain 1 Force'),
                         'type' => EFFECT_GAIN_FORCE,
-                        'count' => 1
+                        'amount' => 1
                      ],
                   ],
                ]
@@ -652,16 +725,14 @@ $empire_bases = [
             'conditions' => [
                ['type' => CONDITION_HAS_RESOURCES, 'count' => 4],
                [
-                  'type' => CONDITION_HAS_VALID_TARGET,
-                  'count' => 1,
-                  'zones' => [
-                     ['target' => TARGET_OPPONENT, 'from' => ZONE_PLAYER_SHIP_AREA],
-                     ['target' => TARGET_GALAXY, 'from' => ZONE_GALAXY_ROW],
-                  ],
-                  'filters' => [
-                     [
-                        'type' => FILTER_HAS_CARD_TYPE,
-                        'cardTypes' => [CARD_TYPE_SHIP],
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA, TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        [
+                           'type' => FILTER_CARD_TYPES,
+                           'cardTypes' => [CARD_TYPE_SHIP],
+                        ],
                      ],
                   ],
                ],
@@ -673,18 +744,20 @@ $empire_bases = [
                ],
                [
                   'type' => EFFECT_SELECT_CARDS,
-                  'count' => 1,
-                  'zones' => [
-                     ['target' => TARGET_OPPONENT, 'from' => ZONE_PLAYER_SHIP_AREA],
-                     ['target' => TARGET_GALAXY, 'from' => ZONE_GALAXY_ROW],
-                  ],
-                  'filters' => [
-                     [
-                        'type' => FILTER_HAS_CARD_TYPE,
-                        'cardTypes' => [CARD_TYPE_SHIP],
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW, TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        [
+                           'type' => FILTER_CARD_TYPES,
+                           'cardTypes' => [CARD_TYPE_SHIP],
+                        ],
                      ],
                   ],
                   'storeAs' => 'death_star_target',
+               ],
+               [
+                  'type' => EFFECT_DESTROY_SELECTED_CARD,
+                  'cardRef' => 'death_star_target',
                ]
             ]
          ]

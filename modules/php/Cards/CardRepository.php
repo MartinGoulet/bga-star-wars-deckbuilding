@@ -28,7 +28,11 @@ final class CardRepository {
     }
 
     public function addCardToTopOfDeck(int $cardId, int $playerId): void {
-        $this->deck->insertCardOnExtremePosition($cardId, 'deck_' . $playerId, true);
+        if($playerId === 0) {
+            $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_DECK, true);
+        } else {
+            $this->deck->insertCardOnExtremePosition($cardId, 'deck_' . $playerId, true);
+        }
     }
 
     public function addCardToShipArea(int $cardId, int $playerId): void {
@@ -53,12 +57,24 @@ final class CardRepository {
         $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_DISCARD, true);
     }
 
+    public function addCardToGalaxyRow(int $cardId): void {
+        $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_ROW, true);
+    }
+
     public function countGalaxyDeck(): int {
         return $this->deck->countCardsInLocation(ZONE_GALAXY_DECK);
     }
 
     public function countPlayerDeck(int $playerId): int {
         return $this->deck->countCardsInLocation('deck_' . $playerId);
+    }
+
+    /**
+     * @return CardInstance[]
+     */
+    public function getGalaxyDeckUI(): array {
+        $cards = $this->deck->getCardsInLocation(ZONE_GALAXY_DECK, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row)->getUI(), $cards);
     }
 
     /**
@@ -140,6 +156,14 @@ final class CardRepository {
      */
     public function getGalaxyDiscardPile(): array {
         $cards = $this->deck->getCardsInLocation(ZONE_GALAXY_DISCARD, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
+    }
+
+    /**
+     * @return CardInstance[]
+     */
+    public function getGalaxyDeckTopCards(int $count): array {
+        $cards = $this->deck->getCardsOnTop($count, ZONE_GALAXY_DECK);
         return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 

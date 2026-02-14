@@ -225,9 +225,21 @@ class NotificationManager {
         this.game.cardManager.setDamageOnCard(args.card);
     }
     async notif_onDiscardCards(args) {
-        const table = this.game.getPlayerTable(args.player_id);
         const cards = args.cards.sort((a, b) => a.locationArg - b.locationArg);
-        await table.discard.addCards(cards, {}, 200);
+        switch (args.destination) {
+            case "player_discard":
+                const table = this.game.getPlayerTable(args.player_id);
+                await table.discard.addCards(cards, {}, 200);
+                break;
+            case "galaxy_discard":
+                const galaxyDiscard = this.game.tableCenter.galaxyDiscard;
+                await galaxyDiscard.addCards(cards, {}, 200);
+                break;
+            default:
+                debugger;
+                this.game.dialogs.showMessage("Unknown destination for discarding cards: " + args.destination, "error");
+                return;
+        }
         await this.game.gameui.wait(350);
     }
     async notif_onShuffleDiscardIntoDeck(args) {
@@ -257,11 +269,18 @@ class NotificationManager {
         await this.game.gameui.wait(350);
     }
     async notif_onMoveCardToTopOfDeck(args) {
-        const table = this.game.getPlayerTable(args.player_id);
-        const card = { ...args.card };
-        delete card.img;
-        await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
-        await this.game.gameui.wait(350);
+        switch (args.destination) {
+            case "player_deck":
+                const table = this.game.getPlayerTable(args.player_id);
+                const card = { ...args.card };
+                delete card.img;
+                await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
+                await this.game.gameui.wait(350);
+                break;
+            default:
+                this.game.dialogs.showMessage("Unknown destination for moving card to top of deck: " + args.destination, "error");
+                break;
+        }
     }
     async notif_onMoveCardToDiscard(args) {
         const table = this.game.getPlayerTable(args.player_id);
@@ -276,20 +295,30 @@ class NotificationManager {
         switch (args.from) {
             case "deck":
                 const deck = this.game.tableCenter.galaxyDeck;
-                deck.setCardNumber(deck.getCardCount(), args.card);
-                deck.setCardVisible(args.card, false);
+                deck.setCardVisible(args.card, false, { updateFront: true, updateFrontDelay: 0 });
                 await this.game.gameui.wait(500);
                 deck.flipCard(args.card);
-                await this.game.gameui.wait(500);
-                this.game.gameui.wait(2500).then(() => {
-                    if (deck.contains(args.card)) {
-                        deck.flipCard(args.card);
-                    }
-                });
                 break;
             default:
                 this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
                 break;
+        }
+    }
+    async notif_onMoveCardToGalaxyRow(args) {
+        await this.game.tableCenter.galaxyRow.addCard(args.card);
+    }
+    async notif_onMoveCardToGalaxyDeck(args) {
+        const deck = this.game.tableCenter.galaxyDeck;
+        const card = { ...args.card };
+        delete card.img;
+        await deck.addCard(card, { finalSide: "back", initialSide: "front" });
+        await this.game.gameui.wait(350);
+    }
+    async notif_onHideCards(args) {
+        for (const cardId of args.cardIds) {
+            const cardTemp = { id: cardId };
+            const stock = this.game.cardManager.getCardStock(cardTemp);
+            stock.setCardVisible(cardTemp, false, { updateFront: true, updateFrontDelay: 0 });
         }
     }
 }
@@ -505,6 +534,7 @@ class EffectCardSelectionState extends BaseState {
         this.displayDescription(args, isCurrentPlayerActive);
         if (!isCurrentPlayerActive)
             return;
+        this.game.statusBar.removeActionButtons();
         this.addConfirmButton(args);
         const stocks = this.getStocks(args);
         stocks.forEach((stock) => {
@@ -556,9 +586,11 @@ class EffectCardSelectionState extends BaseState {
         return selectedCards;
     }
     getStocks(args) {
-        return Array.from(new Set(args.selectableCards.map((card) => {
+        let stocks = args.selectableCards.map((card) => {
             return this.game.cardManager.getCardStock(card);
-        })));
+        });
+        stocks = stocks.filter((stock) => !!stock);
+        return Array.from(new Set(stocks));
     }
 }
 
@@ -645,8 +677,7 @@ class PlayerTurnActionSelectionState extends BaseState {
 class PlayerTurnAskChoiceState extends BaseState {
     onEnteringState(args, isCurrentPlayerActive) {
         this.game.cardManager.setCardAsSelected(args.card);
-    }
-    onPlayerActivationChange(args, isCurrentPlayerActive) {
+        this.game.statusBar.removeActionButtons();
         if (!isCurrentPlayerActive)
             return;
         Object.entries(args.options).forEach(([optionId, option]) => {
@@ -656,6 +687,9 @@ class PlayerTurnAskChoiceState extends BaseState {
             const label = this.game.gameui.format_string(option.label, option.labelArgs ?? {});
             this.game.statusBar.addActionButton(label, handle);
         });
+    }
+    onPlayerActivationChange(args, isCurrentPlayerActive) {
+        this.onEnteringState(args, isCurrentPlayerActive);
     }
 }
 
@@ -751,13 +785,13 @@ class TableCenter {
                <div class="galaxy-row-wrapper">
                   <div>
                      <div class="galaxy-decks">
-                        <div class="deck-draw-pile"></div>
-                        <div class="deck-discard-pile"></div>
+                        <div id="deck-draw-pile" class="deck-draw-pile"></div>
+                        <div id="deck-discard-pile" class="deck-discard-pile"></div>
                         <div class="force-track">
                            <div class="force-track-background"></div>
                            <div class="force-track-indicator" data-force="${game.gamedatas.force}"></div>
                         </div>
-                        <div class="deck-outer-rim"></div>
+                        <div id="deck-outer-rim" class="deck-outer-rim"></div>
                      </div>
                   </div>
                   <div>
@@ -769,7 +803,7 @@ class TableCenter {
             gap: '12px',
         });
         this.galaxyDeck = new BgaCards.Deck(game.cardManager, document.querySelector(".deck-draw-pile"), {
-            cardNumber: game.gamedatas.galaxyDeckCount,
+            autoRemovePreviousCards: false,
             counter: {
                 show: true,
                 size: 6,
@@ -796,6 +830,10 @@ class TableCenter {
         this.galaxyRow.addCards(game.gamedatas.galaxyRow);
         this.galaxyDiscard.addCards(game.gamedatas.galaxyDiscard);
         this.outerRimDeck.addCards(game.gamedatas.outerRimDeck);
+        this.galaxyDeck.addCards(game.gamedatas.galaxyDeck);
+        if (game.gamedatas.galaxyDeckRevealedCard) {
+            this.galaxyDeck.setCardVisible(game.gamedatas.galaxyDeckRevealedCard, true);
+        }
     }
     onLeaveState() {
         [this.galaxyRow, this.galaxyDeck, this.galaxyDiscard, this.outerRimDeck].forEach((stock) => {
@@ -903,11 +941,6 @@ class Game {
                         args[field] = args[field].map((name) => `<strong>${_(name)}</strong>`).join(", ");
                     }
                 });
-                if (args["_private"]) {
-                    const logs = this.bgaFormatText(log, args["_private"]);
-                    log = logs.log;
-                    args["_private"] = logs.args;
-                }
             }
         }
         catch (e) {

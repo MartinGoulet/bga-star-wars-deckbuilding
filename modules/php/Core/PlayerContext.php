@@ -68,7 +68,21 @@ final class PlayerContext {
         $this->game->cardRepository->addCardToPlayerDiscard($card->id, $this->playerId);
         $this->game->notify->all(
             'onMoveCardToDiscard',
-            clienttranslate('${player_name} moves ${card_name} to their discard pile'),
+            clienttranslate('${player_name} discards ${card_name}'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
+            ]
+        );
+    }
+
+    public function moveCardToExile(int $cardId): void {
+        $this->game->cardRepository->addCardToExile($cardId);
+
+        $card = $this->game->cardRepository->getCardById($cardId);
+        $this->game->notify->all(
+            'onExileCard',
+            clienttranslate('${player_name} exiles ${card_name}'),
             [
                 'player_id' => $this->playerId,
                 'card' => $card,
@@ -109,8 +123,8 @@ final class PlayerContext {
                         clienttranslate('${player_name} draws ${_private.card_names}'),
                         [
                             'player_id' => $this->playerId,
-                            'card_names' => array_map(fn($c) => $c->name, $cards),
                             'cards' => $cards,
+                            'card_names' => array_map(fn($c) => $c->name, $cards),
                         ]
                     )
                 ]
@@ -149,6 +163,21 @@ final class PlayerContext {
         return $this->game->cardRepository->getPlayerShips($this->playerId);
     }
 
+    public function destroyCard(CardInstance $card): void {
+        $this->game->cardRepository->addCardToPlayerDiscard($card->id, $this->playerId);
+        $card = $this->game->cardRepository->getCard($card->id);
+
+        $this->game->notify->all(
+            'onDiscardCards',
+            clienttranslate('${player_name} destroys ${card_names}'),
+            [
+                'player_id' => $this->playerId,
+                'cards' => [$card],
+                'destination' => ZONE_PLAYER_DISCARD,
+            ]
+        );
+    }
+
     public function discardCards(array $cardIds): void {
         $this->game->cardRepository->addCardsToPlayerDiscard($cardIds, $this->playerId);
         $cards = $this->game->cardRepository->getCardsByIds($cardIds);
@@ -158,8 +187,8 @@ final class PlayerContext {
             clienttranslate('${player_name} discards ${card_names}'),
             [
                 'player_id' => $this->playerId,
-                'card_names' => array_values(array_map(fn($c) => $c->name, $cards)),
                 'cards' => array_values($cards),
+                'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
     }
@@ -173,6 +202,7 @@ final class PlayerContext {
             [
                 'player_id' => $this->playerId,
                 'card' => $card,
+                'destination' => ZONE_PLAYER_DECK,
             ]
         );
     }
@@ -183,6 +213,32 @@ final class PlayerContext {
         $this->game->notify->all(
             'onMoveCardToGalaxyDiscard',
             clienttranslate('${player_name} moves ${card_name} to the galaxy discard pile'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
+            ]
+        );
+    }
+
+    public function moveCardToGalaxyRow(CardInstance $card): void {
+        $this->game->cardRepository->addCardToGalaxyRow($card->id); 
+        $card = $this->game->cardRepository->getCard($card->id);
+        $this->game->notify->all(
+            'onMoveCardToGalaxyRow',
+            clienttranslate('${player_name} moves ${card_name} to the galaxy row'),
+            [
+                'player_id' => $this->playerId,
+                'card' => $card,
+            ]
+        );
+    }
+
+    public function moveCardToGalaxyDeck(CardInstance $card): void {
+        $this->game->cardRepository->addCardToTopOfDeck($card->id, 0);
+        $card = $this->game->cardRepository->getCard($card->id);
+        $this->game->notify->all(
+            'onMoveCardToGalaxyDeck',
+            clienttranslate('${player_name} moves ${card_name} on top of the galaxy deck'),
             [
                 'player_id' => $this->playerId,
                 'card' => $card,

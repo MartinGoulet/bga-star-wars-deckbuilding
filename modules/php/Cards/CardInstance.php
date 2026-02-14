@@ -40,7 +40,7 @@ class CardInstance {
             return [];
         }
 
-        $trigger= array_find($abilities, fn($ability) => $ability['trigger'] === $trigger);
+        $trigger = array_find($abilities, fn($ability) => $ability['trigger'] === $trigger);
 
         if ($trigger === null) {
             return [];
@@ -50,7 +50,7 @@ class CardInstance {
         $conditions = ConditionFactory::createConditions($conditions);
         $canResolve = true;
         foreach ($conditions as $abilityConditions) {
-            if(!$abilityConditions->isSatisfied($ctx)) {
+            if (!$abilityConditions->isSatisfied($ctx)) {
                 $canResolve = false;
                 break;
             }
@@ -61,6 +61,13 @@ class CardInstance {
         }
 
         return $trigger['effects'] ?? [];
+    }
+
+    public function isOwnedBy(int $playerId): bool {
+        $locationEnd = explode('_', $this->location);
+        $locationEnd = end($locationEnd);
+        return $this->locationArg === $playerId ||
+            $locationEnd === (string)$playerId;
     }
 
     public function getOnlyId(): CardInstance {
@@ -85,5 +92,13 @@ class CardInstance {
             rewards: [],
             traits: [],
         );
+    }
+
+    public function getUI(): array {
+        return [
+            'id' => $this->id,
+            'location' => $this->location,
+            'locationArg' => $this->locationArg,
+        ];
     }
 }

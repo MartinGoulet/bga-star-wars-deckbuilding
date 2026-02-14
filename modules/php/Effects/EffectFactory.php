@@ -3,22 +3,27 @@
 namespace Bga\Games\StarWarsDeckbuilding\Effects;
 
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceOptionEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ConditionalEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DestroyCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DiscardCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DrawCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ExileCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\GainAttackEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\GainForceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\GainResourceEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\HideCardsEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveSelectedCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PayResourceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PurchaseCardFreeEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RepairDamageBaseEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RevealCardsEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RevealTopCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\SelectCardEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\SelectCurrentCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Game;
-use BgaUserException;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
 use BgaVisibleSystemException;
 
 final class EffectFactory {
@@ -31,6 +36,11 @@ final class EffectFactory {
         } else {
 
             $sourceCard = Game::get()->cardRepository->getCardById($sourceCardId);
+        }
+
+        if (!isset($data['type'])) {
+            var_dump($data);
+            die('Effect definition must include type');
         }
 
         switch ($data['type']) {
@@ -64,13 +74,13 @@ final class EffectFactory {
                 );
                 break;
             case EFFECT_GAIN_RESOURCE:
-                $value = new GainResourceEffect($data['count']);
+                $value = new GainResourceEffect($data['amount']);
                 break;
             case EFFECT_GAIN_ATTACK:
-                $value = new GainAttackEffect($data['count']);
+                $value = new GainAttackEffect($data['amount']);
                 break;
             case EFFECT_GAIN_FORCE:
-                $value = new GainForceEffect($data['count']);
+                $value = new GainForceEffect($data['amount']);
                 break;
             case EFFECT_REPAIR_DAMAGE_BASE:
                 $value = new RepairDamageBaseEffect($data['value']);
@@ -83,19 +93,16 @@ final class EffectFactory {
                 );
                 break;
             case EFFECT_SELECT_CARDS:
+                $target = TargetQueryFactory::create($data['target']);
                 $value = new SelectCardEffect(
-                    $data['target'] ?? TARGET_SELF,
-                    $data['from'],
-                    $data['count'],
-                    $data['filters'] ?? [],
+                    $target,
                     $data['storeAs'],
-                    $data['random'] ?? false,
                 );
                 break;
             case EFFECT_MOVE_SELECTED_CARDS:
                 $value = new MoveSelectedCardEffect(
                     $data['target'] ?? TARGET_SELF,
-                    $data['to'],
+                    $data['destination'],
                     $data['cardRef'],
                 );
                 break;
@@ -106,17 +113,39 @@ final class EffectFactory {
                 );
                 break;
             case EFFECT_CONDITIONAL:
-                $value = new ConditionalEffect(
-                    $data['effects']
-                );
+                $value = new ConditionalEffect($data['effects']);
                 break;
             case EFFECT_PAY_RESOURCE:
-                $value = new PayResourceEffect(
-                    $data['amount']
+                $value = new PayResourceEffect($data['amount']);
+                break;
+            case EFFECT_DESTROY_SELECTED_CARD:
+                $value = new DestroyCardEffect($data['cardRef']);
+                break;
+            case EFFECT_CHOICE_OPTION:
+                $value = new ChoiceOptionEffect(
+                    $data['target'] ?? TARGET_SELF,
+                    $data['options']
+                );
+                break;
+            case EFFECT_REVEAL_CARDS:
+                $value = new RevealCardsEffect(
+                    $data['cardRef'],
+                );
+                break;
+            case EFFECT_HIDE_CARDS:
+                $value = new HideCardsEffect($data['cardRef']);
+                break;
+            case EFFECT_SELECT_CURRENT_CARD:
+                $value = new SelectCurrentCardEffect(
+                    $data['storeAs'],
                 );
                 break;
             default:    
-                throw new \InvalidArgumentException("Unknown effect type: " . $data['type']);
+                var_dump([
+                    'error' => 'Unknown effect type',
+                    'type' => $data['type'],
+                ]);
+                die("Unknown effect type: " . $data['type']);
         }
 
         $value->conditions = $conditions;

@@ -5,12 +5,13 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\CardInPlayCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\FirstPurchaseThisRound;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\ForceIsWithYouCondition;
-use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardInZoneCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardInZoneWithTraitCondition;
+use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardsCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasDamageOnBaseCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasResourcesCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasUnitInPlayWithTrait;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\IsCardFactionCondition;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
 
 final class ConditionFactory {
     public static function create(array $condition): Condition {
@@ -29,11 +30,6 @@ final class ConditionFactory {
             ),
             CONDITION_FIRST_PURCHASE_THIS_TURN => new FirstPurchaseThisRound(),
             CONDITION_HAS_DAMAGE_ON_BASE => new HasDamageOnBaseCondition(),
-            CONDITION_HAS_CARD_IN_HAND => new HasCardInZoneCondition(
-                count: 1,
-                zones: [['target' => TARGET_SELF, 'zone' => ZONE_HAND]],
-                filters: [],
-            ),
             CONDITION_CARD_FACTION_IS => new IsCardFactionCondition(
                 $condition['factions'],
                 $condition['cardRef'],
@@ -44,10 +40,8 @@ final class ConditionFactory {
                 negate: true,
             ),
             CONDITION_HAS_RESOURCES => new HasResourcesCondition($condition['count']),
-            CONDITION_HAS_VALID_TARGET => new HasCardInZoneCondition(
-                count: $condition['count'] ?? 1,
-                zones: $condition['zones'],
-                filters: $condition['filters'] ?? [],
+            CONDITION_HAS_CARDS => new HasCardsCondition(
+                TargetQueryFactory::create($condition['target'])
             ),
             default => throw new \InvalidArgumentException("Unknown condition type: " . $condition['type']),
         };

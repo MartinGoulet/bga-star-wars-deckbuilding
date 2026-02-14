@@ -85,6 +85,13 @@ class Game extends \Bga\GameFramework\Table {
                 $args['i18n'][] = ['card_name'];
             }
 
+            if (isset($args['cards']) && !isset($args['card_names']) && str_contains($message, '${card_names}')) {
+                /** @var CardInstance[] $cards */
+                $cards = $args['cards'];
+                $args['card_names'] = array_map(fn($card) => $card->name, $cards);
+                $args['i18n'][] = ['card_names'];
+            }
+
             return $args;
         });
 
@@ -171,6 +178,14 @@ class Game extends \Bga\GameFramework\Table {
         $result['galaxyDiscard'] = $this->cardRepository->getGalaxyDiscardPile();
         $result['playerHand'] = array_values($this->cardRepository->getPlayerHand($current_player_id));
         $result['outerRimDeck'] = array_values($this->cardRepository->getOuterRimDeck());
+
+        $result['galaxyDeck'] = array_values($this->cardRepository->getGalaxyDeckUI());
+
+        $galaxyRevealedCard = $this->globals->get(GVAR_GALAXY_DECK_REVEALED_CARD, []);
+        if(!empty($galaxyRevealedCard)) {
+            $cardId = array_shift($galaxyRevealedCard);
+            $result['galaxyDeckRevealedCard'] = $this->cardRepository->getCard($cardId);
+        }
         
         foreach($result["players"] as &$player) {
             $pId = intval($player['id']);

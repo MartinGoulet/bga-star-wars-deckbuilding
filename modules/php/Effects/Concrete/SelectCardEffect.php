@@ -6,18 +6,15 @@ use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 use Bga\Games\StarWarsDeckbuilding\Effects\NeedsPlayerInput;
 use Bga\Games\StarWarsDeckbuilding\States\Effect_CardSelection;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQuery;
 
 final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput {
 
     private string $nextState = Effect_CardSelection::class;
 
     public function __construct(
-        private string $target,
-        private string $from,
-        private int $count,
-        private array $filters,
+        private TargetQuery $target,
         private string $storeAs,
-        private bool $random,
     ) {
     }
 
@@ -26,16 +23,20 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
 
         $args = $this->getArgs($ctx);
         $cards = $args['selectableCards'] ?? [];
+
         // If only one card is selectable, automatically select it and skip the player input step
         if (count($cards) === 1) {
-            $this->onPlayerChoice($ctx, ['cardIds' => [current($cards)['id']]]);
+            $card = current($cards);
+            $ctx->globals->set($this->storeAs, [$card->id]);
             $this->nextState = '';
             return;
         }
+
         // If random is true, randomly select cards and skip the player input step
-        if ($this->random) {
-            $selectedCards = array_rand($cards, min($this->count, count($cards)));
-            $this->onPlayerChoice($ctx, ['cardIds' => $selectedCards]);
+        if ($this->target->selectionMode === SELECTION_MODE_RANDOM) {
+            $selectedCards = array_rand($cards, min($this->target->max, count($cards)));
+            $selectedCardIds = array_map(fn($index) => $cards[$index]->id, $selectedCards);
+            $ctx->globals->set($this->storeAs, $selectedCardIds);
             $this->nextState = '';
             return;
         }
@@ -46,18 +47,18 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
     }
 
     public function getArgs(GameContext $ctx): array {
-        if ($this->target === TARGET_SELF) {
-            $player_id = $ctx->currentPlayer()->playerId;
-        } else {
-            $player_id = $ctx->opponentPlayer()->playerId;
-        }
+        
+        $selectedCards = $ctx->targetResolver->resolve($this->target);
+        $player_id = $this->target->selectionMode === SELECTION_MODE_PLAYER_CHOICE
+            ? $ctx->currentPlayer()->playerId
+            : $ctx->opponentPlayer()->playerId;
 
         return [
-            'nbr' => $this->count,
-            'optional' => false,
-            'selectableCards' => array_values($this->getSelectableCards($ctx, $player_id)),
-            'card' => $this->sourceCard,
+            'nbr' => $this->target->max,
+            'optional' => $this->target->min === 0,
             'target' => $this->target,
+            'selectableCards' => array_values($selectedCards),
+            'card' => $this->sourceCard,
             'player_name' => $ctx->game->getPlayerNameById($player_id),
             'player_id' => $player_id,
             'description' => clienttranslate('${player_name} must select ${nbr} card(s)'),
@@ -67,6 +68,7 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
 
     public function onPlayerChoice(GameContext $context, array $choice): string {
         $cardIds = $choice['cardIds'] ?? [];
+
         if (empty($cardIds)) {
             return '';
         }
@@ -74,21 +76,5 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
         $context->globals->set($this->storeAs, $cardIds);
 
         return '';
-    }
-
-    private function getSelectableCards(GameContext $ctx, int $playerId): array {
-        $cards = $ctx->getSelectableCards($playerId, [$this->from]);
-
-        // Apply filters
-        foreach ($this->filters as $filter) {
-            if ($filter['type'] === CONDITION_HAS_TRAIT) {
-                $cards = array_filter($cards, function ($card) use ($filter) {
-                    // Verify if any filter['traits'] is in $card['traits']
-                    return !empty(array_intersect($filter['traits'], $card->traits));
-                });
-            }
-        }
-
-        return $cards;
     }
 }

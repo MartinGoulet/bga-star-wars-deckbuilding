@@ -20,13 +20,13 @@ export class TableCenter {
                <div class="galaxy-row-wrapper">
                   <div>
                      <div class="galaxy-decks">
-                        <div class="deck-draw-pile"></div>
-                        <div class="deck-discard-pile"></div>
+                        <div id="deck-draw-pile" class="deck-draw-pile"></div>
+                        <div id="deck-discard-pile" class="deck-discard-pile"></div>
                         <div class="force-track">
                            <div class="force-track-background"></div>
                            <div class="force-track-indicator" data-force="${game.gamedatas.force}"></div>
                         </div>
-                        <div class="deck-outer-rim"></div>
+                        <div id="deck-outer-rim" class="deck-outer-rim"></div>
                      </div>
                   </div>
                   <div>
@@ -40,7 +40,7 @@ export class TableCenter {
          gap: '12px',
       });
       this.galaxyDeck = new BgaCards.Deck<Card>(game.cardManager, document.querySelector(".deck-draw-pile")!, {
-         cardNumber: game.gamedatas.galaxyDeckCount,
+         autoRemovePreviousCards: false,
          counter: {
             show: true,
             size: 6,
@@ -69,6 +69,12 @@ export class TableCenter {
       this.galaxyRow.addCards(game.gamedatas.galaxyRow);
       this.galaxyDiscard.addCards(game.gamedatas.galaxyDiscard);
       this.outerRimDeck.addCards(game.gamedatas.outerRimDeck);
+
+      this.galaxyDeck.addCards(game.gamedatas.galaxyDeck);
+
+      if(game.gamedatas.galaxyDeckRevealedCard) {
+         this.galaxyDeck.setCardVisible(game.gamedatas.galaxyDeckRevealedCard, true);
+      }
    }
 
    public onLeaveState(): void {

@@ -6,6 +6,7 @@ use Bga\GameFramework\Db\Globals;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\Filters\FilterFactory;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
 
 final class GameContext {
@@ -15,11 +16,13 @@ final class GameContext {
     public bool $hasChangeState = false;
     public CardRepository $cardRepository;
     public Globals $globals;
+    public TargetResolver $targetResolver;
 
     public function __construct(public Game $game) {
         $this->activePlayerId = intval($game->getActivePlayerId());
         $this->cardRepository = $this->game->cardRepository;
         $this->globals = $this->game->globals;
+        $this->targetResolver = new TargetResolver($this);
     }
 
     public function changeState(int $stateNumber): void {
@@ -37,6 +40,10 @@ final class GameContext {
 
     public function opponentPlayer(): PlayerContext {
         return new PlayerContext($this->game, $this->getOpponentId());
+    }
+
+    public function galaxy(): GalaxyContext {
+        return new GalaxyContext($this);
     }
 
     public function getOpponentId(): int {
@@ -90,51 +97,6 @@ final class GameContext {
             }
         }
         return $selectableCards;
-    }
-
-    public function getSelectableCardsV2(array $zones, array $filters): array {
-        $selectableCards = [];
-        foreach ($zones as $z) {
-            $cards = $this->getCardsInZone($z['target'], $z['from']);
-            foreach ($cards as $card) {
-                $selectableCards[$card->id] = $card;
-            }
-        }
-
-        // Apply filters
-        foreach ($filters as $filter) {
-            $filterInstance = FilterFactory::createFilter($filter);
-            $selectableCards = $filterInstance->apply($this, $selectableCards);
-        }
-
-        return $selectableCards;
-    }
-
-    /** @return CardInstance[] */
-    private function getCardsInZone(string $target, string $from): array {
-        switch ($from) {
-            case ZONE_HAND:
-                $playerId = $this->getPlayerByTarget($target)->playerId;
-                return $this->game->cardRepository->getPlayerHand($playerId);
-                break;
-            case ZONE_PLAYER_PLAY_AREA:
-                $playerId = $this->getPlayerByTarget($target)->playerId;
-                return $this->game->cardRepository->getPlayerPlayArea($playerId);
-                break;
-            case ZONE_PLAYER_SHIP_AREA:
-                $playerId = $this->getPlayerByTarget($target)->playerId;
-                return $this->game->cardRepository->getPlayerShips($playerId);
-                break;
-            case ZONE_DISCARD:
-                $playerId = $this->getPlayerByTarget($target)->playerId;
-                return $this->game->cardRepository->getPlayerDiscardPile($playerId);
-                break;
-            case ZONE_GALAXY_ROW:
-                return $this->game->cardRepository->getGalaxyRow();
-                break;
-            default:
-                throw new \BgaUserException("Invalid zone for selectable cards: {$from}");
-        }
     }
 
     private function getPlayerByTarget(string $target): PlayerContext {

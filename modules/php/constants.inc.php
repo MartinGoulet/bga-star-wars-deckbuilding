@@ -36,6 +36,8 @@ const GVAR_PENDING_EFFECT = 'pendingEffect';
 const GVAR_ATTACK_MODIFIER_PER_CARDS = 'attackModifierPerCards';
 const GVAR_REMAINING_DAMAGE_TO_ASSIGN = 'remainingDamageToAssign';
 
+const GVAR_GALAXY_DECK_REVEALED_CARD = 'galaxy_deck_revealed_card';
+
 // Ok
 const GVAR_PENDING_EFFECT_SEQUENCE = 'pendingEffectSequence';
 
@@ -81,14 +83,13 @@ const CONDITION_IS_ENEMY_CARD = 'is_enemy_card';
 const CONDITION_HAS_TRAIT = 'has_trait';
 const CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT = 'has_unit_in_play_with_trait';
 const CONDITION_HAS_DAMAGE_ON_BASE = 'has_damage_on_base';
-const CONDITION_HAS_CARD_IN_HAND = 'has_card_in_hand';
 const CONDITION_HAS_CARD_IN_ZONE_WITH_TRAIT = 'has_card_in_zone_with_trait';
 const CONDITION_CARD_IN_PLAY = 'card_in_play';
 const CONDITION_FIRST_PURCHASE_THIS_TURN = 'first_purchase_this_turn';
 const CONDITION_CARD_FACTION_IS = 'card_faction_is';
 const CONDITION_CARD_IS_ENEMY = 'card_is_enemy';
 const CONDITION_HAS_RESOURCES = 'has_resources';
-const CONDITION_HAS_VALID_TARGET = 'has_valid_target';
+const CONDITION_HAS_CARDS = 'has_cards';
 
 const CONDITION_OPERATOR_OR = 'operator_or';
 const CONDITION_OPERATOR_AND = 'operator_and';
@@ -113,10 +114,17 @@ const EFFECT_GAIN_ATTACK = 'gain_attack';
 const EFFECT_GAIN_FORCE = 'gain_force';
 const EFFECT_REPAIR_DAMAGE_BASE = 'repair_damage_base';
 const EFFECT_PURCHASE_CARD_FREE = 'purchase_card_free';
+
+const EFFECT_CHOICE_OPTION = 'choice_option';
 const EFFECT_SELECT_CARDS = 'select_cards';
 const EFFECT_MOVE_SELECTED_CARDS = 'move_selected_cards';
 const EFFECT_REVEAL_TOP_CARD = 'reveal_top_card';
 const EFFECT_PAY_RESOURCE = 'pay_resource';
+const EFFECT_DESTROY_SELECTED_CARD = 'destroy_selected_card';
+const EFFECT_REVEAL_CARDS = 'reveal_cards';
+const EFFECT_HIDE_CARDS = 'hide_cards';
+const EFFECT_SELECT_CURRENT_CARD = 'select_current_card';
+
 /**
  * Choice Options
  */
@@ -166,6 +174,10 @@ const TARGET_GALAXY = 'galaxy';
 const FILTER_HAS_TRAIT = 'has_trait';
 const FILTER_FACTION = 'faction';
 const FILTER_HAS_CARD_TYPE = 'has_card_type';
+
+const FILTER_CARD_TYPES = 'card_types';
+const FILTER_FACTIONS = 'factions';
+
 /**
  * Traits
  */
@@ -193,6 +205,9 @@ const ZONE_DECK = 'deck';
 const ZONE_DISCARD = 'discard';
 const ZONE_PLAYER_PLAY_AREA = 'inplay_';
 const ZONE_PLAYER_SHIP_AREA = 'ship_area';
+const ZONE_PLAYER_DISCARD = 'player_discard';
+const ZONE_PLAYER_DECK = 'player_deck';
+
 const ZONE_GALAXY_ROW = 'galaxy_row';
 const ZONE_GALAXY_DECK = 'deck';
 const ZONE_GALAXY_DISCARD = 'galaxy_discard';
@@ -200,6 +215,27 @@ const ZONE_EXILE = 'exile';
 const ZONE_OUTER_RIM_DECK = 'outer_rim_deck';
 const ZONE_TOP_DECK = 'top_deck';
 const ZONE_CONDITIONAL = 'conditional';
+
+/**
+ * Targeting
+ */
+
+const TARGET_SCOPE_SELF_PLAY_AREA = 'self_play_area';
+const TARGET_SCOPE_SELF_SHIP_AREA = 'self_ship_area';
+const TARGET_SCOPE_SELF_DISCARD = 'self_discard';
+const TARGET_SCOPE_SELF_HAND = 'self_hand';
+const TARGET_SCOPE_OPPONENT_PLAY_AREA = 'opponent_play_area';
+const TARGET_SCOPE_OPPONENT_SHIP_AREA = 'opponent_ship_area';
+const TARGET_SCOPE_OPPONENT_DISCARD = 'opponent_discard';
+const TARGET_SCOPE_OPPONENT_HAND = 'opponent_hand';
+const TARGET_SCOPE_GALAXY_ROW = 'galaxy_row';
+const TARGET_SCOPE_GALAXY_DECK = 'galaxy_deck';
+const TARGET_SCOPE_GALAXY_DISCARD = 'galaxy_discard';
+
+const SELECTION_MODE_PLAYER_CHOICE = 'player_choice';
+const SELECTION_MODE_OPPONENT_CHOICE = 'opponent_choice';
+const SELECTION_MODE_RANDOM = 'random';
+
 
 final class CardIds {
 

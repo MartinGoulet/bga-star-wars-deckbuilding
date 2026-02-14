@@ -39,7 +39,11 @@ class Effect_Choice extends GameState
 
     function onEnteringState(array $args, int $activePlayerId) {
         if(count($args['options']) === 1) {
+            // var_dump($args);
+            // die('ok');
             return $this->actMakeChoice(0, $activePlayerId, $args);
+            // return $this->actMakeChoice(1, $activePlayerId, $args);
+
         }
         $this->gamestate->setPlayersMultiactive([$args['target']], '', true);
     }

@@ -110,17 +110,25 @@ final class GameEngine {
          $effectInstance->resolve($this->context);
 
          if ($effectInstance instanceof NeedsPlayerInput) {
-            return $effectInstance->getNextState();
-         } else {
-            $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
-            array_shift($effects);
-            $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
+            $nextState = $effectInstance->getNextState();
+            if ($nextState !== '') {
+               return $nextState;
+            }
          }
+         
+         $this->removeCurrentEffect();
          $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
       }
 
+      $this->globals->set('galaxy_deck_revealed_card', []);
       $this->context->refillGalaxyRow();
       return PlayerTurn_ActionSelection::class;
+   }
+
+   private function removeCurrentEffect(): void {
+      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+      array_shift($effects);
+      $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
    }
 
    /**

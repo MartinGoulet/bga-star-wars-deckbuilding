@@ -144,11 +144,11 @@ class Game implements Game {
                }
             });
 
-            if (args["_private"]) {
-               const logs = this.bgaFormatText(log, args["_private"]);
-               log = logs.log;
-               args["_private"] = logs.args;
-            }
+            // if (args["_private"]) {
+            //    const logs = this.bgaFormatText(log, args["_private"]);
+            //    log = logs.log;
+            //    args["_private"] = logs.args;
+            // }
          }
       } catch (e: any) {
          console.error(log, args, "Exception thrown", e.stack);

@@ -83,11 +83,25 @@ export class NotificationManager {
       this.game.cardManager.setDamageOnCard(args.card);
    }
 
-   private async notif_onDiscardCards(args: { player_id: number; cards: Card[] }) {
-      const table = this.game.getPlayerTable(args.player_id);
+   private async notif_onDiscardCards(args: { player_id: number; cards: Card[]; destination: string }) {
       // Sort cards by locationArg to discard in the correct order
       const cards = args.cards.sort((a, b) => a.locationArg - b.locationArg);
-      await table.discard.addCards(cards, {}, 200);
+
+      switch (args.destination) {
+         case "player_discard":
+            const table = this.game.getPlayerTable(args.player_id);
+            await table.discard.addCards(cards, {}, 200);
+            break;
+         case "galaxy_discard":
+            const galaxyDiscard = this.game.tableCenter.galaxyDiscard;
+            await galaxyDiscard.addCards(cards, {}, 200);
+            break;
+         default:
+            debugger;
+            this.game.dialogs.showMessage("Unknown destination for discarding cards: " + args.destination, "error");
+            return;
+      }
+
       await this.game.gameui.wait(350);
    }
 
@@ -120,12 +134,22 @@ export class NotificationManager {
       await table.activeBase.addCard(args.card);
       await this.game.gameui.wait(350);
    }
-   private async notif_onMoveCardToTopOfDeck(args: { player_id: number; card: Card }) {
-      const table = this.game.getPlayerTable(args.player_id);
-      const card = { ...args.card };
-      delete (card as any).img;
-      await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
-      await this.game.gameui.wait(350);
+   private async notif_onMoveCardToTopOfDeck(args: { player_id: number; card: Card; destination: string }) {
+      switch (args.destination) {
+         case "player_deck":
+            const table = this.game.getPlayerTable(args.player_id);
+            const card = { ...args.card };
+            delete (card as any).img;
+            await table.deck.addCard(card, { finalSide: "back", initialSide: "front" });
+            await this.game.gameui.wait(350);
+            break;
+         default:
+            this.game.dialogs.showMessage(
+               "Unknown destination for moving card to top of deck: " + args.destination,
+               "error",
+            );
+            break;
+      }
    }
 
    private async notif_onMoveCardToDiscard(args: { player_id: number; card: Card }) {
@@ -143,20 +167,34 @@ export class NotificationManager {
       switch (args.from) {
          case "deck":
             const deck = this.game.tableCenter.galaxyDeck;
-            deck.setCardNumber(deck.getCardCount(), args.card);
-            deck.setCardVisible(args.card, false);
+            // deck.setCardNumber(deck.getCardCount(), args.card);
+            deck.setCardVisible(args.card, false, { updateFront: true, updateFrontDelay: 0 });
             await this.game.gameui.wait(500);
             deck.flipCard(args.card);
-            await this.game.gameui.wait(500);
-            this.game.gameui.wait(2500).then(() => {
-               if(deck.contains(args.card)) {
-                  deck.flipCard(args.card);
-               }
-            });
             break;
          default:
             this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
             break;
+      }
+   }
+
+   private async notif_onMoveCardToGalaxyRow(args: { card: Card }) {
+      await this.game.tableCenter.galaxyRow.addCard(args.card);
+   }
+
+   private async notif_onMoveCardToGalaxyDeck(args: { card: Card }) {
+      const deck = this.game.tableCenter.galaxyDeck;
+      const card = { ...args.card };
+      delete (card as any).img;
+      await deck.addCard(card, { finalSide: "back", initialSide: "front" });
+      await this.game.gameui.wait(350);
+   }
+
+   private async notif_onHideCards(args: { cardIds: number[] }) {
+      for (const cardId of args.cardIds) {
+         const cardTemp = { id: cardId } as Card;
+         const stock = this.game.cardManager.getCardStock(cardTemp);
+         stock.setCardVisible(cardTemp, false, { updateFront: true, updateFrontDelay: 0 });
       }
    }
 }

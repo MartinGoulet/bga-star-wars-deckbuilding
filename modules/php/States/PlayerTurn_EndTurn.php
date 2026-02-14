@@ -68,6 +68,7 @@ class PlayerTurn_EndTurn extends GameState {
             [
                 'player_id' => $activePlayerId,
                 'cards' => array_values($playAreaCards),
+                'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
     }
@@ -94,6 +95,7 @@ class PlayerTurn_EndTurn extends GameState {
             [
                 'player_id' => $activePlayerId,
                 'cards' => array_values($handCards),
+                'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
     }

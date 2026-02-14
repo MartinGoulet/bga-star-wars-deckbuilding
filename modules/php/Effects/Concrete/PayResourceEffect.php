@@ -6,7 +6,8 @@ use Bga\GameFramework\NotificationMessage;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 
-final class PayResourceEffect implements EffectInstance {
+final class PayResourceEffect extends EffectInstance {
+
     public function __construct(private int $count) {
     }
 

@@ -19,8 +19,8 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
             name: 'playerTurnActionResolveDamageShipBase',
             type: StateType::ACTIVE_PLAYER,
 
-            description: clienttranslate('${actplayer} must select a base'),
-            descriptionMyTurn: clienttranslate('${you} must select a base'),
+            description: clienttranslate('${actplayer} must select a ship or base to assign damage to'),
+            descriptionMyTurn: clienttranslate('${you} must select a ship or base to assign damage to'),
         );
     }
 
@@ -93,7 +93,7 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
                 'player_id' => $ctx->opponentPlayer()->playerId,
                 'player_name' => $this->game->getPlayerNameById($ctx->currentPlayer()->playerId),
                 'cards' => [$target],
-                'card_names' => [$target->name],
+                'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
     }

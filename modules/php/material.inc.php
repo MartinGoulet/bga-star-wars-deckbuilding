@@ -9,6 +9,7 @@ $this->card_types = $empire_cards + $rebel_cards + $neutral_cards +
       // Generic
       CardIds::OUTER_RIM_PILOT => [
          'name' => clienttranslate('Outer Rim Pilot'),
+         'gametext' => clienttranslate("Exile this unit to gain 1 Force."),
          'img' => CardIds::OUTER_RIM_PILOT,
          'type' => CARD_TYPE_UNIT,
          'faction' => FACTION_NEUTRAL,
@@ -17,13 +18,22 @@ $this->card_types = $empire_cards + $rebel_cards + $neutral_cards +
          'abilities' => [
             [
                'trigger' => TRIGGER_ACTIVATE_CARD,
-               'costs' => [
-                  ['type' => COST_EXILE_SELF],
-               ],
                'effects' => [
-                  ['type' => ABILITY_GAIN_FORCE, 'value' => 1],
-               ]
-            ]
+                  [
+                     'type' => EFFECT_SELECT_CURRENT_CARD,
+                     'storeAs' => 'outer_rim',
+                  ],
+                  [
+                     'type' => EFFECT_MOVE_SELECTED_CARDS,
+                     'destination' => ZONE_EXILE,
+                     'cardRef' => 'outer_rim',
+                  ],
+                  [
+                     'type' => EFFECT_GAIN_FORCE,
+                     'amount' => 1,
+                  ],
+               ],
+            ],
          ],
       ],
    ];

@@ -13,7 +13,9 @@ export interface StarWarsGamedatas extends Gamedatas<StarWarsPlayer> {
    card_types: { [key: number]: CardType };
    galaxyRow: Card[];
    galaxyDiscard: Card[];
-   galaxyDeckCount: number;
+   // galaxyDeckCount: number;
+   galaxyDeck: Card[];
+   galaxyDeckRevealedCard?: Card;
    playerHand?: Card[];
    outerRimDeck: Card[];
    force: number;

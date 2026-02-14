@@ -22,6 +22,7 @@ export class EffectCardSelectionState
 
       if (!isCurrentPlayerActive) return;
 
+      this.game.statusBar.removeActionButtons();
       this.addConfirmButton(args);
 
       const stocks = this.getStocks(args);
@@ -77,12 +78,10 @@ export class EffectCardSelectionState
    }
 
    private getStocks(args: EffectCardSelectionArgs): InstanceType<typeof BgaCards.CardStock<Card>>[] {
-      return Array.from(
-         new Set(
-            args.selectableCards.map((card) => {
-               return this.game.cardManager.getCardStock(card)!;
-            }),
-         ),
-      );
+      let stocks = args.selectableCards.map((card) => {
+         return this.game.cardManager.getCardStock(card)!;
+      });
+      stocks = stocks.filter((stock) => !!stock);
+      return Array.from(new Set(stocks));
    }
 }
