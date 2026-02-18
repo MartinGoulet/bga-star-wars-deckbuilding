@@ -313,6 +313,11 @@ class Game extends \Bga\GameFramework\Table {
         $this->nbrPurchasesThisRound->initDb(initialValue: 0);
     }
 
+    #[Debug(reload: true)]
+    public function debug_unsetUseCard() {
+        $this->globals->set(GVAR_ABILITY_USED_CARD_IDS, []);
+    }
+
     /*
     Another example of debug function, to easily create situations you want to test.
     Here, put a card you want to test in your hand (assuming you use the Deck component).

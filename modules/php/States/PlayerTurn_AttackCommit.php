@@ -8,8 +8,11 @@ use Bga\GameFramework\Actions\Types\IntArrayParam;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\States\PossibleAction;
+use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Core\PowerResolver;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
 
 class PlayerTurn_AttackCommit extends GameState {
@@ -27,14 +30,19 @@ class PlayerTurn_AttackCommit extends GameState {
     }
 
     public function getArgs(): array {
-        $activePlayerId = intval($this->game->getActivePlayerId());
         $target = $this->game->cardRepository->getCardById(
             $this->game->globals->get(GVAR_ATTACK_TARGET_CARD_ID)
         );
 
         $alreadlyAttackingIds = $this->game->globals->get(GVAR_ALREADY_ATTACKING_CARDS_IDS, []);
-        $attackers = $this->game->cardRepository->getPlayerPlayArea($activePlayerId);
+
+        $targetQuery = TargetQueryFactory::create([
+            'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+        ]);
+
+        $attackers = (new TargetResolver(new GameContext($this->game)))->resolve($targetQuery);
         $attackers = array_filter($attackers, fn($card) => $this->canCardAttack($card, $alreadlyAttackingIds));
+        $attackers = array_filter($attackers, fn($card) => $card->power > 0);
 
         return [
             'target' => $target,
@@ -68,7 +76,7 @@ class PlayerTurn_AttackCommit extends GameState {
         return PlayerTurn_AttackResolve::class;
     }
 
-    public function canCardAttack(CardInstance $card, array $alreadyAttackingIds): bool {
+    public function canCardAttack(CardInstance &$card, array $alreadyAttackingIds): bool {
         if(in_array($card->id, $alreadyAttackingIds)) {
             return false;
         }
@@ -81,8 +89,10 @@ class PlayerTurn_AttackCommit extends GameState {
             return true;
         }
 
-        $resolver = new PowerResolver($this->game);
+        $ctx = new GameContext($this->game);
+        $resolver = new PowerResolver($ctx);
         $power = $resolver->getPowerOfCard($card);
+        $card->power = $power; // Update card power with modifiers for display purposes
         return $power > 0;
     }
 

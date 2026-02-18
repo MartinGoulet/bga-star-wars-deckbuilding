@@ -40,14 +40,14 @@ class CardInstance {
             return [];
         }
 
-        $trigger = array_find($abilities, fn($ability) => $ability['trigger'] === $trigger);
+        $trigger = array_find($abilities, fn($ability) => isset($ability['trigger']) && $ability['trigger'] === $trigger);
 
         if ($trigger === null) {
             return [];
         }
 
         $conditions = $trigger['conditions'] ?? [];
-        $conditions = ConditionFactory::createConditions($conditions);
+        $conditions = ConditionFactory::createConditions($this, $conditions);
         $canResolve = true;
         foreach ($conditions as $abilityConditions) {
             if (!$abilityConditions->isSatisfied($ctx)) {

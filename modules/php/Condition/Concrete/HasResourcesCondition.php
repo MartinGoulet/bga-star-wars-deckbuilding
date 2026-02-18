@@ -5,7 +5,7 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition\Concrete;
 use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 
-final class HasResourcesCondition implements Condition
+final class HasResourcesCondition extends Condition
 {
     public function __construct(private int $count) {
     }

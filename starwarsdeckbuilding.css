@@ -1,16 +1,9 @@
 @charset "UTF-8";
-.bga-cards_card {
-  transition: all 0.5s ease-in-out;
-}
-.bga-cards_card .bga-cards_card-sides {
-  transition: all 0.5s ease-in-out;
-}
 .bga-cards_card .bga-cards_card-side {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
   background-image: url("img/cards.jpg");
   background-size: 800% 800%;
-  transition: all 0.5s ease-in-out;
 }
 .bga-cards_card .bga-cards_card-side[data-img="1"] {
   background-position: 0% 0%;
@@ -486,6 +479,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  max-width: 400px;
 }
 .swd-player-area .swd-player-decks {
   display: flex;

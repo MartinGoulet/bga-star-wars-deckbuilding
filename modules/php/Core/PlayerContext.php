@@ -31,7 +31,7 @@ final class PlayerContext {
         $this->game->playerResources->inc($this->playerId, $amount, $notif);
     }
 
-    public function gainForce(int $amount, string $message = ""): void {
+    public function gainForce(int $amount, CardInstance $card, string $message = ""): void {
         $originalAmount = $amount;
         $amount = $this->faction === FACTION_EMPIRE ? -$amount : $amount;
 
@@ -47,6 +47,7 @@ final class PlayerContext {
         $notif = new NotificationMessage($message, [
             'player_id' => $this->playerId,
             'amount' => $originalAmount,
+            'card' => $card,
         ]);
 
         $this->game->forceTrack->set($currentValue + $amount, $notif);

@@ -296,8 +296,8 @@ class NotificationManager {
             case "deck":
                 const deck = this.game.tableCenter.galaxyDeck;
                 deck.setCardVisible(args.card, false, { updateFront: true, updateFrontDelay: 0 });
-                await this.game.gameui.wait(500);
                 deck.flipCard(args.card);
+                await this.game.gameui.wait(2000);
                 break;
             default:
                 this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
@@ -315,6 +315,7 @@ class NotificationManager {
         await this.game.gameui.wait(350);
     }
     async notif_onHideCards(args) {
+        await this.game.gameui.wait(2000);
         for (const cardId of args.cardIds) {
             const cardTemp = { id: cardId };
             const stock = this.game.cardManager.getCardStock(cardTemp);
@@ -594,13 +595,37 @@ class EffectCardSelectionState extends BaseState {
     }
 }
 
+class PlayerTurnActionResolveDamageShipBaseState extends BaseState {
+    onEnteringState(args, isCurrentPlayerActive) {
+        if (!isCurrentPlayerActive)
+            return;
+        const ships = this.game.getPlayerTable(args.opponentId).ships;
+        ships.setSelectionMode("single");
+        ships.setSelectableCards(args.ships);
+        ships.onSelectionChange = (selection) => {
+            const btnConfirm = document.getElementById("btn-confirm");
+            btnConfirm.disabled = selection.length !== 1;
+        };
+        this.game.statusBar.removeActionButtons();
+        this.game.statusBar.addActionButton(_("Confirm"), async () => {
+            const selectedShip = ships.getSelection().pop();
+            await this.game.actions.performAction("actSelectShipToDealDamage", {
+                cardId: selectedShip.id,
+            });
+        }, {
+            disabled: true,
+            id: "btn-confirm",
+        });
+    }
+}
+
 class PlayerTurnActionSelectionState extends BaseState {
     onEnteringState(args, isCurrentPlayerActive) {
         if (!isCurrentPlayerActive)
             return;
         if (args.canCommitAttack) {
             const handle = async () => await this.game.actions.performAction("actCommitAttack");
-            this.game.statusBar.addActionButton(_("Commit to an attack"), handle);
+            this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
         }
         const handleEndTurn = async () => await this.game.actions.performAction("actEndTurn");
         this.game.statusBar.addActionButton(_("End Turn"), handleEndTurn, {
@@ -700,6 +725,7 @@ class PlayerTurnAttackCommitState extends BaseState {
         this.addCancelButton();
         const activePlayerId = this.game.players.getActivePlayerId();
         const playArea = this.game.getPlayerTable(activePlayerId).playArea;
+        const shipArea = this.game.getPlayerTable(activePlayerId).ships;
         playArea.setSelectionMode("multiple");
         playArea.setSelectableCards(args.attackers);
         if (isCurrentPlayerActive) {
@@ -709,10 +735,22 @@ class PlayerTurnAttackCommitState extends BaseState {
             };
             args.attackers.forEach((card) => playArea.selectCard(card));
         }
+        shipArea.setSelectionMode("multiple");
+        shipArea.setSelectableCards(args.attackers);
+        if (isCurrentPlayerActive) {
+            shipArea.onSelectionChange = (selection) => {
+                const btnConfirm = document.getElementById("btn-confirm-attackers");
+                btnConfirm.disabled = selection.length === 0;
+            };
+            args.attackers.forEach((card) => shipArea.selectCard(card));
+        }
     }
     addConfirmButton() {
         const handleConfirm = async () => {
-            const selectedCards = this.game.getCurrentPlayerTable().playArea.getSelection();
+            const selectedCards = [
+                ...this.game.getCurrentPlayerTable().playArea.getSelection(),
+                ...this.game.getCurrentPlayerTable().ships.getSelection(),
+            ];
             const cardIds = selectedCards.map((card) => card.id);
             await this.game.actions.performAction("actCommitAttack", { cardIds });
         };
@@ -804,6 +842,10 @@ class TableCenter {
         });
         this.galaxyDeck = new BgaCards.Deck(game.cardManager, document.querySelector(".deck-draw-pile"), {
             autoRemovePreviousCards: false,
+            fakeCardGenerator: (deckId) => {
+                const cards = this.galaxyDeck.getCards().sort((a, b) => a.locationArg - b.locationArg);
+                return cards.pop();
+            },
             counter: {
                 show: true,
                 size: 6,
@@ -887,6 +929,7 @@ class Game {
         this.states.register("playerTurnAttackCommit", new PlayerTurnAttackCommitState(this));
         this.states.register("effectCardSelection", new EffectCardSelectionState(this));
         this.states.register("playerTurnStartTurnBase", new PlayerTurnStartTurnBaseState(this));
+        this.states.register("PlayerTurn_ActionResolveDamageShipBase", new PlayerTurnActionResolveDamageShipBaseState(this));
     }
     getCurrentPlayerTable() {
         return this.getPlayerTable(this.players.getCurrentPlayerId());

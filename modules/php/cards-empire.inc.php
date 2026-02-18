@@ -63,10 +63,18 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  "type" => ABILITY_CHOICE,
+                  "type" => EFFECT_CHOICE_OPTION,
                   'options' => [
-                     ['type' => CHOICE_OPTION_GAIN_RESOURCE, 'value' => 4],
-                     ['type' => CHOICE_OPTION_REPAIR_DAMAGE_BASE, 'value' => 4],
+                     [
+                        'label' => clienttranslate('Gain 4 resources'),
+                        'type' => EFFECT_GAIN_RESOURCE, 
+                        'amount' => 4
+                     ],
+                     [
+                        'label' => clienttranslate('Repair 4 damage on base'),
+                        'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                        'amount' => 4
+                     ],
                   ],
                ]
             ],
@@ -129,24 +137,6 @@ $empire_cards = [
       'cost' => 5,
       'stats' => ['power' => 0, 'resource' => 3, 'force' => 0],
       'abilities' => [
-         [
-            'trigger' => TRIGGER_WHILE_IN_PLAY,
-            'effects' => [
-               [
-                  'type' => EFFECT_MODIFY_ATTACK,
-                  'value' => 1,
-                  'target' => [
-                     'scope' => TARGET_YOUR_UNITS,
-                     'filter' => [
-                        [
-                           'type' => FILTER_HAS_TRAIT,
-                           'traits' => TRAIT_FIGHTER
-                        ]
-                     ],
-                  ],
-               ],
-            ]
-         ]
       ],
    ],
 
@@ -164,28 +154,35 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'conditions' => [
                [
-                  'type' => CONDITION_HAS_CARD_IN_ZONE_WITH_TRAIT,
-                  'traits' => [TRAIT_TROOPER],
-                  'target' => TARGET_SELF,
-                  'zone' => ZONE_DISCARD
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        [
+                           'type' => FILTER_HAS_TRAIT,
+                           'traits' => [TRAIT_TROOPER],
+                        ]
+                     ],
+                  ],
                ],
             ],
             'effects' => [
                [
                   'type' => EFFECT_SELECT_CARDS,
-                  'from' => ZONE_DISCARD,
-                  'count' => 1,
-                  'filters' => [
-                     [
-                        'type' => FILTER_HAS_TRAIT,
-                        'traits' => [TRAIT_TROOPER],
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        [
+                           'type' => FILTER_HAS_TRAIT,
+                           'traits' => [TRAIT_TROOPER],
+                        ]
                      ],
                   ],
                   'storeAs' => 'atat_selected_trooper',
                ],
                [
                   'type' => EFFECT_MOVE_SELECTED_CARDS,
-                  'storeRef' => 'atat_selected_trooper',
+                  'cardRef' => 'atat_selected_trooper',
                   'destination' => ZONE_HAND,
                ],
             ],
@@ -195,6 +192,8 @@ $empire_cards = [
 
    CardIds::GRAND_MOFF_TARKIN => [
       'name' => clienttranslate('Grand Moff Tarkin'),
+      'gametext' => clienttranslate("Add an Empire card from the galaxy row to your hand. You must exile that card at the end of your turn"),
+      'rewardText' => clienttranslate("Gain 3 resources and 3 force"),
       'img' => CardIds::GRAND_MOFF_TARKIN,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -205,37 +204,46 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_EMPIRE]]
+                     ],
+                  ],
+               ],
+            ],
             'effects' => [
                [
-                  "type" => EFFECT_MOVE_CARD,
-                  "from" => ZONE_GALAXY_ROW,
-                  "to" => ZONE_HAND,
-                  "target" => [
-                     'scope' => TARGET_ANY_CARD,
-                     'filter' => [
-                        [
-                           'type' => FILTER_FACTION,
-                           'faction' => FACTION_EMPIRE
-                        ]
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_EMPIRE]]
                      ],
-                     'count' => 1,
-                     'selection' => SELECTION_PLAYER_CHOICE,
                   ],
-                  'store_as' => 'tarking_taken_card',
+                  'storeAs' => 'tarkin_selected_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'tarkin_selected_card',
+                  'destination' => ZONE_HAND,
+               ],
+               [
+                  'type' => EFFECT_REGISTER_DELAYED,
+                  'trigger' => TRIGGER_END_OF_TURN,
+                  'effects' => [
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'cardRef' => 'tarkin_selected_card',
+                        'destination' => ZONE_EXILE,
+                     ]
+                  ]
                ]
             ],
          ],
-         [
-            'trigger' => TRIGGER_END_OF_TURN,
-            'effects' => [
-               [
-                  'type' => EFFECT_EXILE_CARD,
-                  'target' => [
-                     'reference' => 'tarking_taken_card',
-                  ],
-               ]
-            ],
-         ]
       ],
    ],
 
@@ -287,18 +295,6 @@ $empire_cards = [
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
       'abilities' => [
-         [
-            'trigger' => TRIGGER_WHILE_IN_PLAY,
-            'effects' => [
-               [
-                  'type' => EFFECT_MODIFY_ATTACK,
-                  'value' => 1,
-                  'target' => [
-                     'scope' => TARGET_YOUR_SHIPS,
-                  ],
-               ],
-            ]
-         ]
       ]
    ],
 
@@ -356,15 +352,17 @@ $empire_cards = [
                      ]
                   ],
                   'effects' => [
-                     ['type' => EFFECT_GAIN_FORCE, 'amount' => 1]
+                     ['type' => EFFECT_GAIN_FORCE, 'amount' => 1],
+                     ['type' => EFFECT_HIDE_CARDS, 'cardRef' => 'scout_revealed_card']
                   ],
                ],
                [
                   'type' => EFFECT_CONDITIONAL,
                   'conditions' => [
                      [
-                        'type' => CONDITION_CARD_IS_ENEMY,
-                        'factions' => [FACTION_EMPIRE],
+                        'type' => CONDITION_CARD_FACTION_IS,
+                        'factions' => [FACTION_EMPIRE, FACTION_NEUTRAL],
+                        'negate' => true,
                         'cardRef' => 'scout_revealed_card',
                      ]
                   ],
@@ -383,6 +381,8 @@ $empire_cards = [
 
    CardIds::DEATH_TROOPER => [
       'name' => clienttranslate('Death Trooper'),
+      'gametext' => clienttranslate("While the Force is with you, this unit gains 2 attack"),
+      'rewardText' => clienttranslate("Gain 2 Force"),
       'img' => CardIds::DEATH_TROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -391,19 +391,24 @@ $empire_cards = [
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
       'abilities' => [
          [
-            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'type' => ABILITY_STATIC_ATTACK_MODIFIER,
+            'value' => 2,
             'condition' => [
                ['type' => CONDITION_FORCE_IS_WITH_YOU],
             ],
-            'effects' => [
-               ['type' => ABILITY_GAIN_ATTACK, 'value' => 2],
-            ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'amount' => 2,
+         ]
+      ]
    ],
 
    CardIds::TIE_INTERCEPTOR => [
       'name' => clienttranslate('TIE Interceptor'),
+      'gametext' => clienttranslate("Reveal the top card of the galaxy deck. If it is an Empire card, draw 1 card. If it is an enemy card, discard it"),
       'img' => CardIds::TIE_INTERCEPTOR,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -415,34 +420,44 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  'type' => ABILITY_REVEAL_GALAXY_ROW_CARD,
-                  'storeAs' => 'revealedCard'
+                  'type' => EFFECT_REVEAL_TOP_CARD,
+                  'from' => ZONE_GALAXY_DECK,
+                  'storeAs' => 'tie_interceptor_revealed_card'
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_FACTION_IS,
+                        'factions' => [FACTION_EMPIRE],
+                        'cardRef' => 'tie_interceptor_revealed_card',
+                     ]
+                  ],
+                  'effects' => [
+                     ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
+                     ['type' => EFFECT_HIDE_CARDS, 'cardRef' => 'tie_interceptor_revealed_card']
+                  ],
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_FACTION_IS,
+                        'factions' => [FACTION_EMPIRE, FACTION_NEUTRAL],
+                        'negate' => true,
+                        'cardRef' => 'tie_interceptor_revealed_card',
+                     ]
+                  ],
+                  'effects' => [
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'destination' => ZONE_GALAXY_DISCARD,
+                        'cardRef' => 'tie_interceptor_revealed_card',
+                     ]
+                  ],
                ],
             ],
          ],
-         [
-            'trigger' => TRIGGER_CONDITIONAL_EFFECT,
-            'condition' => [
-               'type' => CONDITION_HAS_TRAIT,
-               'card' => 'revealedCard',
-               'traits' => TRAIT_EMPIRE,
-            ],
-            'effects' => [
-               'type' => ABILITY_DRAW_CARD,
-               'value' => 1,
-            ],
-         ],
-         [
-            'trigger' => TRIGGER_CONDITIONAL_EFFECT,
-            'condition' => [
-               'type' => CONDITION_IS_ENEMY_CARD,
-               'card' => 'revealedCard',
-            ],
-            'effects' => [
-               'type' => EFFECT_DISCARD_CARD,
-               'card' => 'revealedCard',
-            ],
-         ]
       ],
    ],
 
@@ -475,10 +490,7 @@ $empire_cards = [
                   'cardRef' => 'gozanti_selected_card',
                   'destination' => ZONE_DISCARD,
                ],
-               [
-                  'type' => EFFECT_DRAW_CARD,
-                  'value' => 1,
-               ]
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1]
             ],
          ]
       ],
@@ -571,6 +583,8 @@ $empire_cards = [
 
    CardIds::GENERAL_VEERS => [
       'name' => clienttranslate('General Veers'),
+      'gametext' => clienttranslate("If you have a *Trooper* or *Vehicle* in play, draw 1 card"),
+      'rewardText' => clienttranslate("Gain 3 Force"),
       'img' => CardIds::GENERAL_VEERS,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -581,21 +595,31 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'effects' => [
+            'conditions' => [
                [
-                  'type' => EFFECT_DRAW_CARD,
-                  'conditions' => [
-                     [
-                        'type' => CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT,
-                        'traits' => [TRAIT_TROOPER, TRAIT_VEHICLE],
-                        'operator' => CONDITION_OPERATOR_OR
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+                     'filters' => [
+                        [
+                           'type' => FILTER_HAS_TRAIT,
+                           'traits' => [TRAIT_TROOPER, TRAIT_VEHICLE],
+                        ]
                      ],
                   ],
-                  'value' => 1
                ],
+            ],
+            'effects' => [
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'amount' => 3,
+         ]
+      ]
    ],
 
    // Starter Empire

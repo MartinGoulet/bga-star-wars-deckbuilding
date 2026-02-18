@@ -4,7 +4,6 @@ namespace Bga\Games\StarWarsDeckbuilding\Core;
 
 use Bga\GameFramework\Db\Globals;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
-use Bga\Games\StarWarsDeckbuilding\Filters\FilterFactory;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
@@ -18,11 +17,19 @@ final class GameContext {
     public Globals $globals;
     public TargetResolver $targetResolver;
 
+    public ?array $event = null;
+
     public function __construct(public Game $game) {
         $this->activePlayerId = intval($game->getActivePlayerId());
         $this->cardRepository = $this->game->cardRepository;
         $this->globals = $this->game->globals;
         $this->targetResolver = new TargetResolver($this);
+    }
+
+    public function withEvent(array $event): self {
+        $newContext = clone $this;
+        $newContext->event = $event;
+        return $newContext;
     }
 
     public function changeState(int $stateNumber): void {
@@ -90,7 +97,7 @@ final class GameContext {
                     $cards = $this->game->cardRepository->getPlayerDiscardPile($playerId);
                     break;
                 default:
-                    throw new \BgaUserException("Invalid zone for selectable cards: $z");
+                    throw new \BgaUserException("GameContext: Invalid zone for selectable cards: $z");
             }
             foreach ($cards as $card) {
                 $selectableCards[$card->id] = $card;

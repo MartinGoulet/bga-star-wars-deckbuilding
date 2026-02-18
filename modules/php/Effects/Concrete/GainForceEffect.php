@@ -11,8 +11,8 @@ final class GainForceEffect extends EffectInstance {
     }
 
     public function resolve(GameContext $ctx): void {
-        $message = clienttranslate('${player_name} gains ${amount} Force');
-        $ctx->currentPlayer()->gainForce($this->count, $message);
+        $message = clienttranslate('${player_name} gains ${amount} Force with ${card_name}');
+        $ctx->currentPlayer()->gainForce($this->count, $this->sourceCard, $message);
     }
 }
 

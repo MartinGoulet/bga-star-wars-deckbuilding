@@ -15,6 +15,7 @@ export class PlayerTurnAttackCommitState extends BaseState<PlayerTurnAttackCommi
 
       const activePlayerId = this.game.players.getActivePlayerId()!;
       const playArea = this.game.getPlayerTable(activePlayerId).playArea;
+      const shipArea = this.game.getPlayerTable(activePlayerId).ships;
 
       playArea.setSelectionMode("multiple");
       playArea.setSelectableCards(args.attackers);
@@ -26,11 +27,24 @@ export class PlayerTurnAttackCommitState extends BaseState<PlayerTurnAttackCommi
          args.attackers.forEach((card) => playArea.selectCard(card));
       }
 
+      shipArea.setSelectionMode("multiple");
+      shipArea.setSelectableCards(args.attackers);
+      if (isCurrentPlayerActive) {
+         shipArea.onSelectionChange = (selection: Card[]) => {
+            const btnConfirm = document.getElementById("btn-confirm-attackers")! as HTMLButtonElement;
+            btnConfirm.disabled = selection.length === 0;
+         };
+         args.attackers.forEach((card) => shipArea.selectCard(card));
+      }
+
    }
 
    private addConfirmButton(): void {
       const handleConfirm = async () => {
-         const selectedCards = this.game.getCurrentPlayerTable().playArea.getSelection();
+         const selectedCards = [
+            ...this.game.getCurrentPlayerTable().playArea.getSelection(),
+            ...this.game.getCurrentPlayerTable().ships.getSelection(),
+         ];
          const cardIds = selectedCards.map((card) => card.id);
          await this.game.actions.performAction("actCommitAttack", { cardIds });
       };

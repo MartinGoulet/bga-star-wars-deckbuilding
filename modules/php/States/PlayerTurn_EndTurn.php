@@ -7,6 +7,8 @@ namespace Bga\Games\StarWarsDeckbuilding\States;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
+use Bga\Games\StarWarsDeckbuilding\Core\GameEngine;
+use Bga\Games\StarWarsDeckbuilding\Effects\EffectFactory;
 use Bga\Games\StarWarsDeckbuilding\Game;
 
 class PlayerTurn_EndTurn extends GameState {
@@ -27,6 +29,10 @@ class PlayerTurn_EndTurn extends GameState {
 
     function onEnteringState(int $activePlayerId) {
 
+        // Execute end of turn effects
+        $ctx = new GameContext($this->game, $activePlayerId);
+        $this->handleEndOfTurn($activePlayerId, $ctx->getGameEngine());
+
         // First, discard all of your unit cards from play area
         $this->discardAllUnitsFromPlayArea($activePlayerId);
 
@@ -39,8 +45,10 @@ class PlayerTurn_EndTurn extends GameState {
         // Reset the number of purchases this round
         $this->game->nbrPurchasesThisRound->set(0);
 
+        // Reset damage assigned to ships
+        $this->resetDamageAssignedToShips();
+
         // Finally, draw five cards from your deck.
-        $ctx = new GameContext($this->game, $activePlayerId);
         $ctx->currentPlayer()->drawCards(5);
 
         // Give some extra time to the active player when he completed an action
@@ -98,5 +106,42 @@ class PlayerTurn_EndTurn extends GameState {
                 'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
+    }
+
+    private function resetDamageAssignedToShips() {
+        $this->game->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
+        $damages = $this->game->globals->get(GVAR_DAMAGE_ON_CARDS, []);
+        $cards = $this->game->cardRepository->getCardsByIds(array_keys($damages));
+        foreach ($cards as $card) {
+            if ($card->type === CARD_TYPE_SHIP) {
+                unset($damages[$card->id]);
+            }
+        }
+        $this->game->globals->set(GVAR_DAMAGE_ON_CARDS, $damages);
+    }
+
+    public function handleEndOfTurn(int $playerId, GameEngine $gameEngine): void {
+        $registry = $this->globals->get(GVAR_DELAYED_EFFECTS, []);
+
+        $entries = $registry[$playerId] ?? [];
+
+        foreach ($entries as $entry) {
+
+            if ($entry['trigger'] === TRIGGER_END_OF_TURN) {
+
+                foreach ($entry['effects'] as $effect) {
+                    $effect['sourceCardId'] = $entry['sourceCardId'];
+                    $effectInstance = EffectFactory::createEffectInstance($effect);
+                    $gameEngine->addEffect($effectInstance);
+                }
+
+                $gameEngine->run();
+            }
+
+        }
+
+        // Nettoyer
+        unset($registry[$playerId]);
+        $this->globals->set(GVAR_DELAYED_EFFECTS, $registry);
     }
 }

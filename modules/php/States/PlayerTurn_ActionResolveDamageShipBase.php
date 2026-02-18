@@ -9,6 +9,7 @@ use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\States\PossibleAction;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use BgaVisibleSystemException;
 use CardInstance;
 
 class PlayerTurn_ActionResolveDamageShipBase extends GameState {
@@ -16,19 +17,21 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
         parent::__construct(
             $game,
             id: ST_PLAYER_TURN_ATTACK_RESOLVE_DAMAGE_SHIP_BASE,
-            name: 'playerTurnActionResolveDamageShipBase',
             type: StateType::ACTIVE_PLAYER,
 
-            description: clienttranslate('${actplayer} must select a ship or base to assign damage to'),
-            descriptionMyTurn: clienttranslate('${you} must select a ship or base to assign damage to'),
+            description: clienttranslate('${actplayer} must select a ship or base to assign damage to (${remainingDamage} damage remaining)'),
+            descriptionMyTurn: clienttranslate('${you} must select a ship or base to assign damage to (${remainingDamage} damage remaining)'),
         );
     }
 
     public function getArgs(): array {
         $ctx = new GameContext($this->game);
-        $ships = $ctx->opponentPlayer()->getCardsInShipArea();
+        $opponent = $ctx->opponentPlayer();
+        $ships = $opponent->getCardsInShipArea();
         return [
             'ships' => $ships,
+            'opponentId' => $opponent->playerId,
+            'remainingDamage' => $this->game->globals->get(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0),
             '_no_notify' => count($ships) < 2,
         ];
     }
@@ -74,6 +77,28 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     #[PossibleAction]
     public function actSelectShipToDealDamage(int $cardId, int $activePlayerId, array $args) {
+        $ctx = new GameContext($this->game, $activePlayerId);
+        $target = $this->game->cardRepository->getCardById($cardId);
+        $shipIds = array_map(fn(CardInstance $card) => $card->id, $args['ships']);
+
+        // Verify target is valid
+        if (!in_array($target->id, $shipIds)) {
+            throw new BgaVisibleSystemException("Invalid target for damage assignment");
+        }
+
+        $remainingDamage = $this->game->globals->get(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
+        $remainingDamage = $ctx->assignDamageToTarget($target, $remainingDamage);
+        $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $remainingDamage);
+
+        // Verify if ship is destroyed
+        $this->verifyShipDestroy($target, $ctx);
+
+        if ($remainingDamage <= 0) {
+            return PlayerTurn_ActionSelection::class;
+        }
+
+        // The player will have to choose another ship to assign damage to
+         return PlayerTurn_ActionResolveDamageShipBase::class;
     }
 
     function zombie(int $playerId) {

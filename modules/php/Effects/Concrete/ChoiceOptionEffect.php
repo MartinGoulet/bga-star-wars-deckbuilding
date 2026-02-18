@@ -36,7 +36,7 @@ final class ChoiceOptionEffect extends EffectInstance implements NeedsPlayerInpu
 
         $options = array_filter($this->options, function($o) use ($context) {
             if(!isset($o['conditions'])) return true;
-            $conditions = ConditionFactory::createConditions($o['conditions']);
+            $conditions = ConditionFactory::createConditions($this->sourceCard, $o['conditions']);
             if($conditions === null) return true;
             foreach($conditions as $condition) {
                 if(!$condition->isSatisfied($context)) {

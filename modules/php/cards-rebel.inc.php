@@ -40,7 +40,7 @@ $rebel_cards = [
             'effects' => [
                [
                   'type' => EFFECT_REPAIR_DAMAGE_BASE,
-                  'value' => 3,
+                  'amount' => 3,
                ]
             ],
          ]
@@ -108,11 +108,11 @@ $rebel_cards = [
             'effects' => [
                [
                   'type' => EFFECT_DRAW_CARD,
-                  'value' => 1,
+                  'amount' => 1,
                ],
                [
                   'type' => EFFECT_DRAW_CARD,
-                  'value' => 1,
+                  'amount' => 1,
                   'conditions' => [
                      [
                         'type' => CONDITION_CARD_IN_PLAY,
@@ -204,6 +204,8 @@ $rebel_cards = [
 
    CardIds::PRINCESS_LEIA => [
       'name' => clienttranslate('Princess Leia'),
+      'gametext' => clienttranslate("Purchase a Rebel card from the galaxy row for free. If the Force is with you, place the card on top of your deck"),
+      'rewardText' => clienttranslate("Gain 3 resources and 3 force"),
       'img' => CardIds::PRINCESS_LEIA,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -213,16 +215,59 @@ $rebel_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'effects' => [
+            'conditions' => [
                [
-                  'type' => EFFECT_PURCHASE_CARD_FREE,
-                  'factions' => [FACTION_REBEL],
-                  'destination' => ZONE_CONDITIONAL,
-                  'destinationMap' => [
-                     ZONE_TOP_DECK => [['type' => CONDITION_FORCE_IS_WITH_YOU]],
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL]],
+                     ],
                   ]
                ],
             ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL]],
+                     ],
+                  ],
+                  'storeAs' => 'leia_galaxy_card',
+               ],
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'cardRef' => 'leia_galaxy_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                  ],
+                  'cardRef' => 'leia_galaxy_card',
+                  'destination' => ZONE_PLAYER_DECK,
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU],
+                  ],
+                  'cardRef' => 'leia_galaxy_card',
+                  'destination' => ZONE_PLAYER_DISCARD,
+               ]
+            ],
+         ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'amount' => 3,
+         ],
+         [
+            'type' => EFFECT_GAIN_FORCE,
+            'amount' => 3,
          ]
       ]
    ],
@@ -239,13 +284,52 @@ $rebel_cards = [
 
    CardIds::MILLENNIUM_FALCON => [
       'name' => clienttranslate('Millennium Falcon'),
+      'gametext' => clienttranslate('Add a unique unit from your discard pile to your hand'),
+      'rewardText' => clienttranslate('Purchase a card of your faction for free'),
       'img' => CardIds::MILLENNIUM_FALCON,
-      'type' => CARD_TYPE_SHIP,
+      'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 7,
       'unique' => true,
       'stats' => ['power' => 5, 'resource' => 2, 'force' => 0],
-      'abilities' => []
+      'abilities' => [],
+      'rewards' => [
+         [
+            'type' => EFFECT_CONDITIONAL,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL], 'negate' => true],
+                     ],
+                  ]
+               ]
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL], 'negate' => true],
+                     ],
+                  ],
+                  'storeAs' => 'falcon_retrieve_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_HAND,
+                  'cardRef' => 'falcon_retrieve_card',
+               ],
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'cardRef' => 'falcon_retrieve_card',
+               ],
+            ],
+         ]
+      ]
    ],
 
    CardIds::LUKE_SKYWALKER => [
@@ -337,7 +421,7 @@ $rebel_cards = [
                      ],
                      [
                         'type' => EFFECT_GAIN_FORCE,
-                        'target'=> TARGET_SELF,
+                        'target' => TARGET_SELF,
                         'amount' => 1,
                         'label' => clienttranslate('Opponent gains 1 Force'),
                      ],
@@ -366,7 +450,7 @@ $rebel_cards = [
                      [
                         'label' => clienttranslate('Repair 2 damage from your Base '),
                         'type' => EFFECT_REPAIR_DAMAGE_BASE,
-                        'count' => 2
+                        'amount' => 2
                      ],
                      [
                         'label' => clienttranslate('Gain 1 Resource'),
@@ -400,6 +484,7 @@ $rebel_cards = [
    CardIds::REBEL_COMMANDO => [
       'name' => clienttranslate('Rebel Commando'),
       'gametext' => clienttranslate('Your opponent discards 1 card from their hand (at random if the Force is with you)'),
+      'rewardText' => clienttranslate('Gain 2 Force'),
       'img' => CardIds::REBEL_COMMANDO,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -418,10 +503,10 @@ $rebel_cards = [
                   'effects' => [
                      [
                         'type' => EFFECT_SELECT_CARDS,
-                        'target' => TARGET_OPPONENT,
-                        'from' => ZONE_HAND,
-                        'count' => 1,
-                        'random' => true,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                           'selectionMode' => SELECTION_MODE_RANDOM,
+                        ],
                         'storeAs' => 'rebel_commando_card',
                      ],
                      [
@@ -442,9 +527,10 @@ $rebel_cards = [
                   'effects' => [
                      [
                         'type' => EFFECT_SELECT_CARDS,
-                        'target' => TARGET_OPPONENT,
-                        'from' => ZONE_HAND,
-                        'count' => 1,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                           'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE,
+                        ],
                         'storeAs' => 'rebel_commando_card',
                      ],
                      [
@@ -483,7 +569,7 @@ $rebel_cards = [
             'effects' => [
                [
                   'type' => EFFECT_REPAIR_DAMAGE_BASE,
-                  'value' => 3,
+                  'amount' => 3,
                ]
             ]
          ]
@@ -655,11 +741,13 @@ $rebel_bases = [
    ],
    CardIds::YAVIN_4 => [
       'name' => clienttranslate('Yavin 4'),
+      'gametext' => clienttranslate("When your opponent discards a card from their hand during your turn, deal 2 damage to their base"),
       'img' => 10,
       'faction' => FACTION_REBEL,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+      ],
    ],
 ];
 

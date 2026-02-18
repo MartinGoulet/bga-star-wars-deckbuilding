@@ -6,6 +6,7 @@ interface PlayerTurnActionSelectionArgs {
    selectableGalaxyCardIds: number[];
    selectableAbilityCardIds: number[];
    canCommitAttack: boolean;
+   totalPower: number;
 }
 
 export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSelectionArgs> {
@@ -14,7 +15,7 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
 
       if (args.canCommitAttack) {
          const handle = async () => await this.game.actions.performAction("actCommitAttack");
-         this.game.statusBar.addActionButton(_("Commit to an attack"), handle);
+         this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
       }
 
       const handleEndTurn = async () => await this.game.actions.performAction("actEndTurn");

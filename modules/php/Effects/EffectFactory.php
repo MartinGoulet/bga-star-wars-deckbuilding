@@ -6,7 +6,6 @@ use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceOptionEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ConditionalEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DestroyCardEffect;
-use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DiscardCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DrawCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ExileCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\GainAttackEffect;
@@ -17,6 +16,9 @@ use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveSelectedCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PayResourceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PurchaseCardFreeEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RegisterDelayedEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RegisterPurchaseOptionEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RemoveCardReferenceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RepairDamageBaseEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RevealCardsEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RevealTopCardEffect;
@@ -56,14 +58,7 @@ final class EffectFactory {
             
             case EFFECT_DRAW_CARD:
                 $value = new DrawCardEffect(
-                    $data['value'],
-                    $data['overrideValue'] ?? [],
-                );
-                break;
-            case EFFECT_DISCARD_CARD:
-                $value = new DiscardCardEffect(
-                    $data['target'],
-                    $data['count'],
+                    $data['amount'],
                 );
                 break;
             case EFFECT_EXILE_CARD:
@@ -83,14 +78,10 @@ final class EffectFactory {
                 $value = new GainForceEffect($data['amount']);
                 break;
             case EFFECT_REPAIR_DAMAGE_BASE:
-                $value = new RepairDamageBaseEffect($data['value']);
+                $value = new RepairDamageBaseEffect($data['amount']);
                 break;
             case EFFECT_PURCHASE_CARD_FREE:
-                $value = new PurchaseCardFreeEffect(
-                    $data['factions'] ?? [],
-                    $data['destination'] ?? ZONE_DISCARD,
-                    $data['destinationMapping'] ?? []
-                );
+                $value = new PurchaseCardFreeEffect($data['cardRef']);
                 break;
             case EFFECT_SELECT_CARDS:
                 $target = TargetQueryFactory::create($data['target']);
@@ -139,6 +130,20 @@ final class EffectFactory {
                 $value = new SelectCurrentCardEffect(
                     $data['storeAs'],
                 );
+                break;
+            case EFFECT_REMOVE_CARD_REFERENCE:
+                $value = new RemoveCardReferenceEffect(
+                    $data['cardRef'],
+                );
+                break;
+            case EFFECT_REGISTER_DELAYED:
+                $value = new RegisterDelayedEffect(
+                    $data['trigger'],
+                    $data['effects'],
+                );
+                break;
+            case EFFECT_REGISTER_PURCHASE_OPTION:
+                $value = new RegisterPurchaseOptionEffect();
                 break;
             default:    
                 var_dump([

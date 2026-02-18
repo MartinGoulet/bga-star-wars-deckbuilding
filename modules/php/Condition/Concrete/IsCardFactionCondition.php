@@ -5,7 +5,7 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition\Concrete;
 use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 
-final class IsCardFactionCondition implements Condition
+final class IsCardFactionCondition extends Condition
 {
     public function __construct(
         private array $factions,

@@ -84,7 +84,7 @@ $neutral_cards = [
                                 'conditions' => [
                                     ['type' => CONDITION_HAS_DAMAGE_ON_BASE],
                                 ],
-                                'value' => 3,
+                                'amount' => 3,
                             ],
                             [
                                 'label' => clienttranslate('Gain 3 resources'),
@@ -100,6 +100,7 @@ $neutral_cards = [
 
     CardIds::LANDO_CALRISSIAN => [
         'name' => clienttranslate('Lando Calrissian'),
+        'gametext' => clienttranslate("Draw 1 card. If the Force is with you, your opponent discards 1 card from their hand"),
         'img' => CardIds::LANDO_CALRISSIAN,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
@@ -110,10 +111,7 @@ $neutral_cards = [
             [
                 'trigger' => TRIGGER_ACTIVATE_CARD,
                 'effects' => [
-                    [
-                        'type' => EFFECT_DRAW_CARD,
-                        'value' => 1,
-                    ],
+                    ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
                     [
                         'type' => EFFECT_CONDITIONAL,
                         'conditions' => [
@@ -188,14 +186,14 @@ $neutral_cards = [
                         'conditions' => [
                             ['type' => CONDITION_FORCE_IS_WITH_YOU],
                         ],
-                        'value' => 2,
+                        'amount' => 2,
                     ],
                     [
                         'type' => EFFECT_DRAW_CARD,
                         'conditions' => [
                             ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU]
                         ],
-                        'value' => 1,
+                        'amount' => 1,
                     ],
                 ],
             ]
@@ -224,12 +222,50 @@ $neutral_cards = [
 
     CardIds::KEL_DOR_MYSTIC => [
         'name' => clienttranslate('Kel Dor Mystic'),
+        'gametext' => clienttranslate("Exile this unit to exile 1 card from your hand or discard pile"),
         'img' => CardIds::KEL_DOR_MYSTIC,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
         'cost' => 2,
         'stats' => ['power' => 0, 'resource' => 0, 'force' => 2],
-        'abilities' => [],
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'conditions' => [
+                    [
+                        'type' => CONDITION_HAS_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                        ],
+                    ],
+                ],
+                'effects' => [
+                    [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                        ],
+                        'storeAs' => 'kel_dor_exile',
+                    ],
+                    [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'target' => TARGET_SELF,
+                        'destination' => ZONE_EXILE,
+                        'cardRef' => 'kel_dor_exile',
+                    ],
+                    [
+                        'type' => EFFECT_SELECT_CURRENT_CARD,
+                        'storeAs' => 'kel_dor_self',
+                    ],
+                    [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'target' => TARGET_SELF,
+                        'destination' => ZONE_EXILE,
+                        'cardRef' => 'kel_dor_self',
+                    ]
+                ]
+            ]
+        ],
     ],
 
     CardIds::LOBOT => [
@@ -245,13 +281,25 @@ $neutral_cards = [
 
     CardIds::BOSSK => [
         'name' => clienttranslate('Bossk'),
+        'gametext' => clienttranslate("When Bossk defeats a target in the galaxy row, gain 1 force"),
         'img' => CardIds::BOSSK,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
         'cost' => 3,
         'unique' => true,
         'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
-        'abilities' => []
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ON_CARD_DEFEATED,
+                'conditions' => [
+                    ['type' => CONDITION_THIS_CARD_WAS_ATTACKER],
+                    ['type' => CONDITION_DEFEATED_IN_ZONE, 'zone' => ZONE_GALAXY_ROW],
+                ],
+                'effects' => [
+                    ['type' => EFFECT_GAIN_FORCE, 'amount' => 1],
+                ]
+            ]
+        ]
     ],
 
     CardIds::FANG_FIGHTER => [
@@ -275,7 +323,7 @@ $neutral_cards = [
                         'conditions' => [
                             ['type' => CONDITION_FORCE_IS_WITH_YOU],
                         ],
-                        'value' => 1,
+                        'amount' => 1,
                     ]
                 ],
             ]
@@ -283,13 +331,30 @@ $neutral_cards = [
     ],
 
     CardIds::TWILEK_SMUGGLER => [
-        'name' => clienttranslate('Twi\'lek Smuggler'),
+        'name' => clienttranslate("Twi'lek Smuggler"),
+        'gametext' => clienttranslate("Place the next card you purchase this turn on top of your deck"),
         'img' => CardIds::TWILEK_SMUGGLER,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
         'cost' => 3,
         'stats' => ['power' => 0, 'resource' => 3, 'force' => 0],
-        'abilities' => [],
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'effects' => [
+                    [
+                        'type' => EFFECT_REGISTER_PURCHASE_OPTION,
+                        'option' => [
+                            'label' => clienttranslate('Place purchased card on top of deck'),
+                            'target' => TARGET_SELF,
+                            'type' => EFFECT_MOVE_CARD,
+                            'destination' => ZONE_TOP_DECK,
+                        ],
+                        'expires' => 'after_next_purchase',
+                    ]
+                ],
+            ]
+        ],
     ],
 
     CardIds::CROC_CRUISER => [

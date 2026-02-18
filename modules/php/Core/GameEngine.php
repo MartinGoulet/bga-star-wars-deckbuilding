@@ -8,6 +8,9 @@ use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 use Bga\Games\StarWarsDeckbuilding\Effects\NeedsPlayerInput;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQuery;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use BgaVisibleSystemException;
 use CardInstance;
 
@@ -115,7 +118,7 @@ final class GameEngine {
                return $nextState;
             }
          }
-         
+
          $this->removeCurrentEffect();
          $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
       }
@@ -160,5 +163,20 @@ final class GameEngine {
       $effectInstance = EffectFactory::createEffectInstance($effectDef);
 
       return $effectInstance;
+   }
+
+   public function triggerGlobal(string $trigger): void {
+
+      $targetQuery = TargetQueryFactory::create([
+         'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+      ]);
+      
+      $cardsInPlay = (new TargetResolver($this->context))->resolve($targetQuery);
+
+      foreach ($cardsInPlay as $card) {
+         $this->addCardEffect($card, $trigger);
+      }
+
+      $this->run();
    }
 }

@@ -167,10 +167,9 @@ export class NotificationManager {
       switch (args.from) {
          case "deck":
             const deck = this.game.tableCenter.galaxyDeck;
-            // deck.setCardNumber(deck.getCardCount(), args.card);
             deck.setCardVisible(args.card, false, { updateFront: true, updateFrontDelay: 0 });
-            await this.game.gameui.wait(500);
             deck.flipCard(args.card);
+            await this.game.gameui.wait(2000);
             break;
          default:
             this.game.dialogs.showMessage("Unknown zone for revealing card: " + args.from, "error");
@@ -191,6 +190,7 @@ export class NotificationManager {
    }
 
    private async notif_onHideCards(args: { cardIds: number[] }) {
+      await this.game.gameui.wait(2000);
       for (const cardId of args.cardIds) {
          const cardTemp = { id: cardId } as Card;
          const stock = this.game.cardManager.getCardStock(cardTemp);

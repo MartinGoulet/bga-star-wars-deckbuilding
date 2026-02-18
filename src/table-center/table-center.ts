@@ -41,6 +41,11 @@ export class TableCenter {
       });
       this.galaxyDeck = new BgaCards.Deck<Card>(game.cardManager, document.querySelector(".deck-draw-pile")!, {
          autoRemovePreviousCards: false,
+         fakeCardGenerator: (deckId) => {
+            const cards = this.galaxyDeck.getCards().sort((a, b) => a.locationArg - b.locationArg);
+            return cards.pop()!;
+
+         },
          counter: {
             show: true,
             size: 6,

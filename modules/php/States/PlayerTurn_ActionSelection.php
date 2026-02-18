@@ -10,9 +10,6 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Core\PowerResolver;
 use Bga\Games\StarWarsDeckbuilding\Core\PurchaseResolver;
-use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceEffect;
-use Bga\Games\StarWarsDeckbuilding\Effects\EffectFactory;
-use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use CardInstance;
 
@@ -66,12 +63,15 @@ class PlayerTurn_ActionSelection extends GameState {
         $selectableAbilityCardIds = array_filter($selectableAbilityCardIds, fn($card) => $card->hasPlayableAbility($ctx));
         $selectableAbilityCardIds = array_map(fn($card) => $card->id, $selectableAbilityCardIds);
 
+        $totalPower = PowerResolver::getPlayerTotalPower($activePlayerId, $ctx);
+
         $data = [
             'selectableCardIds' => array_values($selectableCardIds),
             'selectableGalaxyCardIds' => array_values($galaxyCardIds),
             'galaxyCardCosts' => array_map(fn($card) => [$card->id => $card], $galaxyCards),
             'hand' => $selectableCards,
-            'canCommitAttack' => PowerResolver::getPlayerTotalPower($activePlayerId, $ctx) > 0,
+            'canCommitAttack' => $totalPower > 0,
+            'totalPower' => $totalPower,
             'selectableAbilityCardIds' => array_values($selectableAbilityCardIds),
             'playArea' => $playArea,
         ];
@@ -110,6 +110,9 @@ class PlayerTurn_ActionSelection extends GameState {
         // Add resources if applicable
         $ctx = new GameContext($this->game, $activePlayerId);
         $this->addResourcesForPlayedCard($ctx, $card);
+
+        // Add force if applicable
+        $this->addForceForPlayedCard($ctx, $card);
 
         // Resolve abilities
         $context = new GameContext($this->game);
@@ -209,5 +212,11 @@ class PlayerTurn_ActionSelection extends GameState {
         // Add Resources if card has resource value
         if ($card->resource == 0) return;
         $ctx->currentPlayer()->addResources($card->resource);
+    }
+
+    private function addForceForPlayedCard(GameContext $ctx, CardInstance $card): void {
+        // Add Force if card has force value
+        if ($card->force == 0) return;
+        $ctx->currentPlayer()->gainForce($card->force, $card);
     }
 }

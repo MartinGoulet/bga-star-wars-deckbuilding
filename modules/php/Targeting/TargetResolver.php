@@ -3,10 +3,14 @@
 namespace Bga\Games\StarWarsDeckbuilding\Targeting;
 
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
+use BgaUserException;
+use BgaVisibleSystemException;
+use CardInstance;
+use Exception;
+use feException;
 
 final class TargetResolver {
-    public function __construct(private GameContext $ctx)
-    {
+    public function __construct(private GameContext $ctx) {
     }
 
     /**
@@ -71,6 +75,12 @@ final class TargetResolver {
                 $playerId = $this->resolvePlayer($zone);
                 return $this->ctx->game->cardRepository->getPlayerDiscardPile($playerId);
 
+            case TARGET_SCOPE_SELF_BASE:
+            case TARGET_SCOPE_OPPONENT_BASE:
+                $playerId = $this->resolvePlayer($zone);
+                $activeBase = $this->ctx->game->cardRepository->getActiveBase($playerId);
+                return $activeBase ? [$activeBase] : [];
+
             case TARGET_SCOPE_GALAXY_ROW:
                 return $this->ctx->game->cardRepository->getGalaxyRow();
 
@@ -80,7 +90,7 @@ final class TargetResolver {
             case TARGET_SCOPE_GALAXY_DECK:
                 return $this->ctx->game->cardRepository->getGalaxyDeckTopCards($count);
             default:
-                die("Invalid zone for selectable cards: $zone");
+                throw new Exception("TargetResolver: Invalid zone for selectable cards: $zone");
         }
     }
 
@@ -90,10 +100,12 @@ final class TargetResolver {
             TARGET_SCOPE_SELF_PLAY_AREA => $this->ctx->currentPlayer()->playerId,
             TARGET_SCOPE_SELF_HAND => $this->ctx->currentPlayer()->playerId,
             TARGET_SCOPE_SELF_SHIP_AREA => $this->ctx->currentPlayer()->playerId,
+            TARGET_SCOPE_SELF_BASE => $this->ctx->currentPlayer()->playerId,
             TARGET_SCOPE_OPPONENT_DISCARD => $this->ctx->opponentPlayer()->playerId,
             TARGET_SCOPE_OPPONENT_PLAY_AREA => $this->ctx->opponentPlayer()->playerId,
             TARGET_SCOPE_OPPONENT_HAND => $this->ctx->opponentPlayer()->playerId,
             TARGET_SCOPE_OPPONENT_SHIP_AREA => $this->ctx->opponentPlayer()->playerId,
+            TARGET_SCOPE_OPPONENT_BASE => $this->ctx->opponentPlayer()->playerId,
             default => 0,
         };
     }

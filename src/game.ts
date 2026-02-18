@@ -4,6 +4,7 @@ import { NotificationManager } from "./notification-manager";
 import { PlayerHand } from "./player-hand/player-hand";
 import { PlayerTable } from "./player-table/player-table";
 import { EffectCardSelectionState } from "./states/effect-card-selection";
+import { PlayerTurnActionResolveDamageShipBaseState } from "./states/player-trn-action-resolve-damage-ship-base";
 import { PlayerTurnActionSelectionState } from "./states/player-turn-action-selection";
 import { PlayerTurnAskChoiceState } from "./states/player-turn-ask-choice";
 import { PlayerTurnAttackCommitState } from "./states/player-turn-attack-commit";
@@ -80,6 +81,7 @@ class Game implements Game {
       this.states.register("playerTurnAttackCommit", new PlayerTurnAttackCommitState(this));
       this.states.register("effectCardSelection", new EffectCardSelectionState(this));
       this.states.register("playerTurnStartTurnBase", new PlayerTurnStartTurnBaseState(this));
+      this.states.register("PlayerTurn_ActionResolveDamageShipBase", new PlayerTurnActionResolveDamageShipBaseState(this));
    }
 
    public getCurrentPlayerTable(): PlayerTable {

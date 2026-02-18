@@ -5,13 +5,11 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition\Concrete;
 use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 
-final class ForceIsWithYouCondition extends Condition
+final class DefeatedInZoneCondition extends Condition
 {
-    public function __construct(private bool $negate = false)
-    {
-        
-    }
+    public function __construct(private string $zone) {}
+
     public function isSatisfied(GameContext $ctx): bool {
-        return $ctx->currentPlayer()->hasForceWithYou() !== $this->negate;
+        return $ctx->event['zone'] === $this->zone;
     }
 }

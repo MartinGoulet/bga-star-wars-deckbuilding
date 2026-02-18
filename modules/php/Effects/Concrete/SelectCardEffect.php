@@ -35,7 +35,10 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
         // If random is true, randomly select cards and skip the player input step
         if ($this->target->selectionMode === SELECTION_MODE_RANDOM) {
             $selectedCards = array_rand($cards, min($this->target->max, count($cards)));
-            $selectedCardIds = array_map(fn($index) => $cards[$index]->id, $selectedCards);
+            if (!is_array($selectedCards)) {
+                $selectedCards = [$selectedCards];
+            }
+            $selectedCardIds = array_map(fn($index) => $cards[intval($index)]->id, $selectedCards);
             $ctx->globals->set($this->storeAs, $selectedCardIds);
             $this->nextState = '';
             return;

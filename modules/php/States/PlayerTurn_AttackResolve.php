@@ -51,7 +51,7 @@ class PlayerTurn_AttackResolve extends GameState {
      * @param CardInstance[] $attackers
      */
     private function resolveAttackOnBase(GameContext $ctx, CardInstance $target, array $attackers): string {
-        $resolver = new PowerResolver($this->game);
+        $resolver = new PowerResolver($ctx);
         $damages = $resolver->getPowerOfCards($attackers);
         $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $damages);
         return PlayerTurn_ActionResolveDamageShipBase::class;
@@ -83,8 +83,19 @@ class PlayerTurn_AttackResolve extends GameState {
             }
         }
 
+        $event = [
+            'type' => TRIGGER_ON_CARD_DEFEATED,
+            'attackerIds' => array_map(fn($card) => $card->id, $attackers),
+            'defeatedCardId' => $target->id,
+            'zone' => ZONE_GALAXY_ROW,
+            'playerId' => $ctx->currentPlayer()->playerId,
+        ];
+
         $ctx = new GameContext($this->game);
+        $ctx = $ctx->withEvent($event);
         $engine = $ctx->getGameEngine();
+
+        $engine->triggerGlobal(TRIGGER_ON_CARD_DEFEATED);
 
         $engine->addCardEffect($target, TRIGGER_REWARD);
         return $engine->run();
@@ -96,7 +107,7 @@ class PlayerTurn_AttackResolve extends GameState {
      * @param CardInstance[] $attackers
      */
     private function resolveAttackOnShip(GameContext $ctx, CardInstance $target, array $attackers): string {
-        $resolver = new PowerResolver($this->game);
+        $resolver = new PowerResolver($ctx);
         $damages = $resolver->getPowerOfCards($attackers);
         $remaining = $ctx->assignDamageToTarget($target, $damages);
 

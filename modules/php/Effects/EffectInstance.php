@@ -14,7 +14,7 @@ abstract class EffectInstance {
     public function canResolve(GameContext $ctx): bool {
 
         /** @var Condition[] $conditions */
-        $conditions = ConditionFactory::createConditions($this->conditions);
+        $conditions = ConditionFactory::createConditions($this->sourceCard, $this->conditions);
 
         foreach ($conditions as $condition) {
             if (!$condition->isSatisfied($ctx)) {

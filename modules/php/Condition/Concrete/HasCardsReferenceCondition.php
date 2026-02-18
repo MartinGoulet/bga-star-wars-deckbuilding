@@ -5,13 +5,15 @@ namespace Bga\Games\StarWarsDeckbuilding\Condition\Concrete;
 use Bga\Games\StarWarsDeckbuilding\Condition\Condition;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 
-final class ForceIsWithYouCondition extends Condition
-{
-    public function __construct(private bool $negate = false)
-    {
-        
+final class HasCardsReferenceCondition extends Condition {
+    public function __construct(
+        private string $cardReference,
+    ) {
     }
+
     public function isSatisfied(GameContext $ctx): bool {
-        return $ctx->currentPlayer()->hasForceWithYou() !== $this->negate;
+        $cardRef = $ctx->globals->get($this->cardReference, []);
+
+        return !empty($cardRef);
     }
 }

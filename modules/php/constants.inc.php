@@ -30,18 +30,12 @@ const GVAR_ATTACK_TARGET_CARD_ID = 'attackTargetCardId';
 const GVAR_ATTACKERS_CARD_IDS = 'attackersCardIds';
 const GVAR_ALREADY_ATTACKING_CARDS_IDS = 'alreadyAttackingCardsIds';
 const GVAR_ABILITY_USED_CARD_IDS = 'abilityUsedCardIds';
-
 const GVAR_EFFECTS_TO_RESOLVE = 'effectsToResolve';
-const GVAR_PENDING_EFFECT = 'pendingEffect';
 const GVAR_ATTACK_MODIFIER_PER_CARDS = 'attackModifierPerCards';
 const GVAR_REMAINING_DAMAGE_TO_ASSIGN = 'remainingDamageToAssign';
-
 const GVAR_GALAXY_DECK_REVEALED_CARD = 'galaxy_deck_revealed_card';
-
-// Ok
-const GVAR_PENDING_EFFECT_SEQUENCE = 'pendingEffectSequence';
-
-const GVAR_SEQUENCE_STACK = 'sequenceStack';
+const GVAR_DELAYED_EFFECTS = 'delayed_effects';
+const GVAR_PURCHASE_OPTION_OVERRIDES = 'purchase_option_overrides';
 
 /**
  * Factions
@@ -60,16 +54,11 @@ const CARD_TYPE_BASE = 'BASE';
 /**
  * Abilities
  */
-const ABILITY_GAIN_RESOURCE = 'gain_resource';
-const ABILITY_GAIN_ATTACK = 'gain_attack';
-const ABILITY_GAIN_FORCE = 'gain_force';
 const ABILITY_DRAW_CARD = 'draw_card';
-const ABILITY_CONDITIONAL = 'conditional';
 const ABILITY_CHOICE = 'choice';
 const ABILITY_DISCARD_CARD_GALAXY_ROW = 'discard_card_galaxy_row';
-const ABILITY_REVEAL_GALAXY_ROW_CARD = 'reveal_galaxy_row_card';
-const ABILITY_LOOK_AT_TOP_CARD = 'look_at_top_card';
-const ABILITY_SWAP_TOP_DECK_WITH_ROW = 'swap_top_deck_with_row';
+const ABILITY_STATIC_ATTACK_MODIFIER = 'static_attack_modifier';
+const ABILITY_AURA_ATTACK_MODIFIER = 'aura_attack_modifier';
 
 /**
  * Conditions
@@ -79,34 +68,22 @@ const CONDITION_CAPITAL_STARSHIP_IN_PLAY = 'capital_starship_in_play';
 const CONDITION_BASE_IS_DEATH_STAR = 'base_is_death_star';
 const CONDITION_FORCE_IS_WITH_YOU = 'force_is_with_you';
 const CONDITION_FORCE_IS_NOT_WITH_YOU = 'force_is_not_with_you';
-const CONDITION_IS_ENEMY_CARD = 'is_enemy_card';
-const CONDITION_HAS_TRAIT = 'has_trait';
-const CONDITION_HAS_UNIT_IN_PLAY_WITH_TRAIT = 'has_unit_in_play_with_trait';
 const CONDITION_HAS_DAMAGE_ON_BASE = 'has_damage_on_base';
-const CONDITION_HAS_CARD_IN_ZONE_WITH_TRAIT = 'has_card_in_zone_with_trait';
 const CONDITION_CARD_IN_PLAY = 'card_in_play';
 const CONDITION_FIRST_PURCHASE_THIS_TURN = 'first_purchase_this_turn';
 const CONDITION_CARD_FACTION_IS = 'card_faction_is';
-const CONDITION_CARD_IS_ENEMY = 'card_is_enemy';
 const CONDITION_HAS_RESOURCES = 'has_resources';
 const CONDITION_HAS_CARDS = 'has_cards';
-
-const CONDITION_OPERATOR_OR = 'operator_or';
-const CONDITION_OPERATOR_AND = 'operator_and';
-
-
-/**
- * Costs
- */
-const COST_DISCARD_FROM_HAND = 'discard_from_hand';
-
+const CONDITION_HAS_CARDS_REFERENCE = 'has_cards_reference';
+const CONDITION_THIS_CARD_WAS_ATTACKER = 'this_card_was_attacker';
+const CONDITION_DEFEATED_IN_ZONE = 'defeated_in_zone';
+ 
 /**
  * Effects
  */
 const EFFECT_CHOICE = 'choice';
 
 const EFFECT_MODIFY_ATTACK = 'modify_attack';
-const EFFECT_DISCARD_CARD = 'discard_card';
 const EFFECT_CONDITIONAL = 'conditional_effect';
 const EFFECT_DRAW_CARD = 'draw';
 const EFFECT_GAIN_RESOURCE = 'gain_resource';
@@ -124,26 +101,13 @@ const EFFECT_DESTROY_SELECTED_CARD = 'destroy_selected_card';
 const EFFECT_REVEAL_CARDS = 'reveal_cards';
 const EFFECT_HIDE_CARDS = 'hide_cards';
 const EFFECT_SELECT_CURRENT_CARD = 'select_current_card';
+const EFFECT_DEAL_BASE_DAMAGE = 'deal_base_damage';
+const EFFECT_REMOVE_CARD_REFERENCE = 'remove_card_reference';
+const EFFECT_REGISTER_DELAYED = 'register_delayed_effect';
 
-/**
- * Choice Options
- */
-const CHOICE_OPTION_GAIN_RESOURCE = 'gain_resource';
-const CHOICE_OPTION_GAIN_ATTACK = 'gain_attack';
-const CHOICE_OPTION_GAIN_FORCE = 'gain_force';
-const CHOICE_OPTION_REPAIR_DAMAGE_BASE = 'repair_damage_base';
-const CHOICE_OPTION_DISCARD_CARD = 'discard_card';
-
-/**
- * Costs
- */
-const COST_EXILE_SELF = 'exile_self';
-
-/**
- * Effects
- */
 const EFFECT_EXILE_CARD = 'exile_card';
 const EFFECT_MOVE_CARD = 'move_card';
+const EFFECT_REGISTER_PURCHASE_OPTION = 'register_purchase_option';
 
 /**
  * Triggers
@@ -151,32 +115,26 @@ const EFFECT_MOVE_CARD = 'move_card';
 const TRIGGER_WHEN_PURCHASED = 'when_purchased';
 const TRIGGER_DEFEAT_TARGET_GALAXY_ROW = 'defeat_target_galaxy_row';
 const TRIGGER_END_OF_TURN = 'end_of_turn';
-const TRIGGER_CONDITIONAL_EFFECT = 'conditional_effect';
 
 const TRIGGER_ON_PLAY = 'ON_PLAY';
 const TRIGGER_REWARD = 'REWARD';
 const TRIGGER_ACTIVATE_CARD = 'ON_ACTIVATE';
 const TRIGGER_WHILE_IN_PLAY = 'WHILE_IN_PLAY';
+const TRIGGER_ON_CARD_DEFEATED = 'ON_CARD_DEFEATED';
+
 /**
  * Targets
  */
-const TARGET_YOUR_UNITS = 'your_units';
-const TARGET_YOUR_CARDS = 'your_cards';
-const TARGET_YOUR_SHIPS = 'your_ships';
 const TARGET_OPPONENT = 'opponent';
 const TARGET_SELF = 'self';
-const TARGET_ANY_CARD = 'any_card';
-const TARGET_GALAXY = 'galaxy';
 
 /**
  * Filters
  */
 const FILTER_HAS_TRAIT = 'has_trait';
-const FILTER_FACTION = 'faction';
-const FILTER_HAS_CARD_TYPE = 'has_card_type';
-
 const FILTER_CARD_TYPES = 'card_types';
 const FILTER_FACTIONS = 'factions';
+const FILTER_ABILITIES = 'abilities';
 
 /**
  * Traits
@@ -224,10 +182,12 @@ const TARGET_SCOPE_SELF_PLAY_AREA = 'self_play_area';
 const TARGET_SCOPE_SELF_SHIP_AREA = 'self_ship_area';
 const TARGET_SCOPE_SELF_DISCARD = 'self_discard';
 const TARGET_SCOPE_SELF_HAND = 'self_hand';
+const TARGET_SCOPE_SELF_BASE = 'self_base';
 const TARGET_SCOPE_OPPONENT_PLAY_AREA = 'opponent_play_area';
 const TARGET_SCOPE_OPPONENT_SHIP_AREA = 'opponent_ship_area';
 const TARGET_SCOPE_OPPONENT_DISCARD = 'opponent_discard';
 const TARGET_SCOPE_OPPONENT_HAND = 'opponent_hand';
+const TARGET_SCOPE_OPPONENT_BASE = 'opponent_base';
 const TARGET_SCOPE_GALAXY_ROW = 'galaxy_row';
 const TARGET_SCOPE_GALAXY_DECK = 'galaxy_deck';
 const TARGET_SCOPE_GALAXY_DISCARD = 'galaxy_discard';

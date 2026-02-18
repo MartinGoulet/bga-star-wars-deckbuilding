@@ -13,8 +13,7 @@ final class PurchaseResolver {
     /**
      * @var GameContext The current game context, injected via constructor.
      */
-    public function __construct(private GameContext $ctx)
-    {
+    public function __construct(private GameContext $ctx) {
         // No initialization needed beyond context assignment
     }
 
@@ -52,9 +51,23 @@ final class PurchaseResolver {
             TARGET_SELF,
             $this->getPurchaseOptions($activePlayerId, $card, $this->ctx)
         );
+
+        $this->consumeOverrides();
+        
         $result = $engine->run();
 
         return $result;
+    }
+
+    private function consumeOverrides(): void {
+        $overrides = $this->ctx->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+
+        $overrides = array_filter(
+            $overrides,
+            fn($o) => $o['expires'] !== 'after_next_purchase'
+        );
+
+        $this->ctx->globals->set(GVAR_PURCHASE_OPTION_OVERRIDES, $overrides);
     }
 
     /**
@@ -88,6 +101,8 @@ final class PurchaseResolver {
         if ($cardOption !== null) {
             $options[] = $cardOption;
         }
+
+        $options = array_merge($options, $this->getOverrideOptions());
 
         return $options;
     }
@@ -145,5 +160,18 @@ final class PurchaseResolver {
         $effect = current($effect);
         $effect['sourceCardId'] = $card->id;
         return EffectFactory::createEffectInstance($effect);
+    }
+
+    private function getOverrideOptions(): array {
+        $options = [];
+
+        $overrides = $this->ctx->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+
+        foreach ($overrides as $override) {
+            $override['option']['labelArgs'] = $override['option']['labelArgs'] ?? [];
+            $options[] = $override['option'];
+        }
+
+        return $options;
     }
 }
