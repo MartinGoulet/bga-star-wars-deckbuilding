@@ -69,6 +69,10 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
                 $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $remainingDamage);
             }
 
+            return $this->game->playerScore->get($ctx->currentPlayer()->playerId) >= 3
+                ? EndScore::class
+                : PlayerTurn_ActionSelection::class;
+
             return PlayerTurn_ActionSelection::class;
         }
 

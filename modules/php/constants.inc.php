@@ -56,7 +56,6 @@ const CARD_TYPE_BASE = 'BASE';
  */
 const ABILITY_DRAW_CARD = 'draw_card';
 const ABILITY_CHOICE = 'choice';
-const ABILITY_DISCARD_CARD_GALAXY_ROW = 'discard_card_galaxy_row';
 const ABILITY_STATIC_ATTACK_MODIFIER = 'static_attack_modifier';
 const ABILITY_AURA_ATTACK_MODIFIER = 'aura_attack_modifier';
 
@@ -121,6 +120,7 @@ const TRIGGER_REWARD = 'REWARD';
 const TRIGGER_ACTIVATE_CARD = 'ON_ACTIVATE';
 const TRIGGER_WHILE_IN_PLAY = 'WHILE_IN_PLAY';
 const TRIGGER_ON_CARD_DEFEATED = 'ON_CARD_DEFEATED';
+const TRIGGER_ON_REVEAL_BASE = 'ON_REVEAL_BASE';
 
 /**
  * Targets
@@ -144,7 +144,7 @@ const TRAIT_FIGHTER = 'Fighter';
 const TRAIT_VEHICLE = 'Vehicle';
 const TRAIT_TRANSPORT = 'Transport';
 const TRAIT_OFFICER = 'Officer';
-const TRAIT_BOUNTER_HUNTER = 'Bounty Hunter';
+const TRAIT_BOUNTY_HUNTER = 'Bounty Hunter';
 const TRAIT_SITH = 'Sith';
 
 const TRAIT_EMPIRE = 'Empire';

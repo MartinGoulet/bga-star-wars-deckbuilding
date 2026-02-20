@@ -8,7 +8,6 @@ use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
 use Bga\Games\StarWarsDeckbuilding\Effects\NeedsPlayerInput;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
-use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQuery;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use BgaVisibleSystemException;
@@ -93,6 +92,11 @@ final class GameEngine {
       $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
    }
 
+   public function setNextState(string $state): void {
+      $states_info = explode("\\", $state);
+      $this->globals->set('game_engine_end_run_next_state', $states_info);
+   }
+
    /** @return string Return next state */
    public function run(): string {
 
@@ -125,7 +129,15 @@ final class GameEngine {
 
       $this->globals->set('galaxy_deck_revealed_card', []);
       $this->context->refillGalaxyRow();
-      return PlayerTurn_ActionSelection::class;
+
+      $nextState = $this->globals->get('game_engine_end_run_next_state', []);
+      if(!empty($nextState)) {
+         $this->globals->delete('game_engine_end_run_next_state');
+         $nextState= implode("\\", $nextState);
+      } else {
+         $nextState = PlayerTurn_ActionSelection::class;
+      }
+      return $nextState;
    }
 
    private function removeCurrentEffect(): void {

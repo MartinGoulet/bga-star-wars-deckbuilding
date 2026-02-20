@@ -318,6 +318,12 @@ class Game extends \Bga\GameFramework\Table {
         $this->globals->set(GVAR_ABILITY_USED_CARD_IDS, []);
     }
 
+    public function debug_effectToResolve() {
+        var_dump(
+            $this->globals->get(GVAR_EFFECTS_TO_RESOLVE)
+        );
+    }
+
     /*
     Another example of debug function, to easily create situations you want to test.
     Here, put a card you want to test in your hand (assuming you use the Deck component).

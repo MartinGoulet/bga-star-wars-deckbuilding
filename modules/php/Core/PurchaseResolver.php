@@ -134,14 +134,15 @@ final class PurchaseResolver {
      */
     private function getCardAbilityOption(CardInstance $card, GameContext $ctx): ?array {
         $cardEffect = $this->getPurchaseEffect($card);
+        
         if ($cardEffect !== null && $cardEffect->canResolve($ctx)) {
             $option = [
                 'label' => clienttranslate('Use ability of ${card_name}'),
                 'labelArgs' => ['card_name' => $card->name],
                 'cardId' => $card->id,
             ];
-            $options = array_merge($option, $cardEffect->definition);
-            return $options;
+            $option = array_merge($option, $cardEffect->definition);
+            return $option;
         }
         return null;
     }
@@ -153,11 +154,11 @@ final class PurchaseResolver {
      * @return EffectInstance|null The effect instance, or null if none exists.
      */
     private function getPurchaseEffect(CardInstance $card): EffectInstance|null {
-        $effect = $card->getEffect(TRIGGER_WHEN_PURCHASED, $this->ctx);
-        if ($effect === null || empty($effect)) {
+        $effects = $card->getEffect(TRIGGER_WHEN_PURCHASED, $this->ctx);
+        if ($effects === null || empty($effects)) {
             return null;
         }
-        $effect = current($effect);
+        $effect = current($effects);
         $effect['sourceCardId'] = $card->id;
         return EffectFactory::createEffectInstance($effect);
     }

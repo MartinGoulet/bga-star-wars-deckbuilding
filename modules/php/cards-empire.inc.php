@@ -6,6 +6,7 @@ $empire_cards = [
    // Imperials
    CardIds::TIE_FIGHTER => [
       'name' => clienttranslate('TIE Fighter'),
+      'gametext' => clienttranslate("If you have a capital ship in play, draw 1 card"),
       'img' => CardIds::TIE_FIGHTER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -15,11 +16,19 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'condition' => [
-               ['type' => CONDITION_CAPITAL_STARSHIP_IN_PLAY]
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                     ],
+                  ]
+               ]
             ],
             'effects' => [
-               ['type' => ABILITY_DRAW_CARD, 'value' => 1],
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
       ],
@@ -33,6 +42,7 @@ $empire_cards = [
 
    CardIds::AT_ST => [
       'name' => clienttranslate('AT-ST'),
+      'gametext' => clienttranslate('Discard 1 card from the galaxy row'),
       'img' => CardIds::AT_ST,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -42,9 +52,19 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
-            'condition' => [],
             'effects' => [
-               ['type' => ABILITY_DISCARD_CARD_GALAXY_ROW, 'value' => 1],
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                  ],
+                  'storeAs' => 'atst_selected_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_GALAXY_DISCARD,
+                  'cardRef' => 'atst_selected_card'
+               ],
             ],
          ]
       ]
@@ -52,6 +72,8 @@ $empire_cards = [
 
    CardIds::LANDING_CRAFT => [
       'name' => clienttranslate('Landing Craft'),
+      'gametext' => clienttranslate(""),
+      'rewardText' => clienttranslate("Gain 4 resources"),
       'img' => CardIds::LANDING_CRAFT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -67,7 +89,7 @@ $empire_cards = [
                   'options' => [
                      [
                         'label' => clienttranslate('Gain 4 resources'),
-                        'type' => EFFECT_GAIN_RESOURCE, 
+                        'type' => EFFECT_GAIN_RESOURCE,
                         'amount' => 4
                      ],
                      [
@@ -79,6 +101,9 @@ $empire_cards = [
                ]
             ],
          ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 4]
       ]
    ],
 
@@ -115,7 +140,7 @@ $empire_cards = [
       'img' => CardIds::BOBA_FETT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
-      'traits' => [TRAIT_BOUNTER_HUNTER],
+      'traits' => [TRAIT_BOUNTY_HUNTER],
       'unique' => true,
       'cost' => 5,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
@@ -123,7 +148,7 @@ $empire_cards = [
          [
             'trigger' => TRIGGER_DEFEAT_TARGET_GALAXY_ROW,
             'effects' => [
-               ['type' => ABILITY_DRAW_CARD, 'value' => 1],
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
       ]
@@ -131,12 +156,23 @@ $empire_cards = [
 
    CardIds::IMPERIAL_CARRIER => [
       'name' => clienttranslate('Imperial Carrier'),
+      'gametext' => clienttranslate("While Imperial Carrier is in play, each of your *Fighter* units gains 1 attack"),
       'img' => CardIds::IMPERIAL_CARRIER,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_EMPIRE,
       'cost' => 5,
       'stats' => ['power' => 0, 'resource' => 3, 'force' => 0],
       'abilities' => [
+         [
+            'type' => ABILITY_AURA_ATTACK_MODIFIER,
+            'value' => 1,
+            'target' => [
+               'zones' => [TARGET_SCOPE_SELF_PLAY_AREA],
+               'filters' => [
+                  ['type' => FILTER_HAS_TRAIT, 'traits' => [TRAIT_FIGHTER]],
+               ],
+            ],
+         ]
       ],
    ],
 
@@ -294,12 +330,12 @@ $empire_cards = [
       'unique' => true,
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
-      'abilities' => [
-      ]
+      'abilities' => []
    ],
 
    CardIds::TIE_BOMBER => [
       'name' => clienttranslate('TIE Bomber'),
+      'gametext' => clienttranslate('Discard 1 card from the galaxy row'),
       'img' => CardIds::TIE_BOMBER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -310,7 +346,18 @@ $empire_cards = [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
-               ['type' => ABILITY_DISCARD_CARD_GALAXY_ROW, 'value' => 1],
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                  ],
+                  'storeAs' => 'tie_bomber_selected_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'tie_bomber_selected_card',
+                  'destination' => ZONE_GALAXY_DISCARD,
+               ]
             ],
          ]
       ],
@@ -506,7 +553,7 @@ $empire_cards = [
       'traits' => [TRAIT_OFFICER],
       'unique' => true,
       'cost' => 4,
-      'stats' => ['power' => 1, 'resource' => 3, 'force' => 0],
+      'stats' => ['power' => 2, 'resource' => 2, 'force' => 0],
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
@@ -694,11 +741,37 @@ $empire_bases = [
    ],
    CardIds::CORRELIA => [
       'name' => clienttranslate('Correlia'),
+      'gametext' => clienttranslate("When you reveal Correlia, purchase an Empire card or neutral card from the galaxy row for free and add it to your hand"),
       'img' => 2,
       'faction' => FACTION_EMPIRE,
       'health' => 10,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ON_REVEAL_BASE,
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_EMPIRE, FACTION_NEUTRAL]],
+                     ],
+                  ],
+                  'storeAs' => 'correlia_selected_card',
+               ],
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'cardRef' => 'correlia_selected_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'correlia_selected_card',
+                  'destination' => ZONE_HAND,
+               ]
+            ]
+         ]
+      ],
    ],
    CardIds::KESSEL => [
       'name' => clienttranslate('Kessel'),

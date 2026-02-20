@@ -1,5 +1,7 @@
 <?php
 
+use Bga\Games\StarWarsDeckbuilding\States\Effect_CardSelection;
+
 $rebel_cards = [
    CardIds::Y_WING => [
       'name' => clienttranslate('Y-Wing'),
@@ -334,24 +336,55 @@ $rebel_cards = [
 
    CardIds::LUKE_SKYWALKER => [
       'name' => clienttranslate('Luke Skywalker'),
+      'gametext' => clienttranslate("If the Force is with you, destroy a capital ship your opponent has in play"),
+      'rewardText' => clienttranslate('Gain 4 resources and 4 Force'),
       'img' => CardIds::LUKE_SKYWALKER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 8,
       'unique' => true,
       'stats' => ['power' => 6, 'resource' => 0, 'force' => 2],
-      'abilities' => []
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_FORCE_IS_WITH_YOU],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                  ],
+                  'storeAs' => 'luke_target',
+               ],
+               [
+                  'type' => EFFECT_DESTROY_SELECTED_CARD,
+                  'cardRef' => 'luke_target',
+               ],
+            ],
+         ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 4],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 4]
+      ]
    ],
 
    CardIds::BAZE_MALBUS => [
       'name' => clienttranslate('Baze Malbus'),
+      'gametext' => clienttranslate("Baze Malbus gain 1 attack for each Rebel base in your opponent's victory pile"),
+      'rewardText' => clienttranslate('Gain 1 force'),
       'img' => CardIds::BAZE_MALBUS,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 2,
       'unique' => true,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => []
+      'abilities' => [],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 1]
+      ]
    ],
 
    CardIds::SNOWSPEEDER => [
@@ -431,6 +464,38 @@ $rebel_cards = [
             ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_CHOICE_OPTION,
+            'options' => [
+               [
+                  'label' => clienttranslate('Exile a card from hand or discard pile'),
+                  'type' => EFFECT_CONDITIONAL,
+                  'effects' => [
+                     [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                           'selectionMode' => SELECTION_MODE_PLAYER_CHOICE,
+                           'min' => 1,
+                        ],
+                        'storeAs' => 'duros_spy_exile_card',
+                     ],
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'destination' => ZONE_EXILE,
+                        'cardRef' => 'duros_spy_exile_card',
+                     ]
+                  ],
+               ],
+               [
+                  'label' => clienttranslate('Pass'),
+                  'type' => EFFECT_CONDITIONAL,
+                  'effects' => [],
+               ],
+            ]
+         ]
+      ]
    ],
 
    CardIds::REBEL_TRANSPORT => [
@@ -554,6 +619,8 @@ $rebel_cards = [
 
    CardIds::X_WING => [
       'name' => clienttranslate('X-Wing'),
+      'gametext' => clienttranslate('If the Force is with you, draw 1 card'),
+      'rewardText' => clienttranslate('Gain 3 Resources'),
       'img' => CardIds::X_WING,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -564,16 +631,18 @@ $rebel_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'conditions' => [
                ['type' => CONDITION_FORCE_IS_WITH_YOU],
-               ['type' => CONDITION_HAS_DAMAGE_ON_BASE]
             ],
             'effects' => [
-               [
-                  'type' => EFFECT_REPAIR_DAMAGE_BASE,
-                  'amount' => 3,
-               ]
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1]
             ]
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'amount' => 3,
+         ]
+      ]
    ],
 
    // Rebels
@@ -592,7 +661,7 @@ $rebel_cards = [
                ['type' => CONDITION_ANOTHER_UNIQUE_UNIT_IN_PLAY],
             ],
             'effects' => [
-               ['type' => ABILITY_DRAW_CARD, 'value' => 1],
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
       ]
@@ -621,6 +690,7 @@ $rebel_cards = [
 
    CardIds::TEMPLE_GUARDIAN => [
       'name' => clienttranslate('Temple Guardian'),
+      'gametext' => clienttranslate('When you play Temple Guardian, choose: Gain 1 Attack, or gain 1 Resource, or gain 1 Force'),
       'img' => CardIds::TEMPLE_GUARDIAN,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -746,8 +816,7 @@ $rebel_bases = [
       'faction' => FACTION_REBEL,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [
-      ],
+      'abilities' => [],
    ],
 ];
 

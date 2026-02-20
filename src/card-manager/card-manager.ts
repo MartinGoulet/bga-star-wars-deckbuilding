@@ -13,18 +13,16 @@ export class MyCardManager extends BgaCards.Manager<Card> {
          setupDiv: (card: Card, cardDiv: HTMLElement) => {
             if ("type" in card) cardDiv.dataset.type = card.type.toLowerCase();
             if ("faction" in card) {
-               cardDiv.dataset.faction = card.faction;
-               cardDiv.dataset.isNeutral = card.faction === "Neutral" ? "true" : "false";
-               cardDiv.dataset.isAlly =
-                  card.faction !== "Neutral" && card.faction === this.currentPlayer.faction ? "true" : "false";
-               cardDiv.dataset.isEnemy =
-                  card.faction !== "Neutral" && card.faction !== this.currentPlayer.faction ? "true" : "false";
+               this.setDatasetInfo(card, cardDiv);
             }
          },
          setupFrontDiv: (card: Card, frontDiv: HTMLElement) => {
             frontDiv.dataset.img = card.img;
             if("type" in card) {
                this.tooltipManager.addTooltip(frontDiv, card);
+            }
+            if ("faction" in card) {
+               this.setDatasetInfo(card, frontDiv);
             }
             if ("damage" in card && card.damage > 0) {
                this.setDamageOnCard(card);
@@ -36,6 +34,17 @@ export class MyCardManager extends BgaCards.Manager<Card> {
          cardHeight: 168,
       });
       this.tooltipManager = new TooltipManager(this.game);
+   }
+
+   public setDatasetInfo(card: Card, div: HTMLElement): void {
+      if ("faction" in card) {
+         div.dataset.faction = card.faction;
+         div.dataset.isNeutral = card.faction === "Neutral" ? "true" : "false";
+         div.dataset.isAlly =
+            card.faction !== "Neutral" && card.faction === this.currentPlayer.faction ? "true" : "false";
+         div.dataset.isEnemy =
+            card.faction !== "Neutral" && card.faction !== this.currentPlayer.faction ? "true" : "false";
+      }
    }
 
    public setCardAsSelected(card: Card): void {

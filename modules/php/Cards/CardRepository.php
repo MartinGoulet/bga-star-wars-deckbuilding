@@ -180,6 +180,9 @@ final class CardRepository {
         return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
+    /**
+     * @return CardInstance[]
+     */
     public function getPlayerHand(int $playerId): array {
         $cards = $this->deck->getCardsInLocation('hand', $playerId);
         return array_map(fn($row) => $this->createFromRow($row), $cards);

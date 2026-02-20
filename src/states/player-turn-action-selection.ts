@@ -7,6 +7,7 @@ interface PlayerTurnActionSelectionArgs {
    selectableAbilityCardIds: number[];
    canCommitAttack: boolean;
    totalPower: number;
+   hasAutomaticPlay: boolean;
 }
 
 export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSelectionArgs> {
@@ -16,6 +17,11 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
       if (args.canCommitAttack) {
          const handle = async () => await this.game.actions.performAction("actCommitAttack");
          this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
+      }
+
+      if (args.hasAutomaticPlay) {
+         const handleAutomaticPlay = async () => await this.game.actions.performAction("actAutomaticallyPlayCards");
+         this.game.statusBar.addActionButton(_("Automatically Play Cards"), handleAutomaticPlay);
       }
 
       const handleEndTurn = async () => await this.game.actions.performAction("actEndTurn");
@@ -60,6 +66,7 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
       const galaxyRow = this.game.tableCenter.galaxyRow;
 
       const selectableCards = galaxyRow.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+      if(selectableCards.length === 0) return;
 
       galaxyRow.setSelectionMode("single");
       galaxyRow.setSelectableCards(selectableCards);
@@ -73,6 +80,7 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
       const outerRimDeck = this.game.tableCenter.outerRimDeck;
 
       const selectableCards = outerRimDeck.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+      if(selectableCards.length === 0) return;
 
       outerRimDeck.setSelectionMode("single");
       outerRimDeck.setSelectableCards(selectableCards);
@@ -88,7 +96,7 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
       [playArea, ships, activeBase].forEach((area) => {
          const selectableCards = area.getCards().filter((card) => args.selectableAbilityCardIds.includes(card.id));
 
-         if(selectableCards.length === 0) return;
+         if (selectableCards.length === 0) return;
 
          area.setSelectionMode("single");
          area.setSelectableCards(selectableCards);

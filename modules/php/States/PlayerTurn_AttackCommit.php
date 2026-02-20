@@ -36,9 +36,12 @@ class PlayerTurn_AttackCommit extends GameState {
 
         $alreadlyAttackingIds = $this->game->globals->get(GVAR_ALREADY_ATTACKING_CARDS_IDS, []);
 
-        $targetQuery = TargetQueryFactory::create([
-            'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
-        ]);
+        $zones = [TARGET_SCOPE_SELF_PLAY_AREA];
+        if($target->type !== CARD_TYPE_UNIT) {
+            $zones[] = TARGET_SCOPE_SELF_SHIP_AREA;
+        }
+        
+        $targetQuery = TargetQueryFactory::create(['zones' => $zones]);
 
         $attackers = (new TargetResolver(new GameContext($this->game)))->resolve($targetQuery);
         $attackers = array_filter($attackers, fn($card) => $this->canCardAttack($card, $alreadlyAttackingIds));

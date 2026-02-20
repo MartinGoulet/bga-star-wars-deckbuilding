@@ -104,11 +104,16 @@ final class PowerResolver {
                continue;
             }
 
-            die('Aura modifiers not implemented yet'); // TODO Implement aura modifiers
+            $targetQuery = TargetQueryFactory::create($ability['target']);
+            $cardsCanBeTargeted = (new TargetResolver($ctx))->resolve($targetQuery);
 
-            $bonus += $ability['value'] ?? 0;
+            if(!in_array($card->id, array_map(fn($c) => $c->id, $cardsCanBeTargeted))) {
+               continue;
+            }
+
+            $bonus += $ability['value'];
          }
-      }
+      }  
 
 
       return $bonus;
@@ -128,6 +133,7 @@ final class PowerResolver {
             ]
          ],
       ]);
-      return (new TargetResolver($ctx))->resolve($target);
+      $cards = (new TargetResolver($ctx))->resolve($target);
+      return $cards;
    }
 }

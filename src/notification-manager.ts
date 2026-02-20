@@ -39,9 +39,9 @@ export class NotificationManager {
       });
    }
 
-   private async notif_setPlayerCounter(args: any) {
-      // debugger;
-   }
+   // private async notif_setPlayerCounter(args: any) {
+   //    // debugger;
+   // }
 
    private notif_setTableCounter(args: TableCounterNotificationArgs) {
       if (args.name === "force") {
@@ -113,12 +113,62 @@ export class NotificationManager {
    }
 
    private async notif_onRefillGalaxyRow(args: { newCards: Card[] }) {
-      const fromStock = this.game.tableCenter.galaxyDeck;
-      await this.game.tableCenter.galaxyRow.addCards(args.newCards, { fromStock }, 300);
+      args.newCards.forEach(async (card) => {
+         await this.notif_onMoveCardToGalaxyRow({ card });
+         // this.game.tableCenter.galaxyDeck.setCardVisible(card, false, {
+         //    updateMain: true,
+         //    updateFront: true,
+         //    updateFrontDelay: 0,
+         // });
+         // const divElement = this.game.cardManager.getCardElement(card);
+         // if (Boolean(divElement.dataset.isEnemy)) {
+         //    const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
+         //    await this.game.tableCenter.galaxyRow.addCard(card, {
+         //       parallelAnimations: [
+         //          {
+         //             keyframes: [{ transform: rotation }],
+         //          },
+         //       ],
+         //    });
+         // } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+         //    await this.game.tableCenter.galaxyRow.addCard(card, {
+         //       parallelAnimations: [
+         //          {
+         //             keyframes: [{ transform: "rotate(90deg)" }],
+         //          },
+         //       ],
+         //    });
+         // } else {
+         //    await this.game.tableCenter.galaxyRow.addCard(card);
+         // }
+      });
    }
 
    private async notif_onDiscardGalaxyCard(args: { player_id: number; card: Card }) {
-      await this.game.tableCenter.galaxyDiscard.addCard(args.card);
+      const card = args.card;
+      const divElement = this.game.cardManager.getCardElement(card);
+
+      if (Boolean(divElement.dataset.isEnemy)) {
+         const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
+         await this.game.tableCenter.galaxyDiscard.addCard(card, {
+            parallelAnimations: [
+               {
+                  keyframes: [{ transform: rotation }, { transform: "rotate(0deg)" }],
+               },
+            ],
+         });
+      } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+         await this.game.tableCenter.galaxyDiscard.addCard(card, {
+            parallelAnimations: [
+               {
+                  keyframes: [{ transform: "rotate(-90deg)" }, { transform: "rotate(0deg)" }],
+               },
+            ],
+         });
+      } else {
+         await this.game.tableCenter.galaxyDiscard.addCard(card);
+      }
+
       await this.game.gameui.wait(350);
    }
 
@@ -177,8 +227,34 @@ export class NotificationManager {
       }
    }
 
-   private async notif_onMoveCardToGalaxyRow(args: { card: Card }) {
-      await this.game.tableCenter.galaxyRow.addCard(args.card);
+   private async notif_onMoveCardToGalaxyRow({ card }: { card: Card }) {
+      this.game.tableCenter.galaxyDeck.setCardVisible(card, this.game.cardManager.isCardVisible(card), {
+         updateMain: true,
+         updateFront: true,
+         updateFrontDelay: 0,
+      });
+
+      const divElement = this.game.cardManager.getCardElement(card);
+      if (Boolean(divElement.dataset.isEnemy)) {
+         const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
+         await this.game.tableCenter.galaxyRow.addCard(card, {
+            parallelAnimations: [
+               {
+                  keyframes: [{ transform: rotation }],
+               },
+            ],
+         });
+      } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+         await this.game.tableCenter.galaxyRow.addCard(card, {
+            parallelAnimations: [
+               {
+                  keyframes: [{ transform: "rotate(90deg)" }],
+               },
+            ],
+         });
+      } else {
+         await this.game.tableCenter.galaxyRow.addCard(card);
+      }
    }
 
    private async notif_onMoveCardToGalaxyDeck(args: { card: Card }) {

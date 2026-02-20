@@ -7,6 +7,7 @@ namespace Bga\Games\StarWarsDeckbuilding\States;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\States\PossibleAction;
+use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Game;
 
 class PlayerTurn_StartTurnBase extends GameState {
@@ -63,7 +64,13 @@ class PlayerTurn_StartTurnBase extends GameState {
             'card' => $base,
         ]);
 
-        return PlayerTurn_StartTurnResources::class;
+        $ctx = new GameContext($this->game);
+        $engine = $ctx->getGameEngine();
+        $engine->setNextState(PlayerTurn_StartTurnResources::class);
+
+        $engine->addCardEffect($base, TRIGGER_ON_REVEAL_BASE);
+
+        return $engine->run();
     }
 
     function zombie(int $playerId) {

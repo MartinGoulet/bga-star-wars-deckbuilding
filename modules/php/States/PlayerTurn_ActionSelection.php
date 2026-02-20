@@ -74,6 +74,7 @@ class PlayerTurn_ActionSelection extends GameState {
             'totalPower' => $totalPower,
             'selectableAbilityCardIds' => array_values($selectableAbilityCardIds),
             'playArea' => $playArea,
+            'hasAutomaticPlay' => !empty($this->getAutomaticPlayableCards($activePlayerId, $ctx)),
         ];
 
         return $data;
@@ -93,7 +94,19 @@ class PlayerTurn_ActionSelection extends GameState {
     }
 
     #[PossibleAction]
-    public function actPlayCard(int $cardId, int $activePlayerId, array $args) {
+    public function actAutomaticallyPlayCards(int $activePlayerId) {
+        $ctx = new GameContext($this->game);
+        $playableCards = $this->getAutomaticPlayableCards($activePlayerId, $ctx);
+
+        foreach ($playableCards as $card) {
+            $this->actPlayCard($card->id, $activePlayerId);
+        }
+
+        return PlayerTurn_ActionSelection::class;
+    }
+
+    #[PossibleAction]
+    public function actPlayCard(int $cardId, int $activePlayerId) {
         // Verify that the card is in the player's hand
         $this->assertCardInPlayerHand($cardId, $activePlayerId);
 
@@ -218,5 +231,12 @@ class PlayerTurn_ActionSelection extends GameState {
         // Add Force if card has force value
         if ($card->force == 0) return;
         $ctx->currentPlayer()->gainForce($card->force, $card);
+    }
+
+    private function getAutomaticPlayableCards(int $playerId, GameContext $ctx): array {
+        $hand = $this->game->cardRepository->getPlayerHand($playerId);
+        return array_filter($hand, function ($card) use ($ctx) {
+            return empty($card->getEffect(TRIGGER_ON_PLAY, $ctx));
+        });
     }
 }

@@ -4,7 +4,7 @@ import { NotificationManager } from "./notification-manager";
 import { PlayerHand } from "./player-hand/player-hand";
 import { PlayerTable } from "./player-table/player-table";
 import { EffectCardSelectionState } from "./states/effect-card-selection";
-import { PlayerTurnActionResolveDamageShipBaseState } from "./states/player-trn-action-resolve-damage-ship-base";
+import { PlayerTurnActionResolveDamageShipBaseState } from "./states/player-turn-action-resolve-damage-ship-base";
 import { PlayerTurnActionSelectionState } from "./states/player-turn-action-selection";
 import { PlayerTurnAskChoiceState } from "./states/player-turn-ask-choice";
 import { PlayerTurnAttackCommitState } from "./states/player-turn-attack-commit";

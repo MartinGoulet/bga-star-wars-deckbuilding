@@ -48,6 +48,9 @@ class PlayerTurn_EndTurn extends GameState {
         // Reset damage assigned to ships
         $this->resetDamageAssignedToShips();
 
+        // Reset attack modifiers
+        $this->game->globals->set(GVAR_ATTACK_MODIFIER_PER_CARDS, []);
+
         // Finally, draw five cards from your deck.
         $ctx->currentPlayer()->drawCards(5);
 

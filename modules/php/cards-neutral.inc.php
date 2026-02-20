@@ -140,13 +140,52 @@ $neutral_cards = [
     ],
 
     CardIds::JABBA_SAIL_BARGE => [
-        'name' => clienttranslate('Jabba\'s Sail Barge'),
+        'name' => clienttranslate("Jabba's Sail Barge"),
+        'gametext' => clienttranslate("Add a *Bounty Hunter* from your discard pile to your hand"),
         'img' => CardIds::JABBA_SAIL_BARGE,
-        'type' => CARD_TYPE_SHIP,
+        'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
         'cost' => 7,
         'stats' => ['power' => 4, 'resource' => 3, 'force' => 0],
-        'abilities' => [],
+        'abilities' => [
+            [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        [
+                           'type' => FILTER_HAS_TRAIT,
+                           'traits' => [TRAIT_BOUNTY_HUNTER],
+                        ]
+                     ],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        [
+                           'type' => FILTER_HAS_TRAIT,
+                           'traits' => [TRAIT_BOUNTY_HUNTER],
+                        ]
+                     ],
+                  ],
+                  'storeAs' => 'bounty_hunter_to_retrieve',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'bounty_hunter_to_retrieve',
+                  'destination' => ZONE_HAND,
+               ],
+            ],
+         ]
+        ],
     ],
 
     CardIds::JABBA_THE_HUTT => [
@@ -270,13 +309,40 @@ $neutral_cards = [
 
     CardIds::LOBOT => [
         'name' => clienttranslate('Lobot'),
+        'gametext' => clienttranslate("When you play Lobot, choose: He gains 2 attack, 2 resources, or 2 force this turn"),
         'img' => CardIds::LOBOT,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
         'cost' => 3,
         'unique' => true,
         'stats' => ['power' => 0, 'resource' => 0, 'force' => 0],
-        'abilities' => []
+        'abilities' => [
+            [
+                "trigger" => TRIGGER_ON_PLAY,
+                "effects" => [
+                    [
+                        "type" => EFFECT_CHOICE,
+                        'options' => [
+                            [
+                                'label' => clienttranslate('Gain 2 Attack'),
+                                'type' => EFFECT_GAIN_ATTACK,
+                                'amount' => 2
+                            ],
+                            [
+                                'label' => clienttranslate('Gain 2 Resource'),
+                                'type' => EFFECT_GAIN_RESOURCE,
+                                'amount' => 2
+                            ],
+                            [
+                                'label' => clienttranslate('Gain 2 Force'),
+                                'type' => EFFECT_GAIN_FORCE,
+                                'amount' => 2
+                            ],
+                        ],
+                    ]
+                ],
+            ],
+        ],
     ],
 
     CardIds::BOSSK => [
@@ -314,16 +380,21 @@ $neutral_cards = [
                 'trigger' => TRIGGER_WHEN_PURCHASED,
                 'effects' => [
                     [
-                        'type' => EFFECT_MOVE_CARD,
-                        'target' => TARGET_SELF,
-                        'destination' => ZONE_HAND
-                    ],
-                    [
-                        'type' => EFFECT_DRAW_CARD,
-                        'conditions' => [
-                            ['type' => CONDITION_FORCE_IS_WITH_YOU],
-                        ],
-                        'amount' => 1,
+                        'type' => EFFECT_CONDITIONAL,
+                        'effects' => [
+                            [
+                                'type' => EFFECT_MOVE_CARD,
+                                'target' => TARGET_SELF,
+                                'destination' => ZONE_HAND
+                            ],
+                            [
+                                'type' => EFFECT_DRAW_CARD,
+                                'conditions' => [
+                                    ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                                ],
+                                'amount' => 1,
+                            ]
+                        ]
                     ]
                 ],
             ]

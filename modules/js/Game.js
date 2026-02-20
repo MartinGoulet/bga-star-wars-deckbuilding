@@ -85,18 +85,16 @@ class MyCardManager extends BgaCards.Manager {
                 if ("type" in card)
                     cardDiv.dataset.type = card.type.toLowerCase();
                 if ("faction" in card) {
-                    cardDiv.dataset.faction = card.faction;
-                    cardDiv.dataset.isNeutral = card.faction === "Neutral" ? "true" : "false";
-                    cardDiv.dataset.isAlly =
-                        card.faction !== "Neutral" && card.faction === this.currentPlayer.faction ? "true" : "false";
-                    cardDiv.dataset.isEnemy =
-                        card.faction !== "Neutral" && card.faction !== this.currentPlayer.faction ? "true" : "false";
+                    this.setDatasetInfo(card, cardDiv);
                 }
             },
             setupFrontDiv: (card, frontDiv) => {
                 frontDiv.dataset.img = card.img;
                 if ("type" in card) {
                     this.tooltipManager.addTooltip(frontDiv, card);
+                }
+                if ("faction" in card) {
+                    this.setDatasetInfo(card, frontDiv);
                 }
                 if ("damage" in card && card.damage > 0) {
                     this.setDamageOnCard(card);
@@ -111,6 +109,16 @@ class MyCardManager extends BgaCards.Manager {
         this.currentPlayer = currentPlayer;
         this.type = type;
         this.tooltipManager = new TooltipManager(this.game);
+    }
+    setDatasetInfo(card, div) {
+        if ("faction" in card) {
+            div.dataset.faction = card.faction;
+            div.dataset.isNeutral = card.faction === "Neutral" ? "true" : "false";
+            div.dataset.isAlly =
+                card.faction !== "Neutral" && card.faction === this.currentPlayer.faction ? "true" : "false";
+            div.dataset.isEnemy =
+                card.faction !== "Neutral" && card.faction !== this.currentPlayer.faction ? "true" : "false";
+        }
     }
     setCardAsSelected(card) {
         if (!card) {
@@ -186,8 +194,6 @@ class NotificationManager {
             duration: 500,
         });
     }
-    async notif_setPlayerCounter(args) {
-    }
     notif_setTableCounter(args) {
         if (args.name === "force") {
             this.game.tableCenter.setForceCounter(args.value);
@@ -249,11 +255,35 @@ class NotificationManager {
         await table.deck.shuffle();
     }
     async notif_onRefillGalaxyRow(args) {
-        const fromStock = this.game.tableCenter.galaxyDeck;
-        await this.game.tableCenter.galaxyRow.addCards(args.newCards, { fromStock }, 300);
+        args.newCards.forEach(async (card) => {
+            await this.notif_onMoveCardToGalaxyRow({ card });
+        });
     }
     async notif_onDiscardGalaxyCard(args) {
-        await this.game.tableCenter.galaxyDiscard.addCard(args.card);
+        const card = args.card;
+        const divElement = this.game.cardManager.getCardElement(card);
+        if (Boolean(divElement.dataset.isEnemy)) {
+            const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
+            await this.game.tableCenter.galaxyDiscard.addCard(card, {
+                parallelAnimations: [
+                    {
+                        keyframes: [{ transform: rotation }, { transform: "rotate(0deg)" }],
+                    },
+                ],
+            });
+        }
+        else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+            await this.game.tableCenter.galaxyDiscard.addCard(card, {
+                parallelAnimations: [
+                    {
+                        keyframes: [{ transform: "rotate(-90deg)" }, { transform: "rotate(0deg)" }],
+                    },
+                ],
+            });
+        }
+        else {
+            await this.game.tableCenter.galaxyDiscard.addCard(card);
+        }
         await this.game.gameui.wait(350);
     }
     async notif_onExileCard(args) {
@@ -304,8 +334,35 @@ class NotificationManager {
                 break;
         }
     }
-    async notif_onMoveCardToGalaxyRow(args) {
-        await this.game.tableCenter.galaxyRow.addCard(args.card);
+    async notif_onMoveCardToGalaxyRow({ card }) {
+        this.game.tableCenter.galaxyDeck.setCardVisible(card, this.game.cardManager.isCardVisible(card), {
+            updateMain: true,
+            updateFront: true,
+            updateFrontDelay: 0,
+        });
+        const divElement = this.game.cardManager.getCardElement(card);
+        if (Boolean(divElement.dataset.isEnemy)) {
+            const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
+            await this.game.tableCenter.galaxyRow.addCard(card, {
+                parallelAnimations: [
+                    {
+                        keyframes: [{ transform: rotation }],
+                    },
+                ],
+            });
+        }
+        else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+            await this.game.tableCenter.galaxyRow.addCard(card, {
+                parallelAnimations: [
+                    {
+                        keyframes: [{ transform: "rotate(90deg)" }],
+                    },
+                ],
+            });
+        }
+        else {
+            await this.game.tableCenter.galaxyRow.addCard(card);
+        }
     }
     async notif_onMoveCardToGalaxyDeck(args) {
         const deck = this.game.tableCenter.galaxyDeck;
@@ -627,6 +684,10 @@ class PlayerTurnActionSelectionState extends BaseState {
             const handle = async () => await this.game.actions.performAction("actCommitAttack");
             this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
         }
+        if (args.hasAutomaticPlay) {
+            const handleAutomaticPlay = async () => await this.game.actions.performAction("actAutomaticallyPlayCards");
+            this.game.statusBar.addActionButton(_("Automatically Play Cards"), handleAutomaticPlay);
+        }
         const handleEndTurn = async () => await this.game.actions.performAction("actEndTurn");
         this.game.statusBar.addActionButton(_("End Turn"), handleEndTurn, {
             color: "alert",
@@ -666,6 +727,8 @@ class PlayerTurnActionSelectionState extends BaseState {
     setupGalaxyRowSelectableCards(args) {
         const galaxyRow = this.game.tableCenter.galaxyRow;
         const selectableCards = galaxyRow.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+        if (selectableCards.length === 0)
+            return;
         galaxyRow.setSelectionMode("single");
         galaxyRow.setSelectableCards(selectableCards);
         galaxyRow.onCardClick = async (card) => {
@@ -676,6 +739,8 @@ class PlayerTurnActionSelectionState extends BaseState {
     setupOuterRimSelectableCards(args) {
         const outerRimDeck = this.game.tableCenter.outerRimDeck;
         const selectableCards = outerRimDeck.getCards().filter((card) => args.selectableGalaxyCardIds.includes(card.id));
+        if (selectableCards.length === 0)
+            return;
         outerRimDeck.setSelectionMode("single");
         outerRimDeck.setSelectableCards(selectableCards);
         outerRimDeck.onCardClick = async (card) => {
