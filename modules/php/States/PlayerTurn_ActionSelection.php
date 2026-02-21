@@ -142,9 +142,11 @@ class PlayerTurn_ActionSelection extends GameState {
             throw new \BgaUserException("This card is not available for purchase.");
         }
 
-        $ctx = new GameContext($this->game, $activePlayerId);
-        $resolver = new PurchaseResolver($ctx);
-        return $resolver->resolvePurchase($cardId);
+        $this->globals->set(GVAR_PURCHASE_CARD_ID, $cardId);
+        return Purchase_Begin::class;
+        // $ctx = new GameContext($this->game, $activePlayerId);
+        // $resolver = new PurchaseResolver($ctx);
+        // return $resolver->resolvePurchase($cardId);
     }
 
     #[PossibleAction]

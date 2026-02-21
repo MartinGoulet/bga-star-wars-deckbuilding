@@ -20,6 +20,10 @@ const ST_PLAYER_TURN_START_TURN_RESOURCES = 17;
 const ST_PLAYER_TURN_ATTACK_RESOLVE_DAMAGE_SHIP_BASE = 18;
 const ST_PLAYER_TURN_START_TURN = 19;
 
+const ST_PURCHASE_BEGIN = 40;
+const ST_PURCHASE_DESTINATION = 41;
+const ST_PURCHASE_END = 42;
+
 const ST_EFFECT_CARD_SELECTION = 71;
 const ST_EFFECT_CHOICE = 72;
 
@@ -38,6 +42,8 @@ const GVAR_GALAXY_DECK_REVEALED_CARD = 'galaxy_deck_revealed_card';
 const GVAR_DELAYED_EFFECTS = 'delayed_effects';
 const GVAR_PURCHASE_OPTION_OVERRIDES = 'purchase_option_overrides';
 const GVAR_PREVENT_DAMAGE_PER_TURN_EFFECTS = 'prevent_damage_per_turn_effects';
+const GVAR_PURCHASE_CARD_ID = 'purchase_card_id';
+const GVAR_PURCHASE_DESTINATIONS = 'purchase_destinations';
 
 /**
  * Factions
@@ -110,10 +116,15 @@ const EFFECT_EXILE_CARD = 'exile_card';
 const EFFECT_MOVE_CARD = 'move_card';
 const EFFECT_REGISTER_PURCHASE_OPTION = 'register_purchase_option';
 const EFFECT_PREVENT_DAMAGE_PER_TURN = 'prevent_damage_per_turn';
+const EFFECT_ASSIGN_PURCHASE_DESTINATION = 'assign_purchase_destination';
 
 /**
  * Triggers
  */
+const TRIGGER_ON_PURCHASE_BEGIN = 'on_purchase_begin';
+const TRIGGER_ON_PURCHASE_DESTINATION = 'on_purchase_destination';
+const TRIGGER_ON_PURCHASE_END = 'on_purchase_end';
+
 const TRIGGER_WHEN_PURCHASED = 'when_purchased';
 const TRIGGER_DEFEAT_TARGET_GALAXY_ROW = 'defeat_target_galaxy_row';
 const TRIGGER_END_OF_TURN = 'end_of_turn';

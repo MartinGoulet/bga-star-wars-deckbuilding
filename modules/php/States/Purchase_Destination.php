@@ -1,73 +1,74 @@
 <?php
 
-namespace Bga\Games\StarWarsDeckbuilding\Core;
+declare(strict_types=1);
 
+namespace Bga\Games\StarWarsDeckbuilding\States;
+
+use Bga\GameFramework\StateType;
+use Bga\GameFramework\States\GameState;
+use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Effects\EffectFactory;
 use Bga\Games\StarWarsDeckbuilding\Effects\EffectInstance;
+use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
+use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
 
-/**
- * Handles the logic for resolving card purchases in the game.
- */
-final class PurchaseResolver {
-    /**
-     * @var GameContext The current game context, injected via constructor.
-     */
-    public function __construct(private GameContext $ctx) {
-        // No initialization needed beyond context assignment
+class Purchase_Destination extends GameState {
+    function __construct(protected Game $game) {
+        parent::__construct(
+            $game,
+            id: ST_PURCHASE_DESTINATION,
+            type: StateType::GAME,
+        );
     }
 
-    /**
-     * Resolves the purchase of a card by the active player.
-     * Deducts resources, presents purchase options, and triggers effects.
-     *
-     * @param int $cardId The ID of the card being purchased.
-     * @return string The next state to transition to after resolving the purchase.
-     */
-    public function resolvePurchase(int $cardId): string {
-        // Increment the number of purchases this round
-        $this->ctx->game->nbrPurchasesThisRound->inc(1);
-
-        $activePlayerId = $this->ctx->currentPlayer()->playerId;
-        $card = $this->ctx->cardRepository->getCard($cardId);
-
-        // Deduct the card's cost from the active player's resources
-        $this->ctx->game->playerResources->inc($activePlayerId, -$card->cost);
-
-        // Notify players
-        $this->ctx->game->notify->all(
-            'message',
-            clienttranslate('${player_name} purchases ${card_name} from the Galaxy Row'),
-            [
-                'player_id' => $activePlayerId,
-                'card' => $card,
-            ]
-        );
-
-        // Add possible purchase effects as choices for the player
-        $engine = $this->ctx->getGameEngine();
-        $engine->addChoiceEffect(
-            $card,
-            TARGET_SELF,
-            $this->getPurchaseOptions($activePlayerId, $card, $this->ctx)
-        );
-
-        $this->consumeOverrides();
-        
-        $result = $engine->run();
-
-        return $result;
+    public function getArgs(): array {
+        return ['_no_notify' => true];
     }
 
-    private function consumeOverrides(): void {
-        $overrides = $this->ctx->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+    function onEnteringState(int $activePlayerId) {
 
-        $overrides = array_filter(
-            $overrides,
-            fn($o) => $o['expires'] !== 'after_next_purchase'
-        );
+        $ctx = new GameContext($this->game);
+        $engine = $ctx->getGameEngine();
+        $engine->setNextState(Purchase_End::class);
 
-        $this->ctx->globals->set(GVAR_PURCHASE_OPTION_OVERRIDES, $overrides);
+        $target = TargetQueryFactory::create([
+            'zones' => [TARGET_SCOPE_SELF_BASE, TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+        ]);
+
+        $cards = (new TargetResolver($ctx))->resolve($target);
+
+        $destinations = [];
+
+        foreach ($cards as $card) {
+            $effects = $card->getEffect(TRIGGER_ON_PURCHASE_DESTINATION, $ctx);
+            if (!empty($effects)) {
+                $effect = array_shift($effects);
+                $destinations[] = [
+                    'cardId' => $card->id,
+                    'destination' => $effect['destination'],
+                ];
+            }
+        }
+
+        $this->globals->set(GVAR_PURCHASE_DESTINATIONS, $destinations);
+
+        $card = $this->game->cardRepository->getCard($this->globals->get(GVAR_PURCHASE_CARD_ID));
+
+        $options = $this->getPurchaseOptions($activePlayerId, $card, $ctx);
+        if (!empty($options)) {
+
+            $engine->addChoiceEffect(
+                $card,
+                TARGET_SELF,
+                $this->getPurchaseOptions($activePlayerId, $card, $ctx)
+            );
+
+            return $engine->run();
+        }
+
+        return Purchase_End::class;
     }
 
     /**
@@ -82,14 +83,6 @@ final class PurchaseResolver {
     private function getPurchaseOptions(int $activePlayerId, CardInstance $card, GameContext $ctx): array {
         $options = [];
 
-        // Default option: place the purchased card in the discard pile
-        $options[] = [
-            'label' => clienttranslate('Place in discard pile'),
-            'type' => EFFECT_MOVE_CARD,
-            'target' => TARGET_SELF,
-            'destination' => ZONE_DISCARD,
-        ];
-
         // Add base ability option if available
         $baseOption = $this->getBaseAbilityOption($activePlayerId, $ctx);
         if ($baseOption !== null) {
@@ -102,7 +95,15 @@ final class PurchaseResolver {
             $options[] = $cardOption;
         }
 
-        $options = array_merge($options, $this->getOverrideOptions());
+        $options = array_merge($options, $this->getOverrideOptions($ctx));
+
+        // // Default option: place the purchased card in the discard pile
+        // $options[] = [
+        //     'label' => clienttranslate('Place in discard pile'),
+        //     'type' => EFFECT_MOVE_CARD,
+        //     'target' => TARGET_SELF,
+        //     'destination' => ZONE_DISCARD,
+        // ];
 
         return $options;
     }
@@ -111,9 +112,9 @@ final class PurchaseResolver {
      * Returns the option array for using the active base's ability, or null if not available.
      */
     private function getBaseAbilityOption(int $activePlayerId, GameContext $ctx): ?array {
-        $activeBase = $this->ctx->cardRepository->getActiveBase($activePlayerId);
+        $activeBase = $ctx->cardRepository->getActiveBase($activePlayerId);
         if ($activeBase !== null) {
-            $baseEffect = $this->getPurchaseEffect($activeBase);
+            $baseEffect = $this->getPurchaseEffect($activeBase, $ctx);
             if ($baseEffect !== null && $baseEffect->canResolve($ctx)) {
                 $option = [
                     'label' => clienttranslate('Use ability of ${card_name}'),
@@ -123,7 +124,6 @@ final class PurchaseResolver {
                 $mergedOption = array_merge($option, $baseEffect->definition);
                 return $mergedOption;
             }
-
         }
         return null;
     }
@@ -132,8 +132,8 @@ final class PurchaseResolver {
      * Returns the option array for using the purchased card's ability, or null if not available.
      */
     private function getCardAbilityOption(CardInstance $card, GameContext $ctx): ?array {
-        $cardEffect = $this->getPurchaseEffect($card);
-        
+        $cardEffect = $this->getPurchaseEffect($card, $ctx);
+
         if ($cardEffect !== null && $cardEffect->canResolve($ctx)) {
             $option = [
                 'label' => clienttranslate('Use ability of ${card_name}'),
@@ -152,8 +152,8 @@ final class PurchaseResolver {
      * @param CardInstance $card The card to check for a purchase effect.
      * @return EffectInstance|null The effect instance, or null if none exists.
      */
-    private function getPurchaseEffect(CardInstance $card): EffectInstance|null {
-        $effects = $card->getEffect(TRIGGER_WHEN_PURCHASED, $this->ctx);
+    private function getPurchaseEffect(CardInstance $card, GameContext $ctx): EffectInstance|null {
+        $effects = $card->getEffect(TRIGGER_WHEN_PURCHASED, $ctx);
         if ($effects === null || empty($effects)) {
             return null;
         }
@@ -162,10 +162,10 @@ final class PurchaseResolver {
         return EffectFactory::createEffectInstance($effect);
     }
 
-    private function getOverrideOptions(): array {
+    private function getOverrideOptions(GameContext $ctx): array {
         $options = [];
 
-        $overrides = $this->ctx->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+        $overrides = $ctx->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
 
         foreach ($overrides as $override) {
             $override['option']['labelArgs'] = $override['option']['labelArgs'] ?? [];

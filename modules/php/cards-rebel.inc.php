@@ -882,17 +882,16 @@ $rebel_bases = [
       'beginner' => true,
       'abilities' => [
          [
-            'trigger' => TRIGGER_WHEN_PURCHASED,
+            'trigger' => TRIGGER_ON_PURCHASE_DESTINATION,
+            'conditions' => [
+               ['type' => CONDITION_FIRST_PURCHASE_THIS_TURN]
+            ],
             'effects' => [
                [
-                  'type' => EFFECT_MOVE_CARD,
-                  'target' => TARGET_SELF,
-                  'destination' => ZONE_TOP_DECK,
-                  'conditions' => [
-                     ['type' => CONDITION_FIRST_PURCHASE_THIS_TURN]
-                  ]
+                  'type' => EFFECT_ASSIGN_PURCHASE_DESTINATION,
+                  'destination' => ZONE_TOP_DECK
                ]
-            ]
+            ],
          ]
       ],
    ],
