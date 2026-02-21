@@ -4,6 +4,7 @@ namespace Bga\Games\StarWarsDeckbuilding\Core;
 
 use Bga\GameFramework\Db\Globals;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
+use Bga\Games\StarWarsDeckbuilding\Effects\Pipeline\PreventDamagePerTurnEffect;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
@@ -140,6 +141,16 @@ final class GameContext {
      */
     public function assignDamageToTarget(CardInstance $target, int $amount): int {
         $remaining = 0;
+
+        $modifiers = $this->getDamageModifiersForTarget($target);
+        foreach ($modifiers as $modifier) {
+            $amount = $modifier->apply($this, $target, $amount);
+            if ($amount <= 0) {
+                $amount = 0;
+                break;
+            }
+        }
+
         $target->damage += $amount;
         if ($target->damage > $target->health) {
             $remaining = $target->damage - $target->health;
@@ -169,5 +180,22 @@ final class GameContext {
 
 
         return $remaining;
+    }
+
+    /**
+     * @return DamageModifierInterface[]
+     */
+    private function getDamageModifiersForTarget(CardInstance $target): array {
+        // For now, we only have damage prevention abilities, but this can be extended in the future to include damage amplification or other modifiers
+        $modifiers = [];
+        $abilities = $target->abilities ?? [];
+        foreach ($abilities as $ability) {
+            if (isset($ability['type'])) {
+                if ( $ability['type'] === EFFECT_PREVENT_DAMAGE_PER_TURN) {
+                    $modifiers[] = new PreventDamagePerTurnEffect($ability['amount']);
+                }
+            }
+        }
+        return $modifiers;
     }
 }

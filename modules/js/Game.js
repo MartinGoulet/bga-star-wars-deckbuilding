@@ -255,14 +255,14 @@ class NotificationManager {
         await table.deck.shuffle();
     }
     async notif_onRefillGalaxyRow(args) {
-        args.newCards.forEach(async (card) => {
+        await Promise.all(args.newCards.map(async (card) => {
             await this.notif_onMoveCardToGalaxyRow({ card });
-        });
+        }));
     }
     async notif_onDiscardGalaxyCard(args) {
         const card = args.card;
         const divElement = this.game.cardManager.getCardElement(card);
-        if (Boolean(divElement.dataset.isEnemy)) {
+        if (this.isTrue(divElement.dataset.isEnemy)) {
             const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
             await this.game.tableCenter.galaxyDiscard.addCard(card, {
                 parallelAnimations: [
@@ -272,7 +272,7 @@ class NotificationManager {
                 ],
             });
         }
-        else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+        else if (this.isTrue(divElement.dataset.isAlly) && card.type === "Ship") {
             await this.game.tableCenter.galaxyDiscard.addCard(card, {
                 parallelAnimations: [
                     {
@@ -341,7 +341,7 @@ class NotificationManager {
             updateFrontDelay: 0,
         });
         const divElement = this.game.cardManager.getCardElement(card);
-        if (Boolean(divElement.dataset.isEnemy)) {
+        if (this.isTrue(divElement.dataset.isEnemy)) {
             const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
             await this.game.tableCenter.galaxyRow.addCard(card, {
                 parallelAnimations: [
@@ -351,7 +351,7 @@ class NotificationManager {
                 ],
             });
         }
-        else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+        else if (this.isTrue(divElement.dataset.isAlly) && card.type === "Ship") {
             await this.game.tableCenter.galaxyRow.addCard(card, {
                 parallelAnimations: [
                     {
@@ -378,6 +378,9 @@ class NotificationManager {
             const stock = this.game.cardManager.getCardStock(cardTemp);
             stock.setCardVisible(cardTemp, false, { updateFront: true, updateFrontDelay: 0 });
         }
+    }
+    isTrue(value) {
+        return value === true || value === "true";
     }
 }
 

@@ -56,6 +56,14 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
             ? $ctx->currentPlayer()->playerId
             : $ctx->opponentPlayer()->playerId;
 
+        if ($this->target->min == 0) {
+            $description = clienttranslate('${player_name} may select up to ${nbr} card(s)');
+            $descriptionMyTurn = clienttranslate('${you} may select up to ${nbr} card(s)');
+        } else {
+            $description = clienttranslate('${player_name} must select ${nbr} card(s)');
+            $descriptionMyTurn = clienttranslate('${you} must select ${nbr} card(s)');
+        }
+
         return [
             'nbr' => $this->target->max,
             'optional' => $this->target->min === 0,
@@ -64,8 +72,8 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
             'card' => $this->sourceCard,
             'player_name' => $ctx->game->getPlayerNameById($player_id),
             'player_id' => $player_id,
-            'description' => clienttranslate('${player_name} must select ${nbr} card(s)'),
-            'descriptionMyTurn' => clienttranslate('${you} must select ${nbr} card(s)'),
+            'description' => $description,
+            'descriptionMyTurn' => $descriptionMyTurn,
         ];
     }
 

@@ -18,6 +18,7 @@ const ST_PLAYER_TURN_END_TURN = 15;
 const ST_PLAYER_TURN_START_TURN_BASE = 16;
 const ST_PLAYER_TURN_START_TURN_RESOURCES = 17;
 const ST_PLAYER_TURN_ATTACK_RESOLVE_DAMAGE_SHIP_BASE = 18;
+const ST_PLAYER_TURN_START_TURN = 19;
 
 const ST_EFFECT_CARD_SELECTION = 71;
 const ST_EFFECT_CHOICE = 72;
@@ -36,6 +37,7 @@ const GVAR_REMAINING_DAMAGE_TO_ASSIGN = 'remainingDamageToAssign';
 const GVAR_GALAXY_DECK_REVEALED_CARD = 'galaxy_deck_revealed_card';
 const GVAR_DELAYED_EFFECTS = 'delayed_effects';
 const GVAR_PURCHASE_OPTION_OVERRIDES = 'purchase_option_overrides';
+const GVAR_PREVENT_DAMAGE_PER_TURN_EFFECTS = 'prevent_damage_per_turn_effects';
 
 /**
  * Factions
@@ -107,6 +109,7 @@ const EFFECT_REGISTER_DELAYED = 'register_delayed_effect';
 const EFFECT_EXILE_CARD = 'exile_card';
 const EFFECT_MOVE_CARD = 'move_card';
 const EFFECT_REGISTER_PURCHASE_OPTION = 'register_purchase_option';
+const EFFECT_PREVENT_DAMAGE_PER_TURN = 'prevent_damage_per_turn';
 
 /**
  * Triggers
@@ -135,6 +138,7 @@ const FILTER_HAS_TRAIT = 'has_trait';
 const FILTER_CARD_TYPES = 'card_types';
 const FILTER_FACTIONS = 'factions';
 const FILTER_ABILITIES = 'abilities';
+const FILTER_UNIQUE = 'unique';
 
 /**
  * Traits
@@ -146,6 +150,7 @@ const TRAIT_TRANSPORT = 'Transport';
 const TRAIT_OFFICER = 'Officer';
 const TRAIT_BOUNTY_HUNTER = 'Bounty Hunter';
 const TRAIT_SITH = 'Sith';
+const TRAIT_DROID = 'Droid';
 
 const TRAIT_EMPIRE = 'Empire';
 const TRAIT_REBEL = 'Rebel';

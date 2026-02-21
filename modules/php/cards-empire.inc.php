@@ -862,12 +862,28 @@ $empire_bases = [
    ],
    CardIds::ENDOR => [
       'name' => clienttranslate('Endor'),
+      'gametext' => clienttranslate("While Endor is your base, each of your *Trooper* and *Vehicle* units gains 1 attack"),
       'img' => 9,
       'faction' => FACTION_EMPIRE,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'type' => ABILITY_AURA_ATTACK_MODIFIER,
+            'value' => 1,
+            'target' => [
+               'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+               'filters' => [
+                  [
+                     'type' => FILTER_HAS_TRAIT,
+                     'traits' => [TRAIT_TROOPER, TRAIT_VEHICLE],
+                  ]
+               ],
+            ],
+         ]
+      ],
    ],
+   
    CardIds::RODIA => [
       'name' => clienttranslate('Rodia'),
       'img' => 10,

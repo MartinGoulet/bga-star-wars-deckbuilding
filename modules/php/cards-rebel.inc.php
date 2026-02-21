@@ -150,6 +150,7 @@ $rebel_cards = [
 
    CardIds::B_WING => [
       'name' => clienttranslate('B-Wing'),
+      'gametext' => clienttranslate("Your opponent must choose: Either they discard 1 card from their hand, or this unit gains 2 attack"),
       'img' => CardIds::B_WING,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -185,9 +186,9 @@ $rebel_cards = [
                         ]
                      ],
                      [
-                        'label' => clienttranslate('Gain 1 Force'),
-                        'type' => EFFECT_GAIN_FORCE,
-                        'amount' => 1,
+                        'label' => clienttranslate('Gain 2 Attack'),
+                        'type' => EFFECT_GAIN_ATTACK,
+                        'amount' => 2,
                      ],
                   ],
                ],
@@ -196,10 +197,31 @@ $rebel_cards = [
       ],
       'rewards' => [
          [
-            'type' => EFFECT_EXILE_CARD,
-            'target' => TARGET_SELF,
-            'zones' => [ZONE_DISCARD, ZONE_HAND],
-            'count' => 2,
+            'type' => EFFECT_CONDITIONAL,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                  ],
+               ]
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                     'min' => 0,
+                     'max' => 2,
+                  ],
+                  'storeAs' => 'b_wing_exile_cards',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'b_wing_exile_cards',
+               ]
+            ],
          ]
       ]
    ],
@@ -294,7 +316,39 @@ $rebel_cards = [
       'cost' => 7,
       'unique' => true,
       'stats' => ['power' => 5, 'resource' => 2, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        ['type' => FILTER_UNIQUE],
+                     ],
+                  ]
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                     'filters' => [
+                        ['type' => FILTER_UNIQUE],
+                     ],
+                  ],
+                  'storeAs' => 'falcon_retrieve_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_HAND,
+                  'cardRef' => 'falcon_retrieve_card',
+               ],
+            ],
+         ]
+      ],
       'rewards' => [
          [
             'type' => EFFECT_CONDITIONAL,
@@ -738,11 +792,37 @@ $rebel_bases = [
    ],
    CardIds::MON_CALA => [
       'name' => clienttranslate('Mon Cala'),
+      'gametext' => clienttranslate("When you reveal Mon Cala, purchase a Rebel card or neutral card from the galaxy row for free and add it to your hand"),
       'img' => 2,
       'faction' => FACTION_REBEL,
       'health' => 10,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ON_REVEAL_BASE,
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL]],
+                     ],
+                  ],
+                  'storeAs' => 'correlia_selected_card',
+               ],
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'cardRef' => 'correlia_selected_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'cardRef' => 'correlia_selected_card',
+                  'destination' => ZONE_HAND,
+               ]
+            ]
+         ]
+      ],
    ],
    CardIds::DAGOBAH => [
       'name' => clienttranslate('Dagobah'),
@@ -767,11 +847,18 @@ $rebel_bases = [
    ],
    CardIds::HOTH => [
       'name' => clienttranslate('Hoth'),
+      'gametext' => clienttranslate("While Hoth is in play, prevent the first 2 damage dealt to Hoth each turn"),
       'img' => 6,
       'faction' => FACTION_REBEL,
       'health' => 14,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'type' => EFFECT_PREVENT_DAMAGE_PER_TURN,
+            'amount' => 2,
+            'target' => TARGET_SELF,
+         ]
+      ],
    ],
    CardIds::JEDHA => [
       'name' => clienttranslate('Jedha'),

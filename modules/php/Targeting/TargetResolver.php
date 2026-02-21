@@ -3,11 +3,8 @@
 namespace Bga\Games\StarWarsDeckbuilding\Targeting;
 
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
-use BgaUserException;
-use BgaVisibleSystemException;
 use CardInstance;
 use Exception;
-use feException;
 
 final class TargetResolver {
     public function __construct(private GameContext $ctx) {

@@ -113,42 +113,16 @@ export class NotificationManager {
    }
 
    private async notif_onRefillGalaxyRow(args: { newCards: Card[] }) {
-      args.newCards.forEach(async (card) => {
+      await Promise.all(args.newCards.map(async (card) => {
          await this.notif_onMoveCardToGalaxyRow({ card });
-         // this.game.tableCenter.galaxyDeck.setCardVisible(card, false, {
-         //    updateMain: true,
-         //    updateFront: true,
-         //    updateFrontDelay: 0,
-         // });
-         // const divElement = this.game.cardManager.getCardElement(card);
-         // if (Boolean(divElement.dataset.isEnemy)) {
-         //    const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
-         //    await this.game.tableCenter.galaxyRow.addCard(card, {
-         //       parallelAnimations: [
-         //          {
-         //             keyframes: [{ transform: rotation }],
-         //          },
-         //       ],
-         //    });
-         // } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
-         //    await this.game.tableCenter.galaxyRow.addCard(card, {
-         //       parallelAnimations: [
-         //          {
-         //             keyframes: [{ transform: "rotate(90deg)" }],
-         //          },
-         //       ],
-         //    });
-         // } else {
-         //    await this.game.tableCenter.galaxyRow.addCard(card);
-         // }
-      });
+      }));
    }
 
    private async notif_onDiscardGalaxyCard(args: { player_id: number; card: Card }) {
       const card = args.card;
       const divElement = this.game.cardManager.getCardElement(card);
 
-      if (Boolean(divElement.dataset.isEnemy)) {
+      if (this.isTrue(divElement.dataset.isEnemy)) {
          const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
          await this.game.tableCenter.galaxyDiscard.addCard(card, {
             parallelAnimations: [
@@ -157,7 +131,7 @@ export class NotificationManager {
                },
             ],
          });
-      } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+      } else if (this.isTrue(divElement.dataset.isAlly) && card.type === "Ship") {
          await this.game.tableCenter.galaxyDiscard.addCard(card, {
             parallelAnimations: [
                {
@@ -235,7 +209,8 @@ export class NotificationManager {
       });
 
       const divElement = this.game.cardManager.getCardElement(card);
-      if (Boolean(divElement.dataset.isEnemy)) {
+
+      if (this.isTrue(divElement.dataset.isEnemy)) {
          const rotation = card.type === "Ship" ? "rotate(-90deg)" : "rotate(180deg)";
          await this.game.tableCenter.galaxyRow.addCard(card, {
             parallelAnimations: [
@@ -244,7 +219,7 @@ export class NotificationManager {
                },
             ],
          });
-      } else if (Boolean(divElement.dataset.isAlly) && card.type === "Ship") {
+      } else if (this.isTrue(divElement.dataset.isAlly) && card.type === "Ship") {
          await this.game.tableCenter.galaxyRow.addCard(card, {
             parallelAnimations: [
                {
@@ -272,6 +247,10 @@ export class NotificationManager {
          const stock = this.game.cardManager.getCardStock(cardTemp);
          stock.setCardVisible(cardTemp, false, { updateFront: true, updateFrontDelay: 0 });
       }
+   }
+
+   private isTrue(value: any): boolean {
+      return value === true || value === "true";
    }
 }
 

@@ -6,6 +6,7 @@ use Bga\Games\StarWarsDeckbuilding\Targeting\Filtering\AbilitiesFilter;
 use Bga\Games\StarWarsDeckbuilding\Targeting\Filtering\FactionsFilter;
 use Bga\Games\StarWarsDeckbuilding\Targeting\Filtering\TraitsFilter;
 use Bga\Games\StarWarsDeckbuilding\Targeting\Filtering\TypesFilter;
+use Bga\Games\StarWarsDeckbuilding\Targeting\Filtering\UniqueFilter;
 
 final class TargetQueryFactory
 {
@@ -28,6 +29,7 @@ final class TargetQueryFactory
                 FILTER_FACTIONS => new FactionsFilter($filter['factions'], $filter['negate'] ?? false),
                 FILTER_HAS_TRAIT => new TraitsFilter($filter['traits']),
                 FILTER_ABILITIES => new AbilitiesFilter($filter['abilities'], $filter['negate'] ?? false),
+                FILTER_UNIQUE => new UniqueFilter(),
                 default => throw new \InvalidArgumentException("Unknown filter type: {$filter['type']}"),
             };
         }, $filters);

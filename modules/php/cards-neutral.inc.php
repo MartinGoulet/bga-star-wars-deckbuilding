@@ -16,6 +16,7 @@ $neutral_cards = [
         'img' => CardIds::DENGAR,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
+        'traits' => [TRAIT_BOUNTY_HUNTER],
         'cost' => 4,
         'unique' => true,
         'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
@@ -24,12 +25,73 @@ $neutral_cards = [
 
     CardIds::QUARREN_MERCENARY => [
         'name' => clienttranslate('Quarren Mercenary'),
+        'gametext' => clienttranslate('When you purchase this unit, exile 1 card from your hand or discard pile (up to 2 cards instead if the Force is with you)'),
         'img' => CardIds::QUARREN_MERCENARY,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
+        'traits' => [TRAIT_TROOPER],
         'cost' => 4,
         'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
-        'abilities' => [],
+        'abilities' => [
+            [
+                'trigger' => TRIGGER_WHEN_PURCHASED,
+                'conditions' => [
+                    [
+                        'type' => CONDITION_HAS_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                        ],
+                    ],
+                ],
+                'effects' => [
+                    [
+                        'type' => EFFECT_CONDITIONAL,
+                        'conditions' => [
+                            ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU],
+                        ],
+                        'effects' => [
+                            [
+                                'type' => EFFECT_SELECT_CARDS,
+                                'target' => [
+                                    'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                                    'min' => 0,
+                                ],
+                                'storeAs' => 'quarren_exile',
+                            ],
+                            [
+                                'type' => EFFECT_MOVE_SELECTED_CARDS,
+                                'target' => TARGET_SELF,
+                                'destination' => ZONE_EXILE,
+                                'cardRef' => 'quarren_exile',
+                            ],
+                        ]
+                    ], 
+                    [
+                        'type' => EFFECT_CONDITIONAL,
+                        'conditions' => [
+                            ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                        ],
+                        'effects' => [
+                            [
+                                'type' => EFFECT_SELECT_CARDS,
+                                'target' => [
+                                    'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                                    'min' => 0,
+                                    'max' => 2,
+                                ],
+                                'storeAs' => 'quarren_exile',
+                            ],
+                            [
+                                'type' => EFFECT_MOVE_SELECTED_CARDS,
+                                'target' => TARGET_SELF,
+                                'destination' => ZONE_EXILE,
+                                'cardRef' => 'quarren_exile',
+                            ],
+                        ]
+                    ]
+                ],
+            ]
+        ],
     ],
 
     CardIds::HWK_290 => [
@@ -57,6 +119,7 @@ $neutral_cards = [
         'img' => CardIds::IG_88,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
+        'traits' => [TRAIT_BOUNTY_HUNTER, TRAIT_DROID],
         'cost' => 5,
         'unique' => true,
         'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
@@ -149,42 +212,42 @@ $neutral_cards = [
         'stats' => ['power' => 4, 'resource' => 3, 'force' => 0],
         'abilities' => [
             [
-            'trigger' => TRIGGER_ACTIVATE_CARD,
-            'conditions' => [
-               [
-                  'type' => CONDITION_HAS_CARDS,
-                  'target' => [
-                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
-                     'filters' => [
-                        [
-                           'type' => FILTER_HAS_TRAIT,
-                           'traits' => [TRAIT_BOUNTY_HUNTER],
-                        ]
-                     ],
-                  ],
-               ],
-            ],
-            'effects' => [
-               [
-                  'type' => EFFECT_SELECT_CARDS,
-                  'target' => [
-                     'zones' => [TARGET_SCOPE_SELF_DISCARD],
-                     'filters' => [
-                        [
-                           'type' => FILTER_HAS_TRAIT,
-                           'traits' => [TRAIT_BOUNTY_HUNTER],
-                        ]
-                     ],
-                  ],
-                  'storeAs' => 'bounty_hunter_to_retrieve',
-               ],
-               [
-                  'type' => EFFECT_MOVE_SELECTED_CARDS,
-                  'cardRef' => 'bounty_hunter_to_retrieve',
-                  'destination' => ZONE_HAND,
-               ],
-            ],
-         ]
+                'trigger' => TRIGGER_ACTIVATE_CARD,
+                'conditions' => [
+                    [
+                        'type' => CONDITION_HAS_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                            'filters' => [
+                                [
+                                    'type' => FILTER_HAS_TRAIT,
+                                    'traits' => [TRAIT_BOUNTY_HUNTER],
+                                ]
+                            ],
+                        ],
+                    ],
+                ],
+                'effects' => [
+                    [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                            'zones' => [TARGET_SCOPE_SELF_DISCARD],
+                            'filters' => [
+                                [
+                                    'type' => FILTER_HAS_TRAIT,
+                                    'traits' => [TRAIT_BOUNTY_HUNTER],
+                                ]
+                            ],
+                        ],
+                        'storeAs' => 'bounty_hunter_to_retrieve',
+                    ],
+                    [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'cardRef' => 'bounty_hunter_to_retrieve',
+                        'destination' => ZONE_HAND,
+                    ],
+                ],
+            ]
         ],
     ],
 
@@ -254,6 +317,7 @@ $neutral_cards = [
         'img' => CardIds::RODIAN_GUNSLINGER,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
+        'traits' => [TRAIT_BOUNTY_HUNTER],
         'cost' => 2,
         'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
         'abilities' => [],
@@ -351,6 +415,7 @@ $neutral_cards = [
         'img' => CardIds::BOSSK,
         'type' => CARD_TYPE_UNIT,
         'faction' => FACTION_NEUTRAL,
+        'traits' => [TRAIT_BOUNTY_HUNTER],
         'cost' => 3,
         'unique' => true,
         'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
