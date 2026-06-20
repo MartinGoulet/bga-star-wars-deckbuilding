@@ -44,7 +44,7 @@ class PlayerTurn_StartTurnResources extends GameState {
         $capitalShips = $ctx->cardRepository->getPlayerShips($activePlayerId);
         foreach ($capitalShips as $ship) {
             $notif = $message = new NotificationMessage(
-                clienttranslate('${player_name} gains ${resource} resource(s) from ${card_name}.'),
+                clienttranslate('${player_name} gains ${resource} ${resource_icon} from ${card_name}.'),
                 [
                     'player_id' => $activePlayerId,
                     'card' => $ship,

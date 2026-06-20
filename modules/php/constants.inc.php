@@ -311,3 +311,4 @@ final class CardIds {
     public const SULLUST = 88;
     public const YAVIN_4 = 89;
 }
+

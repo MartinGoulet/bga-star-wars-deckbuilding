@@ -28,7 +28,6 @@ class Purchase_Destination extends GameState {
     }
 
     function onEnteringState(int $activePlayerId) {
-
         $ctx = new GameContext($this->game);
         $engine = $ctx->getGameEngine();
         $engine->setNextState(Purchase_End::class);

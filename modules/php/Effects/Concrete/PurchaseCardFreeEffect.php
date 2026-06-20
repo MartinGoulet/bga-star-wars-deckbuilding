@@ -13,6 +13,18 @@ final class PurchaseCardFreeEffect extends EffectInstance {
 
     public function resolve(GameContext $ctx): void {
         $cardIds = $ctx->globals->get($this->cardRef);
+        
+        if (empty($cardIds)) {
+            $ctx->game->notify->all(
+                'message',
+                clienttranslate('${player_name} has not selected a card to purchase for free'),
+                [
+                    'player_id' => $ctx->currentPlayer()->playerId,
+                ]
+            );
+            return;
+        }
+
         $cards = $ctx->cardRepository->getCardsByIds($cardIds);
         $card = array_shift($cards);
 

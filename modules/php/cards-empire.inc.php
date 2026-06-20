@@ -179,6 +179,7 @@ $empire_cards = [
    CardIds::AT_AT => [
       'name' => clienttranslate('AT-AT'),
       'gametext' => clienttranslate('Add a *Trooper* from your discard pile to your hand'),
+      'rewardText' => clienttranslate("Purchase a card of your faction for free"),
       'img' => CardIds::AT_AT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -224,6 +225,28 @@ $empire_cards = [
             ],
          ]
       ],
+      'rewards' => [
+         [
+            'type' => EFFECT_SELECT_CARDS,
+            'target' => [
+               'zones' => [TARGET_SCOPE_GALAXY_ROW],
+               'filters' => [
+                  ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL]],
+               ],
+               'min' => 0,
+            ],
+            'storeAs' => 'atat_reward_selected_card',
+         ],
+         [
+            'type' => EFFECT_PURCHASE_CARD_FREE,
+            'cardRef' => 'atat_reward_selected_card',
+         ],
+         [
+            'type' => EFFECT_MOVE_SELECTED_CARDS,
+            'cardRef' => 'atat_reward_selected_card',
+            'destination' => ZONE_PLAYER_DISCARD,
+         ],
+      ]
    ],
 
    CardIds::GRAND_MOFF_TARKIN => [
@@ -707,17 +730,17 @@ $empire_cards = [
                   "type" => EFFECT_CHOICE,
                   'options' => [
                      [
-                        'label' => clienttranslate('Gain 1 Attack'),
+                        'label' => clienttranslate('1 ${power_icon}'),
                         'type' => EFFECT_GAIN_ATTACK,
                         'amount' => 1
                      ],
                      [
-                        'label' => clienttranslate('Gain 1 Resource'),
+                        'label' => clienttranslate('1 ${resource_icon}'),
                         'type' => EFFECT_GAIN_RESOURCE,
                         'amount' => 1
                      ],
                      [
-                        'label' => clienttranslate('Gain 1 Force'),
+                        'label' => clienttranslate('1 ${force_icon}'),
                         'type' => EFFECT_GAIN_FORCE,
                         'amount' => 1
                      ],
@@ -883,7 +906,7 @@ $empire_bases = [
          ]
       ],
    ],
-   
+
    CardIds::RODIA => [
       'name' => clienttranslate('Rodia'),
       'img' => 10,

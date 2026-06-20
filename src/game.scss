@@ -22,17 +22,19 @@ html::after {
 
 /* Étoiles fines */
 html::before {
-   background-image: radial-gradient(1px 1px at 20% 30%, white, transparent),
-      radial-gradient(1px 1px at 80% 40%, white, transparent), radial-gradient(1px 1px at 50% 80%, white, transparent),
-      radial-gradient(1px 1px at 10% 60%, white, transparent), radial-gradient(1px 1px at 90% 90%, white, transparent);
+   background-image:
+      radial-gradient(1px 1px at 20% 30%, white, transparent), radial-gradient(1px 1px at 80% 40%, white, transparent),
+      radial-gradient(1px 1px at 50% 80%, white, transparent), radial-gradient(1px 1px at 10% 60%, white, transparent),
+      radial-gradient(1px 1px at 90% 90%, white, transparent);
    background-size: 200px 200px;
    opacity: 0.8;
 }
 
 /* Étoiles plus grosses */
 html::after {
-   background-image: radial-gradient(2px 2px at 25% 25%, #ddd, transparent),
-      radial-gradient(2px 2px at 75% 50%, #ddd, transparent), radial-gradient(2px 2px at 60% 75%, #ddd, transparent);
+   background-image:
+      radial-gradient(2px 2px at 25% 25%, #ddd, transparent), radial-gradient(2px 2px at 75% 50%, #ddd, transparent),
+      radial-gradient(2px 2px at 60% 75%, #ddd, transparent);
    background-size: 400px 400px;
    animation-duration: 180s;
    opacity: 0.6;
@@ -73,4 +75,54 @@ html::after {
       display: none;
    }
    padding: 10px;
+}
+
+.swd-icon {
+   width: 24px;
+   height: 24px;
+   display: inline-block;
+   background-size: 300% 100%;
+   background-image: url("img/icons.png");
+
+   &.swd-icon-resource {
+      background-position-x: 0;
+   }
+
+   &.swd-icon-power {
+      background-position-x: -100%;
+   }
+
+   &.swd-icon-force {
+      background-position-x: -200%;
+   }
+}
+
+.log,
+.action-button {
+   .swd-icon {
+      width: 16px;
+      height: 16px;
+   }
+}
+
+.log {
+   .swd-icon-container {
+      padding: 2px;
+      background-color: #000;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      vertical-align: middle;
+   }
+}
+
+.action-button {
+   .swd-icon-container {
+      padding: 2px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      vertical-align: middle;
+   }
 }

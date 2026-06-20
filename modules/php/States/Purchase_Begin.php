@@ -6,7 +6,6 @@ namespace Bga\Games\StarWarsDeckbuilding\States;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
-use Bga\Games\StarWarsDeckbuilding\Core\PurchaseResolver;
 use Bga\Games\StarWarsDeckbuilding\Game;
 
 class Purchase_Begin extends GameState

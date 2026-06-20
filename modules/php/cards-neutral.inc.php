@@ -106,7 +106,29 @@ $neutral_cards = [
       'faction' => FACTION_NEUTRAL,
       'cost' => 4,
       'stats' => ['power' => 0, 'resource' => 4, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_HAS_DAMAGE_ON_BASE],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CURRENT_CARD,
+                  'storeAs' => 'hwk_290',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'hwk_290',
+               ],
+               [
+                  'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                  'amount' => 4,
+               ],
+            ],
+         ],
+      ],
    ],
 
    CardIds::BLOCKADE_RUNNER => [

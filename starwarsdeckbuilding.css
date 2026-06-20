@@ -224,6 +224,26 @@
 .bga-cards_card .back {
   background-position: -600% -700%;
 }
+.bga-cards_card .card-damage {
+  position: absolute;
+  color: white;
+  font-weight: 800;
+  background-color: #5a1740;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  bottom: 5px;
+  left: 48%;
+}
+.bga-cards_card[data-type=ship] .card-damage {
+  left: 82%;
+  bottom: 9px;
+  rotate: -90deg;
+}
 .bga-cards_card[data-type=base] {
   width: 168px !important;
   height: 120px !important;
@@ -272,21 +292,6 @@
 }
 .bga-cards_card[data-type=base][data-faction=Rebel] .bga-cards_card-side {
   background-image: url("img/base-rebel.jpg");
-}
-.bga-cards_card[data-type=base] .card-damage {
-  position: absolute;
-  color: white;
-  font-weight: 800;
-  background-color: #5a1740;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 12px;
-  bottom: 5px;
-  left: 48%;
 }
 
 .swd-table-center {
@@ -442,6 +447,17 @@
   margin: 10px;
   color: #ffffff;
   min-height: 200px;
+}
+.swd-player-table .swd-player-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.swd-player-table .swd-player-resources {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .swd-player-table .swd-player-base-section .card[data-type=ship] {
   width: 168px !important;
@@ -758,6 +774,47 @@ html::after {
 }
 .swd-base-selection:empty {
   display: none;
+}
+
+.swd-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-size: 300% 100%;
+  background-image: url("img/icons.png");
+}
+.swd-icon.swd-icon-resource {
+  background-position-x: 0;
+}
+.swd-icon.swd-icon-power {
+  background-position-x: -100%;
+}
+.swd-icon.swd-icon-force {
+  background-position-x: -200%;
+}
+
+.log .swd-icon,
+.action-button .swd-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.log .swd-icon-container {
+  padding: 2px;
+  background-color: #000;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.action-button .swd-icon-container {
+  padding: 2px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
 }
 
 /*# sourceMappingURL=starwarsdeckbuilding.css.map */

@@ -23,6 +23,28 @@
       background-position: -600% -700%;
    }
 
+   .card-damage {
+      position: absolute;
+      color: white;
+      font-weight: 800;
+      background-color: #5a1740;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      bottom: 5px;
+      left: 48%;
+   }
+
+   &[data-type="ship"] .card-damage {
+      left: 82%;
+      bottom: 9px;
+      rotate: -90deg;
+   }
+
    &[data-type="base"] {
       width: 168px !important;
       height: 120px !important;
@@ -51,22 +73,6 @@
 
       &[data-faction="Rebel"] .bga-cards_card-side {
          background-image: url("img/base-rebel.jpg");
-      }
-
-      .card-damage {
-         position: absolute;
-         color: white;
-         font-weight: 800;
-         background-color: #5a1740;
-         border-radius: 50%;
-         width: 16px;
-         height: 16px;
-         display: flex;
-         justify-content: center;
-         align-items: center;
-         font-size: 12px;
-         bottom: 5px;
-         left: 48%;
       }
    }
 }

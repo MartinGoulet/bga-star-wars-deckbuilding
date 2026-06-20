@@ -83,6 +83,17 @@ class Effect_CardSelection extends GameState {
         return $engine->resume((['cardIds' => $cardIds]));
     }
 
+    #[PossibleAction]
+    public function actCardSelectionPass(array $args) {
+        if (!$args['optional']) {
+            throw new \BgaUserException("You must make a selection");
+        }
+
+        $ctx = new GameContext($this->game);
+        $engine = $ctx->getGameEngine();
+        return $engine->resume((['cardIds' => []]));
+    }
+
     function zombie(int $playerId) {
         // the code to run when the player is a Zombie
     }

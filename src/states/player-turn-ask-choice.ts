@@ -20,14 +20,16 @@ export class PlayerTurnAskChoiceState
       this.game.statusBar.removeActionButtons();
 
       if (!isCurrentPlayerActive) return;
-      
+
       Object.entries(args.options).forEach(([optionId, option]) => {
          const handle = async () => {
             await this.game.actions.performAction("actMakeChoice", { choiceId: Number(optionId) });
          };
 
-         const label = this.game.gameui.format_string(option.label, option.labelArgs ?? {});
-         this.game.statusBar.addActionButton(label, handle);
+         let label = this.game.replaceIcons(option.label);
+         label = this.game.gameui.format_string(label, option.labelArgs ?? {});
+         const color = option.label === "Pass" ? "alert" : "primary";
+         this.game.statusBar.addActionButton(label, handle, { color });
       });
    }
 

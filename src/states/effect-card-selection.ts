@@ -25,6 +25,10 @@ export class EffectCardSelectionState
       this.game.statusBar.removeActionButtons();
       this.addConfirmButton(args);
 
+      if (args.optional) {
+         this.addPassButton(args);
+      }
+
       const stocks = this.getStocks(args);
 
       stocks.forEach((stock) => {
@@ -33,11 +37,7 @@ export class EffectCardSelectionState
          stock.onSelectionChange = () => {
             const selectedCards = this.getSelectedCards(args);
             const btnConfirm = document.getElementById("btn-confirm")! as HTMLButtonElement;
-            if (args.optional) {
-               btnConfirm.disabled = selectedCards.length > args.nbr;
-            } else {
-               btnConfirm.disabled = selectedCards.length !== args.nbr;
-            }
+            btnConfirm.disabled = selectedCards.length !== args.nbr;
          };
       });
    }
@@ -54,8 +54,18 @@ export class EffectCardSelectionState
          });
       };
       this.game.statusBar.addActionButton(_("Confirm"), handleConfirm, {
-         disabled: !args.optional,
+         disabled: true,
          id: "btn-confirm",
+      });
+   }
+
+   private addPassButton(args: EffectCardSelectionArgs): void {
+      const handlePass = async () => {
+         await this.game.actions.performAction("actCardSelectionPass");
+      };
+      this.game.statusBar.addActionButton(_("Pass"), handlePass, {
+         id: "btn-pass",
+         color: "alert",
       });
    }
 

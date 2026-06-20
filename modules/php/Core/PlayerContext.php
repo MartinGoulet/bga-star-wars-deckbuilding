@@ -20,7 +20,7 @@ final class PlayerContext {
 
     public function addResources(int $amount, string $message = ""): void {
         if ($message === "") {
-            $message = clienttranslate('${player_name} gains ${amount} Resource(s)');
+            $message = clienttranslate('${player_name} gains ${amount} ${resource_icon}');
         }
         $notif = new NotificationMessage($message, [
             'player_id' => $this->playerId,
@@ -41,7 +41,7 @@ final class PlayerContext {
         }
 
         if ($message === "") {
-            $message = clienttranslate('${player_name} gains ${amount} Power');
+            $message = clienttranslate('${player_name} gains ${amount} ${power_icon}');
         }
 
         $notif = new NotificationMessage($message, [

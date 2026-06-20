@@ -22,14 +22,16 @@ class Purchase_End extends GameState
         return ['_no_notify' => true];
     }
 
-    function onEnteringState(int $activePlayerId) {
+    function onEnteringState() {
 
         $ctx = new GameContext($this->game);
 
         $card = $this->game->cardRepository->getCard($this->globals->get(GVAR_PURCHASE_CARD_ID));
-        if ($card->location === ZONE_GALAXY_ROW) {
+        if (in_array($card->location, [ZONE_GALAXY_ROW, ZONE_OUTER_RIM_DECK])) {
             $ctx->currentPlayer()->discardCards([$card->id]);
         }
+
+        $ctx->refillGalaxyRow();
 
         return PlayerTurn_ActionSelection::class;
     }

@@ -92,6 +92,18 @@ class Game extends \Bga\GameFramework\Table {
                 $args['i18n'][] = ['card_names'];
             }
 
+
+            if (str_contains($message, '${resource_icon}')) {
+                $args['resource_icon'] = 'Resource(s)';
+                $args['i18n'][] = ['resource_icon'];
+            }
+            if (str_contains($message, '${power_icon}')) {
+                $args['power_icon'] = 'Power';
+                $args['i18n'][] = ['power_icon'];
+            }if (str_contains($message, '${force_icon}')) {
+                $args['force_icon'] = 'Force';
+                $args['i18n'][] = ['force_icon'];
+            }
             return $args;
         });
 

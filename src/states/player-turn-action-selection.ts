@@ -16,7 +16,11 @@ export class PlayerTurnActionSelectionState extends BaseState<PlayerTurnActionSe
 
       if (args.canCommitAttack) {
          const handle = async () => await this.game.actions.performAction("actCommitAttack");
-         this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
+         let label = _("Commit to an attack (${totalPower}${power_icon})"); //, { totalPower: args.totalPower });
+         label = this.game.replaceIcons(label);
+         const labelArgs = { totalPower: args.totalPower.toString() };
+         label = this.game.gameui.format_string(label, labelArgs);
+         this.game.statusBar.addActionButton(label, handle, { color: "primary" });
       }
 
       if (args.hasAutomaticPlay) {

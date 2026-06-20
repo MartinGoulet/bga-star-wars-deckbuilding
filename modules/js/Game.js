@@ -491,7 +491,10 @@ class PlayerTable {
         const html = `<div id="player-table-${this.playerId}" class="swd-player-table" data-player-id="${this.playerId}" style="--color-border: ${color};">
          <div class="swd-player-info">
             <div class="swd-player-name">${player.name}</div>
-            <div class="swd-player-resources">Resources: <span id="player-resources-${this.playerId}"></span></div>
+            <div class="swd-player-resources">
+               <div class="swd-icon swd-icon-resource"></div> 
+               <span id="player-resources-${this.playerId}"></span>
+            </div>
          </div>
          <div class="swd-player-area">
             <div class="swd-play-area"></div>
@@ -597,6 +600,9 @@ class EffectCardSelectionState extends BaseState {
             return;
         this.game.statusBar.removeActionButtons();
         this.addConfirmButton(args);
+        if (args.optional) {
+            this.addPassButton(args);
+        }
         const stocks = this.getStocks(args);
         stocks.forEach((stock) => {
             stock.setSelectionMode(args.nbr > 1 ? "multiple" : "single");
@@ -604,12 +610,7 @@ class EffectCardSelectionState extends BaseState {
             stock.onSelectionChange = () => {
                 const selectedCards = this.getSelectedCards(args);
                 const btnConfirm = document.getElementById("btn-confirm");
-                if (args.optional) {
-                    btnConfirm.disabled = selectedCards.length > args.nbr;
-                }
-                else {
-                    btnConfirm.disabled = selectedCards.length !== args.nbr;
-                }
+                btnConfirm.disabled = selectedCards.length !== args.nbr;
             };
         });
     }
@@ -624,8 +625,17 @@ class EffectCardSelectionState extends BaseState {
             });
         };
         this.game.statusBar.addActionButton(_("Confirm"), handleConfirm, {
-            disabled: !args.optional,
+            disabled: true,
             id: "btn-confirm",
+        });
+    }
+    addPassButton(args) {
+        const handlePass = async () => {
+            await this.game.actions.performAction("actCardSelectionPass");
+        };
+        this.game.statusBar.addActionButton(_("Pass"), handlePass, {
+            id: "btn-pass",
+            color: "alert",
         });
     }
     displayDescription(args, isCurrentPlayerActive) {
@@ -685,7 +695,11 @@ class PlayerTurnActionSelectionState extends BaseState {
             return;
         if (args.canCommitAttack) {
             const handle = async () => await this.game.actions.performAction("actCommitAttack");
-            this.game.statusBar.addActionButton(_("Commit to an attack") + ` (${args.totalPower})`, handle);
+            let label = _("Commit to an attack (${totalPower}${power_icon})");
+            label = this.game.replaceIcons(label);
+            const labelArgs = { totalPower: args.totalPower.toString() };
+            label = this.game.gameui.format_string(label, labelArgs);
+            this.game.statusBar.addActionButton(label, handle, { color: "primary" });
         }
         if (args.hasAutomaticPlay) {
             const handleAutomaticPlay = async () => await this.game.actions.performAction("actAutomaticallyPlayCards");
@@ -777,8 +791,10 @@ class PlayerTurnAskChoiceState extends BaseState {
             const handle = async () => {
                 await this.game.actions.performAction("actMakeChoice", { choiceId: Number(optionId) });
             };
-            const label = this.game.gameui.format_string(option.label, option.labelArgs ?? {});
-            this.game.statusBar.addActionButton(label, handle);
+            let label = this.game.replaceIcons(option.label);
+            label = this.game.gameui.format_string(label, option.labelArgs ?? {});
+            const color = option.label === "Pass" ? "alert" : "primary";
+            this.game.statusBar.addActionButton(label, handle, { color });
         });
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) {
@@ -1038,6 +1054,12 @@ class Game {
             playerTable.discard.closePopup();
         });
     }
+    replaceIcons(text) {
+        return text
+            .replaceAll(/\$\{resource_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`)
+            .replaceAll(/\$\{power_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`)
+            .replaceAll(/\$\{force_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`);
+    }
     bgaFormatText(log, args) {
         try {
             if (log && args && !args.processed) {
@@ -1050,6 +1072,21 @@ class Game {
                 ["card_names"].forEach((field) => {
                     if (args[field] !== null && args[field] !== undefined && Array.isArray(args[field])) {
                         args[field] = args[field].map((name) => `<strong>${_(name)}</strong>`).join(", ");
+                    }
+                });
+                ["resource_icon"].forEach((field) => {
+                    if (args[field] !== null && args[field] !== undefined) {
+                        args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`;
+                    }
+                });
+                ["resource_power", "power_icon"].forEach((field) => {
+                    if (args[field] !== null && args[field] !== undefined) {
+                        args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`;
+                    }
+                });
+                ["resource_force", "force_icon"].forEach((field) => {
+                    if (args[field] !== null && args[field] !== undefined) {
+                        args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`;
                     }
                 });
             }

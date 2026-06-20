@@ -5,6 +5,20 @@
    color: #ffffff;
    min-height: 200px;
 
+   .swd-player-info {
+      display: flex;
+      // justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+   }
+
+   .swd-player-resources {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+   }
+
    .swd-player-base-section {
       .card[data-type="ship"] {
          width: 168px !important;

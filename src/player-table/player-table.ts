@@ -32,7 +32,10 @@ export class PlayerTable {
       const html = `<div id="player-table-${this.playerId}" class="swd-player-table" data-player-id="${this.playerId}" style="--color-border: ${color};">
          <div class="swd-player-info">
             <div class="swd-player-name">${player.name}</div>
-            <div class="swd-player-resources">Resources: <span id="player-resources-${this.playerId}"></span></div>
+            <div class="swd-player-resources">
+               <div class="swd-icon swd-icon-resource"></div> 
+               <span id="player-resources-${this.playerId}"></span>
+            </div>
          </div>
          <div class="swd-player-area">
             <div class="swd-play-area"></div>

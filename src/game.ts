@@ -129,6 +129,13 @@ class Game implements Game {
       });
    }
 
+   public replaceIcons(text: string): string {
+      return text
+         .replaceAll(/\$\{resource_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`)
+         .replaceAll(/\$\{power_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`)
+         .replaceAll(/\$\{force_icon\}/g, `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`);
+   }
+
    bgaFormatText(log: string, args: any): { log: string; args: any } {
       try {
          if (log && args && !args.processed) {
@@ -143,6 +150,24 @@ class Game implements Game {
             ["card_names"].forEach((field) => {
                if (args[field] !== null && args[field] !== undefined && Array.isArray(args[field])) {
                   args[field] = args[field].map((name: string) => `<strong>${_(name)}</strong>`).join(", ");
+               }
+            });
+
+            ["resource_icon"].forEach((field) => {
+               if (args[field] !== null && args[field] !== undefined) {
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`; 
+               }
+            });
+
+            ["resource_power", "power_icon"].forEach((field) => {
+               if (args[field] !== null && args[field] !== undefined) {
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`; 
+               }
+            });
+
+            ["resource_force", "force_icon"].forEach((field) => {
+               if (args[field] !== null && args[field] !== undefined) {
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`; 
                }
             });
 

@@ -13,7 +13,7 @@ final class PayResourceEffect extends EffectInstance {
 
     public function resolve(GameContext $ctx): void {
         $playerId = $ctx->currentPlayer()->playerId;
-        $message = clienttranslate('${player_name} pays ${amount} Resource(s)');
+        $message = clienttranslate('${player_name} pays ${amount} ${resource_icon}');
         $notif = new NotificationMessage($message, [
             'player_id' => $playerId,
             'amount' => $this->count,

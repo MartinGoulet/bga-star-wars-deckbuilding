@@ -758,17 +758,17 @@ $rebel_cards = [
                   "type" => EFFECT_CHOICE,
                   'options' => [
                      [
-                        'label' => clienttranslate('Gain 1 Attack'),
+                        'label' => clienttranslate('1 ${power_icon}'),
                         'type' => EFFECT_GAIN_ATTACK,
                         'amount' => 1
                      ],
                      [
-                        'label' => clienttranslate('Gain 1 Resource'),
+                        'label' => clienttranslate('1 ${resource_icon}'),
                         'type' => EFFECT_GAIN_RESOURCE,
                         'amount' => 1
                      ],
                      [
-                        'label' => clienttranslate('Gain 1 Force'),
+                        'label' => clienttranslate('1 ${force_icon}'),
                         'type' => EFFECT_GAIN_FORCE,
                         'amount' => 1
                      ],
