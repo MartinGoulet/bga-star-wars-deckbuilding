@@ -106,7 +106,7 @@ $rebel_cards = [
 
    CardIds::HAMMERHEAD_CORVETTE => [
       'name' => clienttranslate('Hammerhead Corvette'),
-      'gametext' => clienttranslate('Exile this capital ship to destroy a capital ship your opponent has in play, or an ennemy capital ship in the galaxy row'),
+      'gametext' => clienttranslate('Exile this capital ship to destroy a capital ship your opponent has in play, or an enemy capital ship in the galaxy row'),
       'img' => CardIds::HAMMERHEAD_CORVETTE,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_REBEL,
@@ -115,6 +115,18 @@ $rebel_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA, TARGET_SCOPE_GALAXY_ROW],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                        ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL], 'negate' => true],
+                     ],
+                  ],
+               ],
+            ],
             'effects' => [
                [
                   'type' => EFFECT_SELECT_CARDS,
@@ -424,12 +436,12 @@ $rebel_cards = [
                   'storeAs' => 'falcon_retrieve_card',
                ],
                [
-                  'type' => EFFECT_MOVE_SELECTED_CARDS,
-                  'destination' => ZONE_HAND,
+                  'type' => EFFECT_PURCHASE_CARD_FREE,
                   'cardRef' => 'falcon_retrieve_card',
                ],
                [
-                  'type' => EFFECT_PURCHASE_CARD_FREE,
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_PLAYER_DISCARD,
                   'cardRef' => 'falcon_retrieve_card',
                ],
             ],
@@ -452,12 +464,24 @@ $rebel_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'conditions' => [
                ['type' => CONDITION_FORCE_IS_WITH_YOU],
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                     ],
+                  ],
+               ],
             ],
             'effects' => [
                [
                   'type' => EFFECT_SELECT_CARDS,
                   'target' => [
                      'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                     ],
                   ],
                   'storeAs' => 'luke_target',
                ],
