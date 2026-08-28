@@ -62,8 +62,7 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
                 if($base->damage >= $base->health) {
                     // Base destroyed
-                    $ctx->exileCard($base->id);
-                    $this->game->playerScore->inc($ctx->currentPlayer()->playerId, 1);
+                    $ctx->defeatBase($base);
                 }
 
                 $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $remainingDamage);

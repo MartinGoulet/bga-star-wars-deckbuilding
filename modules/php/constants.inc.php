@@ -44,6 +44,8 @@ const GVAR_PURCHASE_OPTION_OVERRIDES = 'purchase_option_overrides';
 const GVAR_PREVENT_DAMAGE_PER_TURN_EFFECTS = 'prevent_damage_per_turn_effects';
 const GVAR_PURCHASE_CARD_ID = 'purchase_card_id';
 const GVAR_PURCHASE_DESTINATIONS = 'purchase_destinations';
+const GVAR_PENDING_EVENTS = 'pending_events';
+const GVAR_VICTORY_PILES = 'victory_piles';
 
 /**
  * Factions
@@ -66,6 +68,7 @@ const ABILITY_DRAW_CARD = 'draw_card';
 const ABILITY_CHOICE = 'choice';
 const ABILITY_STATIC_ATTACK_MODIFIER = 'static_attack_modifier';
 const ABILITY_AURA_ATTACK_MODIFIER = 'aura_attack_modifier';
+const ABILITY_ATTACK_PER_OPPONENT_REBEL_BASE = 'attack_per_opponent_rebel_base';
 
 /**
  * Conditions
@@ -84,6 +87,7 @@ const CONDITION_HAS_CARDS = 'has_cards';
 const CONDITION_HAS_CARDS_REFERENCE = 'has_cards_reference';
 const CONDITION_THIS_CARD_WAS_ATTACKER = 'this_card_was_attacker';
 const CONDITION_DEFEATED_IN_ZONE = 'defeated_in_zone';
+const CONDITION_OPPONENT_DISCARDED_CARD_FROM_HAND = 'opponent_discarded_card_from_hand';
  
 /**
  * Effects
@@ -109,6 +113,7 @@ const EFFECT_REVEAL_CARDS = 'reveal_cards';
 const EFFECT_HIDE_CARDS = 'hide_cards';
 const EFFECT_SELECT_CURRENT_CARD = 'select_current_card';
 const EFFECT_DEAL_BASE_DAMAGE = 'deal_base_damage';
+const EFFECT_DEAL_DAMAGE = 'deal_damage';
 const EFFECT_REMOVE_CARD_REFERENCE = 'remove_card_reference';
 const EFFECT_REGISTER_DELAYED = 'register_delayed_effect';
 
@@ -134,6 +139,7 @@ const TRIGGER_REWARD = 'REWARD';
 const TRIGGER_ACTIVATE_CARD = 'ON_ACTIVATE';
 const TRIGGER_WHILE_IN_PLAY = 'WHILE_IN_PLAY';
 const TRIGGER_ON_CARD_DEFEATED = 'ON_CARD_DEFEATED';
+const TRIGGER_ON_CARD_DISCARDED = 'ON_CARD_DISCARDED';
 const TRIGGER_ON_REVEAL_BASE = 'ON_REVEAL_BASE';
 
 /**

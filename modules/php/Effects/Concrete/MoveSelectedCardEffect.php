@@ -35,6 +35,7 @@ final class MoveSelectedCardEffect extends EffectInstance {
                     $player->moveCardToDiscard($cardToMove);
                     break;
                 case ZONE_TOP_DECK:
+                case ZONE_PLAYER_DECK:
                     $player->moveCardToTopOfDeck($cardToMove);
                     break;
                 case ZONE_GALAXY_DISCARD:

@@ -5,12 +5,61 @@ use Bga\Games\StarWarsDeckbuilding\States\Effect_CardSelection;
 $rebel_cards = [
    CardIds::Y_WING => [
       'name' => clienttranslate('Y-Wing'),
+      'gametext' => clienttranslate('Exile this unit to deal 2 damage to your opponent\'s base or a capital ship they have in play'),
+      'rewardText' => clienttranslate('Gain 1 Resource'),
       'img' => CardIds::Y_WING,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 1,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_BASE, TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_BASE, CARD_TYPE_SHIP]],
+                     ],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_BASE, TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_BASE, CARD_TYPE_SHIP]],
+                     ],
+                  ],
+                  'storeAs' => 'y_wing_target',
+               ],
+               [
+                  'type' => EFFECT_DEAL_DAMAGE,
+                  'amount' => 2,
+                  'cardRef' => 'y_wing_target',
+               ],
+               [
+                  'type' => EFFECT_SELECT_CURRENT_CARD,
+                  'storeAs' => 'y_wing_self',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'y_wing_self',
+               ],
+            ],
+         ],
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_GAIN_RESOURCE,
+            'amount' => 1,
+         ]
+      ]
    ],
 
    CardIds::JYN_ERSO => [
@@ -435,7 +484,12 @@ $rebel_cards = [
       'cost' => 2,
       'unique' => true,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'type' => ABILITY_ATTACK_PER_OPPONENT_REBEL_BASE,
+            'value' => 1,
+         ],
+      ],
       'rewards' => [
          ['type' => EFFECT_GAIN_FORCE, 'amount' => 1]
       ]
@@ -805,19 +859,21 @@ $rebel_bases = [
                   'type' => EFFECT_SELECT_CARDS,
                   'target' => [
                      'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'min' => 0,
+                     'max' => 1,
                      'filters' => [
                         ['type' => FILTER_FACTIONS, 'factions' => [FACTION_REBEL, FACTION_NEUTRAL]],
                      ],
                   ],
-                  'storeAs' => 'correlia_selected_card',
+                  'storeAs' => 'mon_cala_selected_card',
                ],
                [
                   'type' => EFFECT_PURCHASE_CARD_FREE,
-                  'cardRef' => 'correlia_selected_card',
+                  'cardRef' => 'mon_cala_selected_card',
                ],
                [
                   'type' => EFFECT_MOVE_SELECTED_CARDS,
-                  'cardRef' => 'correlia_selected_card',
+                  'cardRef' => 'mon_cala_selected_card',
                   'destination' => ZONE_HAND,
                ]
             ]
@@ -902,7 +958,28 @@ $rebel_bases = [
       'faction' => FACTION_REBEL,
       'health' => 16,
       'beginner' => true,
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ON_CARD_DISCARDED,
+            'conditions' => [
+               ['type' => CONDITION_OPPONENT_DISCARDED_CARD_FROM_HAND],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_BASE],
+                  ],
+                  'storeAs' => 'yavin_4_target',
+               ],
+               [
+                  'type' => EFFECT_DEAL_DAMAGE,
+                  'amount' => 2,
+                  'cardRef' => 'yavin_4_target',
+               ],
+            ],
+         ],
+      ],
    ],
 ];
 

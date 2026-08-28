@@ -2,6 +2,7 @@
 
 namespace Bga\Games\StarWarsDeckbuilding\Condition;
 
+use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\AnotherUniqueUnitInPlayCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\CardInPlayCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\DefeatedInZoneCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\FirstPurchaseThisRound;
@@ -11,8 +12,10 @@ use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardsReferenceCondition
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasDamageOnBaseCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasResourcesCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\IsCardFactionCondition;
+use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\OpponentDiscardedCardFromHandCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\ThisCardWasAttackerCondition;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
+use CardIds;
 use CardInstance;
 
 final class ConditionFactory {
@@ -20,7 +23,10 @@ final class ConditionFactory {
         $return = match ($condition['type']) {
             CONDITION_FORCE_IS_WITH_YOU => new ForceIsWithYouCondition(),
             CONDITION_FORCE_IS_NOT_WITH_YOU => new ForceIsWithYouCondition(negate: true),
-            CONDITION_CARD_IN_PLAY => new CardInPlayCondition($condition['cardIds']),
+            CONDITION_CARD_IN_PLAY => new CardInPlayCondition(
+                $condition['cardIds'],
+                $condition['negate'] ?? false
+            ),
             CONDITION_FIRST_PURCHASE_THIS_TURN => new FirstPurchaseThisRound(),
             CONDITION_HAS_DAMAGE_ON_BASE => new HasDamageOnBaseCondition(),
             CONDITION_CARD_FACTION_IS => new IsCardFactionCondition(
@@ -38,6 +44,10 @@ final class ConditionFactory {
             CONDITION_THIS_CARD_WAS_ATTACKER => new ThisCardWasAttackerCondition(),
             CONDITION_DEFEATED_IN_ZONE => new DefeatedInZoneCondition(
                 $condition['zone']
+            ),
+            CONDITION_OPPONENT_DISCARDED_CARD_FROM_HAND => new OpponentDiscardedCardFromHandCondition(),
+            CONDITION_ANOTHER_UNIQUE_UNIT_IN_PLAY => new AnotherUniqueUnitInPlayCondition(
+                excludeCardRef: $cardRef
             ),
             default => throw new \InvalidArgumentException("Unknown condition type: " . $condition['type']),
         };

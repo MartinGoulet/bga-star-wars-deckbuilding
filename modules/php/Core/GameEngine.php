@@ -33,7 +33,7 @@ final class GameEngine {
       } else {
          $trigger = array_find(
             $cardInstance->abilities,
-            fn($ability) => $ability['trigger'] === $trigger
+            fn($ability) => isset($ability['trigger']) && $ability['trigger'] === $trigger
          );
          if (empty($trigger)) return;
       }
@@ -99,11 +99,15 @@ final class GameEngine {
 
    /** @return string Return next state */
    public function run(): string {
+      while (true) {
+         $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+         if (empty($effects)) {
+            if (!$this->processPendingEvent()) {
+               break;
+            }
+            continue;
+         }
 
-      /** @var array */
-      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
-
-      while (count($effects) > 0) {
          $effectDef = current($effects);
          /** @var EffectInstance $effectInstance */
          $effectInstance = EffectFactory::createEffectInstance($effectDef);
@@ -124,7 +128,7 @@ final class GameEngine {
          }
 
          $this->removeCurrentEffect();
-         $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+         $this->processPendingEvent();
       }
 
       $this->globals->set('galaxy_deck_revealed_card', []);
@@ -177,18 +181,46 @@ final class GameEngine {
       return $effectInstance;
    }
 
-   public function triggerGlobal(string $trigger): void {
+   public function triggerGlobal(string $trigger, bool $run = true, bool $prepend = false): void {
 
       $targetQuery = TargetQueryFactory::create([
-         'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA],
+         'zones' => [TARGET_SCOPE_SELF_PLAY_AREA, TARGET_SCOPE_SELF_SHIP_AREA, TARGET_SCOPE_SELF_BASE],
       ]);
       
       $cardsInPlay = (new TargetResolver($this->context))->resolve($targetQuery);
+      $triggeredEffects = [];
 
       foreach ($cardsInPlay as $card) {
-         $this->addCardEffect($card, $trigger);
+         foreach ($card->getEffect($trigger, $this->context) as $effect) {
+            $triggeredEffects[] = array_merge(
+               $effect,
+               ['sourceCardId' => $card->id]
+            );
+         }
       }
 
-      $this->run();
+      $effects = $this->globals->get(GVAR_EFFECTS_TO_RESOLVE, []);
+      $effects = $prepend
+         ? array_merge($triggeredEffects, $effects)
+         : array_merge($effects, $triggeredEffects);
+      $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
+
+      if ($run) {
+         $this->run();
+      }
+   }
+
+   private function processPendingEvent(): bool {
+      $events = $this->globals->get(GVAR_PENDING_EVENTS, []);
+      if (empty($events)) {
+         return false;
+      }
+
+      $event = array_shift($events);
+      $this->globals->set(GVAR_PENDING_EVENTS, $events);
+
+      $eventContext = $this->context->withEvent($event);
+      $eventContext->getGameEngine()->triggerGlobal($event['type'], run: false, prepend: true);
+      return true;
    }
 }

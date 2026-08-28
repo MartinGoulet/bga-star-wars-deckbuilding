@@ -5,6 +5,7 @@ namespace Bga\Games\StarWarsDeckbuilding\Effects;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ChoiceOptionEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ConditionalEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DealDamageEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DestroyCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\DrawCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\ExileCardEffect;
@@ -111,6 +112,9 @@ final class EffectFactory {
                 break;
             case EFFECT_DESTROY_SELECTED_CARD:
                 $value = new DestroyCardEffect($data['cardRef']);
+                break;
+            case EFFECT_DEAL_DAMAGE:
+                $value = new DealDamageEffect($data['amount'], $data['cardRef']);
                 break;
             case EFFECT_CHOICE_OPTION:
                 $value = new ChoiceOptionEffect(

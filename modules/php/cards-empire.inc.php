@@ -109,6 +109,8 @@ $empire_cards = [
 
    CardIds::DIRECTOR_KRENNIC => [
       'name' => clienttranslate('Director Krennic'),
+      'gametext' => clienttranslate("Draw 1 card (2 cards instead if your base is the Death Star)"),
+      'rewardText' => clienttranslate("Gain 3 resources and 2 force"),
       'img' => CardIds::DIRECTOR_KRENNIC,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -121,13 +123,24 @@ $empire_cards = [
             'trigger' => TRIGGER_ACTIVATE_CARD,
             'effects' => [
                [
-                  'type' => ABILITY_DRAW_CARD,
-                  'value' => 1,
-                  'conditional_override' => [
-                     'condition' => [
-                        ['type' => CONDITION_BASE_IS_DEATH_STAR],
-                     ],
-                     'value' => 2,
+                  'type' => EFFECT_DRAW_CARD,
+                  'amount' => 1,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_IN_PLAY, 
+                        'cardIds' => [CardIds::DEATH_STAR],
+                        'negate' => true
+                     ]
+                  ],
+               ],
+               [
+                  'type' => EFFECT_DRAW_CARD,
+                  'amount' => 2,
+                  'conditions' => [
+                     [
+                        'type' => CONDITION_CARD_IN_PLAY, 
+                        'cardIds' => [CardIds::DEATH_STAR],
+                     ]
                   ],
                ],
             ],
@@ -461,6 +474,7 @@ $empire_cards = [
       'stats' => ['power' => 3, 'resource' => 0, 'force' => 0],
       'abilities' => [
          [
+            'trigger' => ABILITY_STATIC_ATTACK_MODIFIER,
             'type' => ABILITY_STATIC_ATTACK_MODIFIER,
             'value' => 2,
             'condition' => [
@@ -777,6 +791,8 @@ $empire_bases = [
                   'type' => EFFECT_SELECT_CARDS,
                   'target' => [
                      'zones' => [TARGET_SCOPE_GALAXY_ROW],
+                     'min' => 0,
+                     'max' => 1,
                      'filters' => [
                         ['type' => FILTER_FACTIONS, 'factions' => [FACTION_EMPIRE, FACTION_NEUTRAL]],
                      ],

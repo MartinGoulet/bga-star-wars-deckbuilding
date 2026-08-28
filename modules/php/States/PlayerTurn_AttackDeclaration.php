@@ -60,6 +60,9 @@ class PlayerTurn_AttackDeclaration extends GameState {
             array_values($galaxyCardsWithHealth)
         );
 
+        // Remove null
+        $targets = array_filter($targets, fn($card) => $card !== null);
+
         return [
             'targets' => array_values($targets),
             'power' => $totalPower,

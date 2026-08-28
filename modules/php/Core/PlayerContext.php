@@ -67,6 +67,7 @@ final class PlayerContext {
 
     public function moveCardToDiscard(CardInstance $card): void {
         $this->game->cardRepository->addCardToPlayerDiscard($card->id, $this->playerId);
+        $this->queueDiscardEvent($card);
         $this->game->notify->all(
             'onMoveCardToDiscard',
             clienttranslate('${player_name} discards ${card_name}'),
@@ -164,6 +165,10 @@ final class PlayerContext {
         return $this->game->cardRepository->getPlayerShips($this->playerId);
     }
 
+    public function getCardsInBase(): CardInstance {
+        return $this->game->cardRepository->getActiveBase($this->playerId);
+    }
+
     public function destroyCard(CardInstance $card): void {
         $this->game->cardRepository->addCardToPlayerDiscard($card->id, $this->playerId);
         $card = $this->game->cardRepository->getCard($card->id);
@@ -180,7 +185,11 @@ final class PlayerContext {
     }
 
     public function discardCards(array $cardIds): void {
+        $cards = $this->game->cardRepository->getCardsByIds($cardIds);
         $this->game->cardRepository->addCardsToPlayerDiscard($cardIds, $this->playerId);
+        foreach ($cards as $card) {
+            $this->queueDiscardEvent($card);
+        }
         $cards = $this->game->cardRepository->getCardsByIds($cardIds);
 
         $this->game->notify->all(
@@ -245,5 +254,20 @@ final class PlayerContext {
                 'card' => $card,
             ]
         );
+    }
+
+    private function queueDiscardEvent(CardInstance $card): void {
+        if ($card->location !== ZONE_HAND) {
+            return;
+        }
+
+        $events = $this->game->globals->get(GVAR_PENDING_EVENTS, []);
+        $events[] = [
+            'type' => TRIGGER_ON_CARD_DISCARDED,
+            'playerId' => $this->playerId,
+            'cardId' => $card->id,
+            'zone' => ZONE_HAND,
+        ];
+        $this->game->globals->set(GVAR_PENDING_EVENTS, $events);
     }
 }

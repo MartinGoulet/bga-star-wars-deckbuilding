@@ -101,4 +101,8 @@ class CardInstance {
             'locationArg' => $this->locationArg,
         ];
     }
+
+    public function isUnit(): bool {
+        return str_contains($this->type, CARD_TYPE_UNIT);
+    }
 }

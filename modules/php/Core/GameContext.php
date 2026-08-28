@@ -130,6 +130,28 @@ final class GameContext {
         );
     }
 
+    public function addCardToVictoryPile(CardInstance $card): void {
+        $victoryPiles = $this->globals->get(GVAR_VICTORY_PILES, []);
+        $playerId = $this->currentPlayer()->playerId;
+        $victoryPiles[$playerId] = $victoryPiles[$playerId] ?? [];
+        $victoryPiles[$playerId][] = $card->id;
+        $this->globals->set(GVAR_VICTORY_PILES, $victoryPiles);
+    }
+
+    /** @return CardInstance[] */
+    public function getVictoryPile(int $playerId): array {
+        $victoryPiles = $this->globals->get(GVAR_VICTORY_PILES, []);
+        $cardIds = $victoryPiles[$playerId] ?? [];
+
+        return empty($cardIds) ? [] : $this->cardRepository->getCardsByIds($cardIds);
+    }
+
+    public function defeatBase(CardInstance $base): void {
+        $this->addCardToVictoryPile($base);
+        $this->exileCard($base->id);
+        $this->game->playerScore->inc($this->currentPlayer()->playerId, 1);
+    }
+
     public function getGameEngine(): GameEngine {
         return new GameEngine($this->game, $this);
     }
