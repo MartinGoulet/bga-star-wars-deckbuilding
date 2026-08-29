@@ -1084,6 +1084,7 @@ $rebel_bases = [
    ],
    CardIds::SULLUST => [
       'name' => clienttranslate('Sullust'),
+      'gametext' => clienttranslate('While Sullust is your base, place the first card you purchase each turn on top of your deck'),
       'img' => 9,
       'faction' => FACTION_REBEL,
       'health' => 16,
