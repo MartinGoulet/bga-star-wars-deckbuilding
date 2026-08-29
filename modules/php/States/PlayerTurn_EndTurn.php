@@ -45,8 +45,8 @@ class PlayerTurn_EndTurn extends GameState {
         // Reset the number of purchases this round
         $this->game->nbrPurchasesThisRound->set(0);
 
-        // Reset damage assigned to ships
-        $this->resetDamageAssignedToShips();
+        // Reset any damage left to assign from the current attack
+        $this->game->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
 
         // Finally, draw five cards from your deck.
         $ctx->currentPlayer()->drawCards(5);
@@ -106,18 +106,6 @@ class PlayerTurn_EndTurn extends GameState {
                 'destination' => ZONE_PLAYER_DISCARD,
             ]
         );
-    }
-
-    private function resetDamageAssignedToShips() {
-        $this->game->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
-        $damages = $this->game->globals->get(GVAR_DAMAGE_ON_CARDS, []);
-        $cards = $this->game->cardRepository->getCardsByIds(array_keys($damages));
-        foreach ($cards as $card) {
-            if ($card->type === CARD_TYPE_SHIP) {
-                unset($damages[$card->id]);
-            }
-        }
-        $this->game->globals->set(GVAR_DAMAGE_ON_CARDS, $damages);
     }
 
     public function handleEndOfTurn(int $playerId, GameEngine $gameEngine): void {
