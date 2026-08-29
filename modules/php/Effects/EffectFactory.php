@@ -17,6 +17,7 @@ use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\MoveSelectedCardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PayResourceEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PurchaseCardFreeEffect;
+use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\PurchaseCardFromGalaxyDiscardEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RegisterDelayedEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RegisterPurchaseOptionEffect;
 use Bga\Games\StarWarsDeckbuilding\Effects\Concrete\RemoveCardReferenceEffect;
@@ -83,6 +84,9 @@ final class EffectFactory {
                 break;
             case EFFECT_PURCHASE_CARD_FREE:
                 $value = new PurchaseCardFreeEffect($data['cardRef']);
+                break;
+            case EFFECT_PURCHASE_CARD_FROM_GALAXY_DISCARD:
+                $value = new PurchaseCardFromGalaxyDiscardEffect($data['cardRef']);
                 break;
             case EFFECT_SELECT_CARDS:
                 $target = TargetQueryFactory::create($data['target']);

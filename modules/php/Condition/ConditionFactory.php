@@ -11,9 +11,11 @@ use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardsCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasCardsReferenceCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasDamageOnBaseCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasResourcesCondition;
+use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\HasPurchasableGalaxyDiscardCardCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\IsCardFactionCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\OpponentDiscardedCardFromHandCondition;
 use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\ThisCardWasAttackerCondition;
+use Bga\Games\StarWarsDeckbuilding\Condition\Concrete\AttackTargetInZoneCondition;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetQueryFactory;
 use CardIds;
 use CardInstance;
@@ -46,6 +48,8 @@ final class ConditionFactory {
                 $condition['zone']
             ),
             CONDITION_OPPONENT_DISCARDED_CARD_FROM_HAND => new OpponentDiscardedCardFromHandCondition(),
+            CONDITION_HAS_PURCHASABLE_GALAXY_DISCARD_CARD => new HasPurchasableGalaxyDiscardCardCondition(),
+            CONDITION_ATTACK_TARGET_IN_ZONE => new AttackTargetInZoneCondition($condition['zone']),
             CONDITION_ANOTHER_UNIQUE_UNIT_IN_PLAY => new AnotherUniqueUnitInPlayCondition(
                 excludeCardRef: $cardRef
             ),

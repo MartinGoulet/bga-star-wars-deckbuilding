@@ -36,13 +36,19 @@ class Purchase_Begin extends GameState
         // Deduct the card's cost from the active player's resources
         $this->game->playerResources->inc($activePlayerId, -$card->cost);
 
+        $purchaseSource = $card->location === ZONE_GALAXY_DISCARD
+            ? clienttranslate('the Galaxy discard pile')
+            : clienttranslate('the Galaxy Row');
+
         // Notify players
         $this->notify->all(
             'message',
-            clienttranslate('${player_name} purchases ${card_name} from the Galaxy Row'),
+            clienttranslate('${player_name} purchases ${card_name} from ${purchase_source}'),
             [
                 'player_id' => $activePlayerId,
                 'card' => $card,
+                'purchase_source' => $purchaseSource,
+                'i18n' => ['purchase_source'],
             ]
         );
 

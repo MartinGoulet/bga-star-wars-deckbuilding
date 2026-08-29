@@ -88,6 +88,8 @@ const CONDITION_HAS_CARDS_REFERENCE = 'has_cards_reference';
 const CONDITION_THIS_CARD_WAS_ATTACKER = 'this_card_was_attacker';
 const CONDITION_DEFEATED_IN_ZONE = 'defeated_in_zone';
 const CONDITION_OPPONENT_DISCARDED_CARD_FROM_HAND = 'opponent_discarded_card_from_hand';
+const CONDITION_HAS_PURCHASABLE_GALAXY_DISCARD_CARD = 'has_purchasable_galaxy_discard_card';
+const CONDITION_ATTACK_TARGET_IN_ZONE = 'attack_target_in_zone';
  
 /**
  * Effects
@@ -122,6 +124,7 @@ const EFFECT_MOVE_CARD = 'move_card';
 const EFFECT_REGISTER_PURCHASE_OPTION = 'register_purchase_option';
 const EFFECT_PREVENT_DAMAGE_PER_TURN = 'prevent_damage_per_turn';
 const EFFECT_ASSIGN_PURCHASE_DESTINATION = 'assign_purchase_destination';
+const EFFECT_PURCHASE_CARD_FROM_GALAXY_DISCARD = 'purchase_card_from_galaxy_discard';
 
 /**
  * Triggers

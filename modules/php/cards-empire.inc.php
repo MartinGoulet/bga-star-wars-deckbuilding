@@ -7,6 +7,7 @@ $empire_cards = [
    CardIds::TIE_FIGHTER => [
       'name' => clienttranslate('TIE Fighter'),
       'gametext' => clienttranslate("If you have a capital ship in play, draw 1 card"),
+      'rewardText' => clienttranslate("Gain 1 resource"),
       'img' => CardIds::TIE_FIGHTER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -43,6 +44,7 @@ $empire_cards = [
    CardIds::AT_ST => [
       'name' => clienttranslate('AT-ST'),
       'gametext' => clienttranslate('Discard 1 card from the galaxy row'),
+      'rewardText' => clienttranslate("Exile up to 2 cards from your hand or discard pile"),
       'img' => CardIds::AT_ST,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -67,12 +69,20 @@ $empire_cards = [
                ],
             ],
          ]
+      ],
+      'rewards' => [
+         [
+            'type' => EFFECT_EXILE_CARD,
+            'target' => TARGET_SELF,
+            'zones' => [ZONE_HAND, ZONE_DISCARD],
+            'count' => 2,
+         ],
       ]
    ],
 
    CardIds::LANDING_CRAFT => [
       'name' => clienttranslate('Landing Craft'),
-      'gametext' => clienttranslate(""),
+      'gametext' => clienttranslate("Choose: Gain 4 resources or Repair 4 damage from your base"),
       'rewardText' => clienttranslate("Gain 4 resources"),
       'img' => CardIds::LANDING_CRAFT,
       'type' => CARD_TYPE_UNIT,
@@ -93,7 +103,7 @@ $empire_cards = [
                         'amount' => 4
                      ],
                      [
-                        'label' => clienttranslate('Repair 4 damage on base'),
+                        'label' => clienttranslate('Repair 4 damage from your base'),
                         'type' => EFFECT_REPAIR_DAMAGE_BASE,
                         'amount' => 4
                      ],
@@ -127,7 +137,7 @@ $empire_cards = [
                   'amount' => 1,
                   'conditions' => [
                      [
-                        'type' => CONDITION_CARD_IN_PLAY, 
+                        'type' => CONDITION_CARD_IN_PLAY,
                         'cardIds' => [CardIds::DEATH_STAR],
                         'negate' => true
                      ]
@@ -138,18 +148,24 @@ $empire_cards = [
                   'amount' => 2,
                   'conditions' => [
                      [
-                        'type' => CONDITION_CARD_IN_PLAY, 
+                        'type' => CONDITION_CARD_IN_PLAY,
                         'cardIds' => [CardIds::DEATH_STAR],
                      ]
                   ],
                ],
             ],
          ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 2],
       ]
    ],
 
    CardIds::BOBA_FETT => [
       'name' => clienttranslate('Boba Fett'),
+      'gametext' => clienttranslate("When Boba Fett defeats a target in a galaxy row, draw 1 card"),
+      'rewardText' => clienttranslate("Gain 3 resources and 2 force"),
       'img' => CardIds::BOBA_FETT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -164,7 +180,11 @@ $empire_cards = [
                ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
-      ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 2],
+      ],
    ],
 
    CardIds::IMPERIAL_CARRIER => [
@@ -317,6 +337,10 @@ $empire_cards = [
             ],
          ],
       ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 3],
+      ],
    ],
 
    CardIds::STAR_DESTROYER => [
@@ -331,6 +355,8 @@ $empire_cards = [
 
    CardIds::DARTH_VADER => [
       'name' => clienttranslate('Darth Vader'),
+      'gametext' => clienttranslate('While the Force is with you, Darth Vader gets 4 power'),
+      'rewardText' => clienttranslate("Gain 4 resources and 4 force"),
       'img' => CardIds::DARTH_VADER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -341,7 +367,7 @@ $empire_cards = [
       'abilities' => [
          [
             'trigger' => TRIGGER_WHILE_IN_PLAY,
-            'condition' => [
+            'conditions' => [
                ['type' => CONDITION_FORCE_IS_WITH_YOU],
             ],
             'effects' => [
@@ -354,11 +380,17 @@ $empire_cards = [
                ],
             ],
          ]
-      ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 4],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 4],
+      ],
    ],
 
    CardIds::ADMIRAL_PIETT => [
       'name' => clienttranslate('Admiral Piett'),
+      'gametext' => clienttranslate('When Admiral Piett is in play, each of your capital ships gain 1 power'),
+      'rewardText' => clienttranslate("Gain 1 resources"),
       'img' => CardIds::ADMIRAL_PIETT,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -366,12 +398,27 @@ $empire_cards = [
       'unique' => true,
       'cost' => 2,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
-      'abilities' => []
+      'abilities' => [
+         [
+            'type' => ABILITY_AURA_ATTACK_MODIFIER,
+            'value' => 1,
+            'target' => [
+               'zones' => [TARGET_SCOPE_SELF_SHIP_AREA],
+               'filters' => [
+                  ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+               ],
+            ],
+         ],
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 1],
+      ],
    ],
 
    CardIds::TIE_BOMBER => [
       'name' => clienttranslate('TIE Bomber'),
       'gametext' => clienttranslate('Discard 1 card from the galaxy row'),
+      'rewardText' => clienttranslate("Exile 1 card from your hand or discard pile"),
       'img' => CardIds::TIE_BOMBER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -410,6 +457,7 @@ $empire_cards = [
    CardIds::SCOUT_TROOPER => [
       'name' => clienttranslate('Scout Trooper'),
       'gametext' => clienttranslate("Reveal the top card of the Galaxy deck. If it's an Empire card, gain 1 force. If it's an enemy card, discard it"),
+      'rewardText' => clienttranslate("Exile 1 card from your hand or discard pile"),
       'img' => CardIds::SCOUT_TROOPER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -460,6 +508,9 @@ $empire_cards = [
             ],
          ],
       ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 1],
+      ],
    ],
 
    CardIds::DEATH_TROOPER => [
@@ -493,6 +544,7 @@ $empire_cards = [
    CardIds::TIE_INTERCEPTOR => [
       'name' => clienttranslate('TIE Interceptor'),
       'gametext' => clienttranslate("Reveal the top card of the galaxy deck. If it is an Empire card, draw 1 card. If it is an enemy card, discard it"),
+      'rewardText' => clienttranslate("Gain 3 resources"),
       'img' => CardIds::TIE_INTERCEPTOR,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_EMPIRE,
@@ -543,10 +595,14 @@ $empire_cards = [
             ],
          ],
       ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+      ],
    ],
 
    CardIds::GOZANTI_CRUISER => [
       'name' => clienttranslate('Gozanti Cruiser'),
+      'gametext' => clienttranslate("Discard 1 card from your hand to draw 1 card"),
       'img' => CardIds::GOZANTI_CRUISER,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_EMPIRE,
@@ -657,10 +713,7 @@ $empire_cards = [
          ]
       ],
       'rewards' => [
-         [
-            'type' => EFFECT_GAIN_FORCE,
-            'amount' => 3,
-         ]
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 3]
       ]
 
    ],
@@ -699,10 +752,7 @@ $empire_cards = [
          ]
       ],
       'rewards' => [
-         [
-            'type' => EFFECT_GAIN_FORCE,
-            'amount' => 3,
-         ]
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 3]
       ]
    ],
 

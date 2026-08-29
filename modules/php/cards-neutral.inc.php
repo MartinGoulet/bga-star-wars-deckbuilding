@@ -3,16 +3,36 @@
 $neutral_cards = [
    CardIds::Z95_HEADHUNTER => [
       'name' => clienttranslate('Z-95 Headhunter'),
+      'gametext' => clienttranslate('If your opponent has a capital ship in play, draw 1 card'),
       'img' => CardIds::Z95_HEADHUNTER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
       'cost' => 1,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_SHIP_AREA],
+                     'filters' => [
+                        ['type' => FILTER_CARD_TYPES, 'cardTypes' => [CARD_TYPE_SHIP]],
+                     ],
+                  ],
+               ],
+            ],
+            'effects' => [
+               ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
+            ],
+         ],
+      ],
    ],
 
    CardIds::DENGAR => [
       'name' => clienttranslate('Dengar'),
+      'gametext' => clienttranslate('When Dengar defeats a target in the galaxy row, gain 2 resources'),
       'img' => CardIds::DENGAR,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
@@ -20,7 +40,18 @@ $neutral_cards = [
       'cost' => 4,
       'unique' => true,
       'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
-      'abilities' => []
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ON_CARD_DEFEATED,
+            'conditions' => [
+               ['type' => CONDITION_THIS_CARD_WAS_ATTACKER],
+               ['type' => CONDITION_DEFEATED_IN_ZONE, 'zone' => ZONE_GALAXY_ROW],
+            ],
+            'effects' => [
+               ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 2],
+            ],
+         ],
+      ]
    ],
 
    CardIds::QUARREN_MERCENARY => [
@@ -57,7 +88,8 @@ $neutral_cards = [
                               'type' => EFFECT_SELECT_CARDS,
                               'target' => [
                                  'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
-                                 'min' => 0,
+                                 'min' => 1,
+                                 'max' => 1,
                               ],
                               'storeAs' => 'quarren_exile',
                            ],
@@ -101,6 +133,7 @@ $neutral_cards = [
 
    CardIds::HWK_290 => [
       'name' => clienttranslate('HWK-290'),
+      'gametext' => clienttranslate('Exile this unit to repair 4 damage from your base'),
       'img' => CardIds::HWK_290,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
@@ -143,6 +176,7 @@ $neutral_cards = [
 
    CardIds::IG_88 => [
       'name' => clienttranslate('IG-88'),
+      'gametext' => clienttranslate('When IG-88 defeats a target in the galaxy row, exile 1 card from your hand or discard pile'),
       'img' => CardIds::IG_88,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
@@ -150,12 +184,43 @@ $neutral_cards = [
       'cost' => 5,
       'unique' => true,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
-      'abilities' => []
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ON_CARD_DEFEATED,
+            'conditions' => [
+               ['type' => CONDITION_THIS_CARD_WAS_ATTACKER],
+               ['type' => CONDITION_DEFEATED_IN_ZONE, 'zone' => ZONE_GALAXY_ROW],
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND, TARGET_SCOPE_SELF_DISCARD],
+                     'min' => 1,
+                     'max' => 1,
+                  ],
+                  'storeAs' => 'ig_88_exile',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'target' => TARGET_SELF,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'ig_88_exile',
+               ],
+            ],
+         ],
+      ]
    ],
 
    CardIds::NEBULON_B_FRIGATE => [
       'name' => clienttranslate('Nebulon-B Frigate'),
-      'gametext' => clienttranslate("Choose: Repair 3 daamage from your base, or gain 3 resources"),
+      'gametext' => clienttranslate("Choose: Repair 3 damage from your base, or gain 3 resources"),
       'img' => CardIds::NEBULON_B_FRIGATE,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_NEUTRAL,
@@ -206,6 +271,12 @@ $neutral_cards = [
                   'type' => EFFECT_CONDITIONAL,
                   'conditions' => [
                      ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                     [
+                        'type' => CONDITION_HAS_CARDS,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                        ],
+                     ],
                   ],
                   'effects' => [
                      [
@@ -331,23 +402,59 @@ $neutral_cards = [
 
    CardIds::JAWA_SCAVENGER => [
       'name' => clienttranslate('Jawa Scavenger'),
+      'gametext' => clienttranslate('Exile this unit to purchase a card from the galaxy discard pile as if it were in the galaxy row'),
       'img' => CardIds::JAWA_SCAVENGER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
       'cost' => 1,
       'stats' => ['power' => 0, 'resource' => 2, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_HAS_PURCHASABLE_GALAXY_DISCARD_CARD],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CURRENT_CARD,
+                  'storeAs' => 'jawa_scavenger_self',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'target' => TARGET_SELF,
+                  'destination' => ZONE_EXILE,
+                  'cardRef' => 'jawa_scavenger_self',
+               ],
+               [
+                  'type' => EFFECT_PURCHASE_CARD_FROM_GALAXY_DISCARD,
+                  'cardRef' => 'jawa_scavenger_purchase',
+               ],
+            ],
+         ],
+      ],
    ],
 
    CardIds::RODIAN_GUNSLINGER => [
       'name' => clienttranslate('Rodian Gunslinger'),
+      'gametext' => clienttranslate('This unit gain 2 power while attacking a target in the galaxy row'),
       'img' => CardIds::RODIAN_GUNSLINGER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
       'traits' => [TRAIT_BOUNTY_HUNTER],
       'cost' => 2,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'type' => ABILITY_STATIC_ATTACK_MODIFIER,
+            'value' => 2,
+            'conditions' => [
+               [
+                  'type' => CONDITION_ATTACK_TARGET_IN_ZONE,
+                  'zone' => ZONE_GALAXY_ROW,
+               ],
+            ],
+         ],
+      ],
    ],
 
    CardIds::KEL_DOR_MYSTIC => [
@@ -462,6 +569,7 @@ $neutral_cards = [
 
    CardIds::FANG_FIGHTER => [
       'name' => clienttranslate('Fang Fighter'),
+      'gametext' => clienttranslate('When you purchase this unit, add it to your hand (and draw 1 card if the Force is with you)'),
       'img' => CardIds::FANG_FIGHTER,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_NEUTRAL,
@@ -522,12 +630,45 @@ $neutral_cards = [
 
    CardIds::CROC_CRUISER => [
       'name' => clienttranslate('Croc Cruiser'),
+      'gametext' => clienttranslate('Discard 1 card from your hand to repair 3 damage from your base'),
       'img' => CardIds::CROC_CRUISER,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_NEUTRAL,
       'cost' => 3,
       'stats' => ['power' => 0, 'resource' => 1, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               ['type' => CONDITION_HAS_DAMAGE_ON_BASE],
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_SELF_HAND],
+                  ],
+                  'storeAs' => 'croc_cruiser_discard',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'target' => TARGET_SELF,
+                  'destination' => ZONE_DISCARD,
+                  'cardRef' => 'croc_cruiser_discard',
+               ],
+               [
+                  'type' => EFFECT_REPAIR_DAMAGE_BASE,
+                  'amount' => 3,
+               ],
+            ],
+         ],
+      ],
    ],
 ];
 

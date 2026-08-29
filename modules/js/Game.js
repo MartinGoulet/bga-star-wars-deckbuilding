@@ -1053,6 +1053,7 @@ class Game {
         this.playerTables.forEach((playerTable) => {
             playerTable.discard.closePopup();
         });
+        this.tableCenter?.galaxyDiscard.closePopup();
     }
     replaceIcons(text) {
         return text

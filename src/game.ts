@@ -127,6 +127,7 @@ class Game implements Game {
       this.playerTables.forEach((playerTable) => {
          playerTable.discard.closePopup();
       });
+      this.tableCenter?.galaxyDiscard.closePopup();
    }
 
    public replaceIcons(text: string): string {

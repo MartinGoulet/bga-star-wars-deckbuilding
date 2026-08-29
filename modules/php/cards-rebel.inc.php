@@ -1,7 +1,5 @@
 <?php
 
-use Bga\Games\StarWarsDeckbuilding\States\Effect_CardSelection;
-
 $rebel_cards = [
    CardIds::Y_WING => [
       'name' => clienttranslate('Y-Wing'),
@@ -55,22 +53,78 @@ $rebel_cards = [
          ],
       ],
       'rewards' => [
-         [
-            'type' => EFFECT_GAIN_RESOURCE,
-            'amount' => 1,
-         ]
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 1]
       ]
    ],
 
    CardIds::JYN_ERSO => [
       'name' => clienttranslate('Jyn Erso'),
+      'gametext' => clienttranslate("Look at your opponent's hand. If the Force is with you, place 1 card from their hand on the top of their deck"),
+      'rewardText' => clienttranslate('Gain 3 Force'),
       'img' => CardIds::JYN_ERSO,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 4,
       'unique' => true,
       'stats' => ['power' => 4, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_WITH_YOU],
+                  ],
+                  'effects' => [
+                     [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                           'min' => 1,
+                           'max' => 1,
+                        ],
+                        'storeAs' => 'jyn_erso_selected_card',
+                     ],
+                     [
+                        'type' => EFFECT_MOVE_SELECTED_CARDS,
+                        'target' => TARGET_OPPONENT,
+                        'destination' => ZONE_PLAYER_DECK,
+                        'cardRef' => 'jyn_erso_selected_card',
+                     ],
+                  ],
+               ],
+               [
+                  'type' => EFFECT_CONDITIONAL,
+                  'conditions' => [
+                     ['type' => CONDITION_FORCE_IS_NOT_WITH_YOU],
+                  ],
+                  'effects' => [
+                     [
+                        'type' => EFFECT_SELECT_CARDS,
+                        'target' => [
+                           'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                           'min' => 0,
+                           'max' => 1,
+                        ],
+                        'storeAs' => 'jyn_erso_seen_card',
+                     ],
+                  ],
+               ],
+            ],
+         ],
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 3]
+      ]
    ],
 
    CardIds::U_WING => [
@@ -159,6 +213,8 @@ $rebel_cards = [
 
    CardIds::HAN_SOLO => [
       'name' => clienttranslate('Han Solo'),
+      'gametext' => clienttranslate('Draw 1 card (2 cards instead if you have the Millennium Falcon in play)'),
+      'rewardText' => clienttranslate('Gain 3 Resources and 2 Force'),
       'img' => CardIds::HAN_SOLO,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -185,33 +241,64 @@ $rebel_cards = [
                ],
             ],
          ]
-      ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 2]
+      ],
    ],
 
    CardIds::CASSIAN_ANDOR => [
       'name' => clienttranslate('Cassian Andor'),
+      'gametext' => clienttranslate('When Cassian Andor defeats a target in the galaxy row, your opponent discards 1 card from their hand'),
+      'rewardText' => clienttranslate('Gain 3 Resources and 2 Force'),
       'img' => CardIds::CASSIAN_ANDOR,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 5,
       'unique' => true,
       'stats' => ['power' => 5, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
-      'rewards' => [
+      'abilities' => [
          [
-            'type' => EFFECT_GAIN_RESOURCE,
-            'amount' => 3,
+            'trigger' => TRIGGER_ON_CARD_DEFEATED,
+            'conditions' => [
+               ['type' => CONDITION_THIS_CARD_WAS_ATTACKER],
+               ['type' => CONDITION_DEFEATED_IN_ZONE, 'zone' => ZONE_GALAXY_ROW],
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                     'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE,
+                  ],
+                  'storeAs' => 'cassian_andor_discard_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'target' => TARGET_OPPONENT,
+                  'destination' => ZONE_DISCARD,
+                  'cardRef' => 'cassian_andor_discard_card',
+               ],
+            ],
          ],
-         [
-            'type' => EFFECT_GAIN_FORCE,
-            'amount' => 2,
-         ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_RESOURCE, 'amount' => 3],
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 2]
       ]
    ],
 
    CardIds::B_WING => [
       'name' => clienttranslate('B-Wing'),
       'gametext' => clienttranslate("Your opponent must choose: Either they discard 1 card from their hand, or this unit gains 2 attack"),
+      'rewardText' => clienttranslate('Exile up to 2 cards from your hand or discard pile'),
       'img' => CardIds::B_WING,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -528,7 +615,35 @@ $rebel_cards = [
       'faction' => FACTION_REBEL,
       'cost' => 2,
       'stats' => ['power' => 2, 'resource' => 0, 'force' => 0],
-      'abilities' => [],
+      'abilities' => [
+         [
+            'trigger' => TRIGGER_ACTIVATE_CARD,
+            'conditions' => [
+               [
+                  'type' => CONDITION_HAS_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                  ],
+               ],
+            ],
+            'effects' => [
+               [
+                  'type' => EFFECT_SELECT_CARDS,
+                  'target' => [
+                     'zones' => [TARGET_SCOPE_OPPONENT_HAND],
+                     'selectionMode' => SELECTION_MODE_OPPONENT_CHOICE,
+                  ],
+                  'storeAs' => 'snowspeeder_discard_card',
+               ],
+               [
+                  'type' => EFFECT_MOVE_SELECTED_CARDS,
+                  'target' => TARGET_OPPONENT,
+                  'destination' => ZONE_DISCARD,
+                  'cardRef' => 'snowspeeder_discard_card',
+               ],
+            ],
+         ],
+      ],
       'rewards' => [
          [
             'type' => EFFECT_SELECT_CARDS,
@@ -632,6 +747,7 @@ $rebel_cards = [
 
    CardIds::REBEL_TRANSPORT => [
       'name' => clienttranslate('Rebel Transport'),
+      'gametext' => clienttranslate('Choose: Repair 2 damage from your Base or gain 1 Resource'),
       'img' => CardIds::REBEL_TRANSPORT,
       'type' => CARD_TYPE_SHIP,
       'faction' => FACTION_REBEL,
@@ -645,7 +761,7 @@ $rebel_cards = [
                   "type" => EFFECT_CHOICE,
                   "options" => [
                      [
-                        'label' => clienttranslate('Repair 2 damage from your Base '),
+                        'label' => clienttranslate('Repair 2 damage from your Base'),
                         'type' => EFFECT_REPAIR_DAMAGE_BASE,
                         'amount' => 2
                      ],
@@ -663,18 +779,25 @@ $rebel_cards = [
 
    CardIds::CHIRRUT_IMWE => [
       'name' => clienttranslate('Chirrut Îmwe'),
+      'gametext' => clienttranslate('While the Force is with you, Chirrut Îmwe gains 2 Power'),
+      'rewardText' => clienttranslate('Gain 2 Force'),
       'img' => CardIds::CHIRRUT_IMWE,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
       'cost' => 3,
       'unique' => true,
       'stats' => ['power' => 0, 'resource' => 0, 'force' => 2],
-      'abilities' => [],
-      'rewards' => [
+      'abilities' => [
          [
-            'type' => EFFECT_GAIN_FORCE,
-            'amount' => 2,
-         ]
+            'type' => ABILITY_STATIC_ATTACK_MODIFIER,
+            'value' => 2,
+            'conditions' => [
+               ['type' => CONDITION_FORCE_IS_WITH_YOU],
+            ],
+         ],
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 2]
       ]
    ],
 
@@ -780,6 +903,8 @@ $rebel_cards = [
    // Rebels
    CardIds::CHEWBACCA => [
       'name' => clienttranslate('Chewbacca'),
+      'gametext' => clienttranslate('If you have another unique unit in play, draw 1 card'),
+      'rewardText' => clienttranslate('Gain 3 Force'),
       'img' => CardIds::CHEWBACCA,
       'type' => CARD_TYPE_UNIT,
       'faction' => FACTION_REBEL,
@@ -796,6 +921,9 @@ $rebel_cards = [
                ['type' => EFFECT_DRAW_CARD, 'amount' => 1],
             ],
          ]
+      ],
+      'rewards' => [
+         ['type' => EFFECT_GAIN_FORCE, 'amount' => 3]
       ]
    ],
 
