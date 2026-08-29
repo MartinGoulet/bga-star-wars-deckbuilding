@@ -32,13 +32,14 @@ final class PlayerContext {
     }
 
     public function gainForce(int $amount, CardInstance $card, string $message = ""): void {
-        $originalAmount = $amount;
         $amount = $this->faction === FACTION_EMPIRE ? -$amount : $amount;
 
         $currentValue = $this->game->forceTrack->get();
-        if (($currentValue + $amount) < -3 || ($currentValue + $amount) > 3) {
+        $newValue = max(-3, min(3, $currentValue + $amount));
+        if ($newValue === $currentValue) {
             return;
         }
+        $appliedAmount = abs($newValue - $currentValue);
 
         if ($message === "") {
             $message = clienttranslate('${player_name} gains ${amount} ${power_icon}');
@@ -46,11 +47,11 @@ final class PlayerContext {
 
         $notif = new NotificationMessage($message, [
             'player_id' => $this->playerId,
-            'amount' => $originalAmount,
+            'amount' => $appliedAmount,
             'card' => $card,
         ]);
 
-        $this->game->forceTrack->set($currentValue + $amount, $notif);
+        $this->game->forceTrack->set($newValue, $notif);
     }
 
     public function moveCardToHand(CardInstance $card): void {
