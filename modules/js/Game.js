@@ -923,6 +923,7 @@ class TableCenter {
             </div>`);
         this.galaxyRow = new BgaCards.LineStock(game.cardManager, document.getElementById("galaxy-row"), {
             gap: '12px',
+            sort: (firstCard, secondCard) => firstCard.locationArg - secondCard.locationArg,
         });
         this.galaxyDeck = new BgaCards.Deck(game.cardManager, document.querySelector(".deck-draw-pile"), {
             autoRemovePreviousCards: false,

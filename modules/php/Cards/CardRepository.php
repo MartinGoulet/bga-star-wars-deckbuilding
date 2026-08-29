@@ -10,6 +10,8 @@ use CardInstance;
 
 final class CardRepository {
 
+    private const GALAXY_ROW_SIZE = 6;
+
     public array | null $damageOnCards = null;
 
     public function __construct(private Game $game, private Deck $deck) {
@@ -57,8 +59,19 @@ final class CardRepository {
         $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_DISCARD, true);
     }
 
-    public function addCardToGalaxyRow(int $cardId): void {
-        $this->deck->insertCardOnExtremePosition($cardId, ZONE_GALAXY_ROW, true);
+    public function addCardToGalaxyRow(int $cardId, ?int $locationArg = null): int {
+        $availablePositions = $this->getAvailableGalaxyRowPositions();
+
+        if ($locationArg === null) {
+            $locationArg = $availablePositions[0] ?? null;
+        }
+
+        if ($locationArg === null || !in_array($locationArg, $availablePositions, true)) {
+            throw new \InvalidArgumentException('Cannot add a card to the Galaxy Row at the requested position.');
+        }
+
+        $this->deck->insertCard($cardId, ZONE_GALAXY_ROW, $locationArg);
+        return $locationArg;
     }
 
     public function countGalaxyDeck(): int {
@@ -88,9 +101,39 @@ final class CardRepository {
     /**
      * @return CardInstance[]
      */
-    public function drawCardsFromGalaxyDeck(int $count): array {
-        $cards = $this->deck->pickCardsForLocation($count, ZONE_GALAXY_DECK, ZONE_GALAXY_ROW);
-        return array_map(fn($row) => $this->createFromRow($row), $cards);
+    public function drawCardsFromGalaxyDeck(int $count, ?array $locationArgs = null): array {
+        if ($count <= 0) {
+            return [];
+        }
+
+        $availablePositions = $this->getAvailableGalaxyRowPositions();
+        $locationArgs ??= array_slice($availablePositions, 0, $count);
+
+        if (count($locationArgs) < $count) {
+            throw new \InvalidArgumentException('Not enough available positions in the Galaxy Row.');
+        }
+
+        $cards = [];
+        foreach (array_slice($locationArgs, 0, $count) as $locationArg) {
+            if (!in_array($locationArg, $availablePositions, true)) {
+                throw new \InvalidArgumentException('Cannot draw a card to the requested Galaxy Row position.');
+            }
+
+            $card = $this->deck->pickCardForLocation(
+                ZONE_GALAXY_DECK,
+                ZONE_GALAXY_ROW,
+                $locationArg,
+            );
+
+            if ($card === null) {
+                break;
+            }
+
+            $cards[] = $this->getCard((int) $card['id']);
+            $availablePositions = array_values(array_diff($availablePositions, [$locationArg]));
+        }
+
+        return $cards;
     }
 
     public function getCard(int $cardId): CardInstance {
@@ -232,7 +275,7 @@ final class CardRepository {
         $this->deck->createCards($cards, ZONE_DECK);
         $this->deck->shuffle(ZONE_DECK);
 
-        $this->drawCardsFromGalaxyDeck(6);
+        $this->drawCardsFromGalaxyDeck(self::GALAXY_ROW_SIZE, range(1, self::GALAXY_ROW_SIZE));
 
         // Setup outer rim row
         $cards = [];
@@ -281,5 +324,17 @@ final class CardRepository {
             // ab stands for "active base"
             $this->deck->moveCard($card['id'], 'ab_' . $player_id);
         }
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getAvailableGalaxyRowPositions(): array {
+        $occupiedPositions = array_map(
+            fn(CardInstance $card) => $card->locationArg,
+            $this->getGalaxyRow(),
+        );
+
+        return array_values(array_diff(range(1, self::GALAXY_ROW_SIZE), $occupiedPositions));
     }
 }

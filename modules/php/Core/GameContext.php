@@ -10,7 +10,6 @@ use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
 
 final class GameContext {
-    private const GALAXY_ROW_SIZE = 6;
     private int $activePlayerId;
 
     public bool $hasChangeState = false;
@@ -60,11 +59,11 @@ final class GameContext {
     }
 
     public function refillGalaxyRow(): void {
-        $galaxyRow = $this->game->cardRepository->getGalaxyRow();
-        $neededCards = self::GALAXY_ROW_SIZE - count($galaxyRow);
+        $availablePositions = $this->game->cardRepository->getAvailableGalaxyRowPositions();
+        $neededCards = count($availablePositions);
 
         if ($neededCards > 0) {
-            $newCards = $this->game->cardRepository->drawCardsFromGalaxyDeck($neededCards);
+            $newCards = $this->game->cardRepository->drawCardsFromGalaxyDeck($neededCards, $availablePositions);
             $this->game->notify->all(
                 'onRefillGalaxyRow',
                 clienttranslate('Refilling Galaxy Row with ${num} card(s). ${card_names}'),

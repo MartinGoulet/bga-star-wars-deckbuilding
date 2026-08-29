@@ -695,13 +695,13 @@ $empire_cards = [
                                  ],
                                  [
                                     'type' => EFFECT_MOVE_SELECTED_CARDS,
-                                    'destination' => ZONE_GALAXY_ROW,
-                                    'cardRef' => GVAR_GALAXY_DECK_REVEALED_CARD,
+                                    'destination' => ZONE_GALAXY_DECK,
+                                    'cardRef' => 'moff_swap_target',
                                  ],
                                  [
                                     'type' => EFFECT_MOVE_SELECTED_CARDS,
-                                    'destination' => ZONE_GALAXY_DECK,
-                                    'cardRef' => 'moff_swap_target',
+                                    'destination' => ZONE_GALAXY_ROW,
+                                    'cardRef' => GVAR_GALAXY_DECK_REVEALED_CARD,
                                  ],
                               ],
                            ],
