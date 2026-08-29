@@ -33,6 +33,13 @@ class PlayerTurn_EndTurn extends GameState {
         $ctx = new GameContext($this->game, $activePlayerId);
         $this->handleEndOfTurn($activePlayerId, $ctx->getGameEngine());
 
+        $overrides = $this->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+        $overrides = array_values(array_filter(
+            $overrides,
+            fn($override) => ($override['expires'] ?? null) !== 'after_next_purchase'
+        ));
+        $this->globals->set(GVAR_PURCHASE_OPTION_OVERRIDES, $overrides);
+
         // First, discard all of your unit cards from play area
         $this->discardAllUnitsFromPlayArea($activePlayerId);
 

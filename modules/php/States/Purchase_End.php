@@ -38,6 +38,13 @@ class Purchase_End extends GameState
             }
         }
 
+        $overrides = $this->globals->get(GVAR_PURCHASE_OPTION_OVERRIDES, []);
+        $overrides = array_values(array_filter(
+            $overrides,
+            fn($override) => ($override['expires'] ?? null) !== 'after_next_purchase'
+        ));
+        $this->globals->set(GVAR_PURCHASE_OPTION_OVERRIDES, $overrides);
+
         $this->globals->set(GVAR_PURCHASE_DESTINATIONS, []);
 
         $ctx->refillGalaxyRow();
