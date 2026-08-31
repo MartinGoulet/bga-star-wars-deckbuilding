@@ -10,6 +10,8 @@ import { PlayerTurnAskChoiceState } from "./states/player-turn-ask-choice";
 import { PlayerTurnAttackCommitState } from "./states/player-turn-attack-commit";
 import { PlayerTurnAttackDeclarationState } from "./states/player-turn-attack-declaration";
 import { PlayerTurnStartTurnBaseState } from "./states/player-turn-start-turn-base";
+import { SoloEnemyChooseTargetState } from "./states/solo-enemy-choose-target";
+import { SoloEnemyBoard } from "./solo-enemy/solo-enemy-board";
 import { TableCenter } from "./table-center/table-center";
 import { StarWarsGamedatas, StarWarsPlayer } from "./types/game";
 
@@ -32,6 +34,7 @@ class Game implements Game {
    public cardManager: MyCardManager;
    // @ts-ignore
    public discardCardManager: DiscardCardManager;
+   public soloEnemyBoard?: SoloEnemyBoard;
 
    public animationManager: InstanceType<typeof BgaAnimations.Manager>;
    public playerTables: PlayerTable[] = [];
@@ -66,6 +69,9 @@ class Game implements Game {
 
       this.tableCenter = new TableCenter(this);
       this.playerTables = this.createPlayerTables();
+      if (this.gamedatas.soloEnemy) {
+         this.soloEnemyBoard = new SoloEnemyBoard(this, this.gamedatas.soloEnemy);
+      }
       this.setupPlayerHand();
 
       this.registerStates();
@@ -82,6 +88,7 @@ class Game implements Game {
       this.states.register("effectCardSelection", new EffectCardSelectionState(this));
       this.states.register("playerTurnStartTurnBase", new PlayerTurnStartTurnBaseState(this));
       this.states.register("PlayerTurn_ActionResolveDamageShipBase", new PlayerTurnActionResolveDamageShipBaseState(this));
+      this.states.register("SoloEnemy_ChooseTarget", new SoloEnemyChooseTargetState(this));
    }
 
    public getCurrentPlayerTable(): PlayerTable {

@@ -21,6 +21,50 @@ final class MoveSelectedCardEffect extends EffectInstance {
 
         $cards = $ctx->cardRepository->getCardsByIds($cardIds);
 
+        if ($ctx->isSolo() && $this->target !== TARGET_SELF) {
+            $enemy = $ctx->soloEnemy();
+            foreach ($cards as $cardToMove) {
+                if (in_array($this->destination, [ZONE_DISCARD, ZONE_PLAYER_DISCARD], true)) {
+                    $enemy->moveCard($cardToMove, ZONE_SOLO_ENEMY_MUSTER_HIDDEN);
+                    $ctx->game->notify->all(
+                        'onSoloEnemyCardReturnedToMuster',
+                        clienttranslate('The enemy turns a Muster card face down'),
+                        [
+                            'card' => $cardToMove->getOnlyId(),
+                            'destination' => ZONE_SOLO_ENEMY_MUSTER_HIDDEN,
+                        ],
+                    );
+                    continue;
+                }
+
+                if (in_array($this->destination, [ZONE_TOP_DECK, ZONE_PLAYER_DECK], true)) {
+                    $enemy->moveCard($cardToMove, ZONE_SOLO_ENEMY_MUSTER_HIDDEN);
+                    $ctx->game->notify->all(
+                        'onSoloEnemyCardReturnedToMuster',
+                        clienttranslate('The enemy turns a Muster card face down'),
+                        [
+                            'card' => $cardToMove->getOnlyId(),
+                            'destination' => ZONE_SOLO_ENEMY_MUSTER_HIDDEN,
+                        ],
+                    );
+                    continue;
+                }
+
+                if ($this->destination === ZONE_EXILE) {
+                    $ctx->cardRepository->addCardToExile($cardToMove->id);
+                    $ctx->game->notify->all(
+                        'onSoloEnemyCardExiled',
+                        clienttranslate('The enemy exiles ${card_name}'),
+                        ['card' => $cardToMove],
+                    );
+                    continue;
+                }
+
+                throw new \InvalidArgumentException('Unsupported solo enemy card destination.');
+            }
+            return;
+        }
+
         $player = $this->target === TARGET_SELF
             ? $ctx->currentPlayer()
             : $ctx->opponentPlayer();

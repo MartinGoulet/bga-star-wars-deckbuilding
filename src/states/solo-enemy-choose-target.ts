@@ -1,12 +1,13 @@
 import { Card } from "../types/game";
 import { BaseState } from "./base-state";
 
-interface PlayerTurnAttackDeclarationArgs {
+interface SoloEnemyChooseTargetArgs {
    targets: Card[];
+   reason?: string;
 }
 
-export class PlayerTurnAttackDeclarationState extends BaseState<PlayerTurnAttackDeclarationArgs> {
-   onEnteringState(args: PlayerTurnAttackDeclarationArgs, isCurrentPlayerActive: boolean): void {
+export class SoloEnemyChooseTargetState extends BaseState<SoloEnemyChooseTargetArgs> {
+   onEnteringState(args: SoloEnemyChooseTargetArgs, isCurrentPlayerActive: boolean): void {
       const stocks = this.game.playerTables.flatMap((table) => [table.activeBase, table.ships]);
       stocks.push(this.game.tableCenter.galaxyRow);
       if (this.game.soloEnemyBoard) {
@@ -18,15 +19,10 @@ export class PlayerTurnAttackDeclarationState extends BaseState<PlayerTurnAttack
          stock.setSelectableCards(args.targets);
          stock.onCardClick = async (card: Card) => {
             stock.unselectCard(card, true);
-            if (isCurrentPlayerActive && args.targets.find((c) => c.id === card.id)) {
-               await this.game.actions.performAction("actDeclareAttack", { cardId: card.id });
+            if (isCurrentPlayerActive && args.targets.some((target) => target.id === card.id)) {
+               await this.game.actions.performAction("actChooseTarget", { cardId: card.id });
             }
          };
-      });
-
-      const handleCancel = async () => this.game.actions.performAction("actCancel");
-      this.game.statusBar.addActionButton(_('Cancel'), handleCancel, {
-         color: 'alert'
       });
    }
 }

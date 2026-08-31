@@ -3,6 +3,7 @@
 @use "player-table/player-table";
 @use "player-hand/player-hand";
 @use "tooltip-manager/tooltip-manager";
+@use "solo-enemy/solo-enemy-board";
 
 html {
    background: black;

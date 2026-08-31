@@ -51,6 +51,10 @@ final class TargetResolver {
 
     /** @return CardInstance[] */
     private function getSelectableCards(string $zone, int $count = 0): array {
+        if ($this->ctx->isSolo() && str_starts_with($zone, 'opponent_')) {
+            return $this->getSoloEnemyCards($zone);
+        }
+
         switch ($zone) {
             case TARGET_SCOPE_SELF_HAND:
             case TARGET_SCOPE_OPPONENT_HAND:
@@ -89,6 +93,22 @@ final class TargetResolver {
             default:
                 throw new Exception("TargetResolver: Invalid zone for selectable cards: $zone");
         }
+    }
+
+    /** @return CardInstance[] */
+    private function getSoloEnemyCards(string $zone): array {
+        $enemy = $this->ctx->soloEnemy();
+        return match ($zone) {
+            TARGET_SCOPE_OPPONENT_PLAY_AREA => $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),
+            TARGET_SCOPE_OPPONENT_SHIP_AREA => array_values(array_filter(
+                $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),
+                fn(CardInstance $card) => $card->type === CARD_TYPE_SHIP,
+            )),
+            TARGET_SCOPE_OPPONENT_HAND,
+            TARGET_SCOPE_OPPONENT_DISCARD => $enemy->getCards(ZONE_SOLO_ENEMY_MUSTER_VISIBLE),
+            TARGET_SCOPE_OPPONENT_BASE => $enemy->getActiveBase() === null ? [] : [$enemy->getActiveBase()],
+            default => throw new Exception("TargetResolver: Invalid solo opponent zone: $zone"),
+        };
     }
 
     private function resolvePlayer(string $target): ?int {

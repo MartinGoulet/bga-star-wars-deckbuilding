@@ -231,6 +231,23 @@ final class CardRepository {
         return array_map(fn($row) => $this->createFromRow($row), $cards);
     }
 
+    /**
+     * @return CardInstance[]
+     */
+    public function getSoloEnemyCards(string $zone): array {
+        $cards = $this->deck->getCardsInLocation($zone, null, 'card_location_arg');
+        return array_map(fn($row) => $this->createFromRow($row), $cards);
+    }
+
+    public function getSoloEnemyActiveBase(): CardInstance|null {
+        $card = $this->deck->getCardOnTop(ZONE_SOLO_ENEMY_ACTIVE_BASE);
+        return $card === null ? null : $this->createFromRow($card);
+    }
+
+    public function moveCardToSoloEnemyZone(int $cardId, string $zone): void {
+        $this->deck->insertCardOnExtremePosition($cardId, $zone, true);
+    }
+
     public function getCardOnTopOfGalaxyDeck(): CardInstance | null {
         $card = $this->deck->getCardOnTop(ZONE_GALAXY_DECK);
         if ($card === null) {
@@ -259,7 +276,12 @@ final class CardRepository {
         $this->deck->shuffle('deck_' . $playerId);
     }
 
-    public function setup(array $players): void {
+    public function setup(array $players, ?string $soloEnemyFaction = null, int $soloShuttleCount = 3): void {
+
+        if (count($players) === 1) {
+            $this->setupSolo($players, $soloEnemyFaction, $soloShuttleCount);
+            return;
+        }
 
         // Setup galaxy deck
         $cards = [];
@@ -323,6 +345,157 @@ final class CardRepository {
             $card = array_shift($cards);
             // ab stands for "active base"
             $this->deck->moveCard($card['id'], 'ab_' . $player_id);
+        }
+    }
+
+    private function setupSolo(array $players, ?string $soloEnemyFaction, int $soloShuttleCount): void {
+        if ($soloEnemyFaction === null) {
+            throw new \InvalidArgumentException('The solo enemy faction is required.');
+        }
+
+        $leaderType = $soloEnemyFaction === FACTION_EMPIRE
+            ? CardIds::DARTH_VADER
+            : CardIds::LUKE_SKYWALKER;
+
+        // The enemy leader is removed before the Galaxy deck is shuffled.
+        $cards = [];
+        foreach ($this->game->galaxy_deck_composition as $cardTypeId => $amount) {
+            if ($cardTypeId === $leaderType) {
+                continue;
+            }
+            $cards[] = [
+                'type' => $this->game->card_types[$cardTypeId]['type'],
+                'type_arg' => $cardTypeId,
+                'nbr' => $amount,
+            ];
+        }
+        $this->deck->createCards($cards, ZONE_GALAXY_DECK);
+        $this->deck->shuffle(ZONE_GALAXY_DECK);
+        $this->drawCardsFromGalaxyDeck(self::GALAXY_ROW_SIZE, range(1, self::GALAXY_ROW_SIZE));
+
+        $this->deck->createCards([
+            [
+                'type' => CARD_TYPE_UNIT,
+                'type_arg' => CardIds::OUTER_RIM_PILOT,
+                'nbr' => 10,
+            ],
+        ], ZONE_OUTER_RIM_DECK);
+
+        foreach ($players as $playerId => $player) {
+            $cards = [];
+            foreach ($this->game->starter_decks[$player['faction']] as $cardTypeId => $amount) {
+                $cards[] = [
+                    'type' => 'STARTER',
+                    'type_arg' => $cardTypeId,
+                    'nbr' => $amount,
+                ];
+            }
+            $this->deck->createCards($cards, 'deck_' . $playerId);
+            $this->deck->shuffle('deck_' . $playerId);
+            $this->deck->pickCardsForLocation(5, 'deck_' . $playerId, ZONE_HAND, $playerId);
+        }
+
+        foreach ($players as $playerId => $player) {
+            $startingBaseType = null;
+            $cards = [];
+            foreach ($this->game->base_decks[$player['faction']] as $cardTypeId => $baseInfo) {
+                if (isset($baseInfo['beginner'])) {
+                    $cards[] = [
+                        'type' => CARD_TYPE_BASE,
+                        'type_arg' => $cardTypeId,
+                        'nbr' => 1,
+                    ];
+                }
+
+                if (isset($baseInfo['starting_base'])) {
+                    $startingBaseType = (int) $cardTypeId;
+                }
+            }
+
+            if ($startingBaseType === null) {
+                throw new \InvalidArgumentException('The player base deck is incomplete.');
+            }
+
+            $this->deck->createCards($cards, 'base_' . $playerId);
+            $startingBaseCards = $this->deck->getCardsOfType(CARD_TYPE_BASE, $startingBaseType);
+            $startingBase = array_shift($startingBaseCards);
+            if ($startingBase === null) {
+                throw new \InvalidArgumentException('The player starting base could not be created.');
+            }
+            $this->deck->moveCard($startingBase['id'], 'ab_' . $playerId);
+        }
+
+        $enemyBases = $this->game->base_decks[$soloEnemyFaction];
+        $startingBaseType = null;
+        $nonStartingBaseTypes = [];
+        foreach ($enemyBases as $cardTypeId => $baseInfo) {
+            if (isset($baseInfo['starting_base'])) {
+                $startingBaseType = $cardTypeId;
+            } else {
+                $nonStartingBaseTypes[] = $cardTypeId;
+            }
+        }
+
+        if ($startingBaseType === null || count($nonStartingBaseTypes) < 2) {
+            throw new \InvalidArgumentException('The solo enemy base deck is incomplete.');
+        }
+
+        shuffle($nonStartingBaseTypes);
+        $this->deck->createCards([
+            [
+                'type' => 'BASE',
+                'type_arg' => $startingBaseType,
+                'nbr' => 1,
+            ],
+        ], ZONE_SOLO_ENEMY_ACTIVE_BASE);
+        $this->deck->createCards(array_map(
+            fn(int $cardTypeId) => [
+                'type' => 'BASE',
+                'type_arg' => $cardTypeId,
+                'nbr' => 1,
+            ],
+            array_slice($nonStartingBaseTypes, 0, 2),
+        ), ZONE_SOLO_ENEMY_BASES);
+
+        $this->deck->createCards([
+            [
+                'type' => CARD_TYPE_UNIT,
+                'type_arg' => $leaderType,
+                'nbr' => 1,
+            ],
+        ], ZONE_SOLO_ENEMY_LEADER);
+
+        // Create the complete starter set in reserve, then move only the visible starters.
+        $enemyStarterCards = [];
+        foreach ($this->game->starter_decks[$soloEnemyFaction] as $cardTypeId => $amount) {
+            $enemyStarterCards[] = [
+                'type' => 'STARTER',
+                'type_arg' => $cardTypeId,
+                'nbr' => $amount,
+            ];
+        }
+        $this->deck->createCards($enemyStarterCards, ZONE_SOLO_ENEMY_RESERVE);
+        $reserveCards = $this->deck->getCardsInLocation(ZONE_SOLO_ENEMY_RESERVE);
+
+        $shuttleIds = [];
+        $trooperIds = [];
+        foreach ($reserveCards as $card) {
+            if ((int) $card['type_arg'] === ($soloEnemyFaction === FACTION_EMPIRE ? CardIds::IMPERIAL_SHUTTLE : CardIds::ALLIANCE_SHUTTLE)) {
+                $shuttleIds[] = (int) $card['id'];
+            }
+            if ((int) $card['type_arg'] === ($soloEnemyFaction === FACTION_EMPIRE ? CardIds::STORMTROOPER : CardIds::REBEL_TROOPER)) {
+                $trooperIds[] = (int) $card['id'];
+            }
+        }
+
+        foreach (array_slice($shuttleIds, 0, $soloShuttleCount) as $cardId) {
+            $this->deck->moveCard($cardId, ZONE_SOLO_ENEMY_SHUTTLES);
+        }
+        if (isset($trooperIds[0])) {
+            $this->deck->moveCard($trooperIds[0], ZONE_SOLO_ENEMY_MUSTER_VISIBLE);
+        }
+        if (isset($trooperIds[1])) {
+            $this->deck->moveCard($trooperIds[1], ZONE_SOLO_ENEMY_MUSTER_HIDDEN);
         }
     }
 

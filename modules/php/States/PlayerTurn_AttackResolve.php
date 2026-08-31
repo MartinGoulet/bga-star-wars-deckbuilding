@@ -38,6 +38,8 @@ class PlayerTurn_AttackResolve extends GameState {
 
         if ($target->type === CARD_TYPE_BASE) {
             return $this->resolveAttackOnBase($ctx, $target, $attackers);
+        } else if ($ctx->isSolo() && $target->location === ZONE_SOLO_ENEMY_LEADER) {
+            return $this->resolveAttackOnSoloLeader($ctx, $target, $attackers);
         } else  if ($target->location === ZONE_GALAXY_ROW) {
             return $this->resolveAttackOnUnit($ctx, $target, $attackers);
         } else {
@@ -101,6 +103,41 @@ class PlayerTurn_AttackResolve extends GameState {
         return $engine->run();
     }
 
+    /** @param CardInstance[] $attackers */
+    private function resolveAttackOnSoloLeader(GameContext $ctx, CardInstance $target, array $attackers): string {
+        $resolver = new PowerResolver($ctx);
+        if ($resolver->getPowerOfCards($attackers) < $target->health) {
+            throw new BgaUserException(clienttranslate('Not enough power to assault the Leader'));
+        }
+
+        $this->globals->set(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, true);
+        $this->notify->all(
+            'onSoloEnemyLeaderAssaulted',
+            clienttranslate('${player_name} assaults ${card_name}'),
+            [
+                'player_id' => $ctx->currentPlayer()->playerId,
+                'card' => $target,
+                'attackers' => array_values($attackers),
+            ],
+        );
+
+        $event = [
+            'type' => TRIGGER_ON_CARD_DEFEATED,
+            'attackerIds' => array_map(fn(CardInstance $card) => $card->id, $attackers),
+            'defeatedCardId' => $target->id,
+            'zone' => ZONE_GALAXY_ROW,
+            'playerId' => $ctx->currentPlayer()->playerId,
+        ];
+        $eventContext = (new GameContext($this->game))->withEvent($event);
+        $eventEngine = $eventContext->getGameEngine();
+        $eventEngine->triggerGlobal(TRIGGER_ON_CARD_DEFEATED);
+
+        $engine = $ctx->getGameEngine();
+        $engine->setNextState(PlayerTurn_ActionSelection::class);
+        $engine->addCardEffect($target, TRIGGER_REWARD);
+        return $engine->run();
+    }
+
     /**
      * @param int $attackerPlayerId
      * @param CardInstance $target
@@ -112,18 +149,30 @@ class PlayerTurn_AttackResolve extends GameState {
         $remaining = $ctx->assignDamageToTarget($target, $damages);
 
         if ($target->damage == $target->health) {
-            $this->game->cardRepository->addCardsToPlayerDiscard([$target->id], $ctx->opponentPlayer()->playerId);
-            $target = $this->game->cardRepository->getCardById($target->id);
+            if ($ctx->isSolo()) {
+                $this->game->cardRepository->addCardToExile($target->id);
+                $this->game->notify->all(
+                    'onSoloEnemyCardExiled',
+                    clienttranslate('${player_name} exiles ${card_name}'),
+                    [
+                        'player_id' => $ctx->currentPlayer()->playerId,
+                        'card' => $target,
+                    ],
+                );
+            } else {
+                $this->game->cardRepository->addCardsToPlayerDiscard([$target->id], $ctx->opponentPlayer()->playerId);
+                $target = $this->game->cardRepository->getCardById($target->id);
 
-            $this->game->notify->all(
-                'onDiscardCards',
-                clienttranslate('${player_name} destroys ${card_names} in their Ship Area'),
-                [
-                    'player_id' => $ctx->opponentPlayer()->playerId,
-                    'cards' => [$target],
-                    'destination' => ZONE_PLAYER_DISCARD,
-                ]
-            );
+                $this->game->notify->all(
+                    'onDiscardCards',
+                    clienttranslate('${player_name} destroys ${card_names} in their Ship Area'),
+                    [
+                        'player_id' => $ctx->opponentPlayer()->playerId,
+                        'cards' => [$target],
+                        'destination' => ZONE_PLAYER_DISCARD,
+                    ]
+                );
+            }
         }
 
         if ($remaining > 0) {

@@ -27,14 +27,41 @@ final class DealDamageEffect extends EffectInstance
             }
 
             if ($target->type === CARD_TYPE_BASE) {
-                $ctx->defeatBase($target);
-                if ($ctx->game->playerScore->get($ctx->currentPlayer()->playerId) >= 3) {
+                if ($ctx->isSolo() && $target->location === ZONE_SOLO_ENEMY_ACTIVE_BASE) {
+                    $ctx->game->cardRepository->addCardToExile($target->id);
+                    $ctx->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
+                    $ctx->globals->inc(GVAR_SOLO_ENEMY_BASES_DESTROYED, 1);
+                    $ctx->game->notify->all(
+                        'onSoloEnemyDestroyBase',
+                        clienttranslate('${player_name} destroys ${card_name}'),
+                        [
+                            'player_id' => $ctx->currentPlayer()->playerId,
+                            'card' => $target,
+                        ],
+                    );
+                    if ($ctx->globals->get(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0) >= 3) {
+                        $ctx->getGameEngine()->setNextState(EndScore::class);
+                    }
+                } else {
+                    $ctx->defeatBase($target);
+                }
+                if (!$ctx->isSolo() && $ctx->game->playerScore->get($ctx->currentPlayer()->playerId) >= 3) {
                     $ctx->getGameEngine()->setNextState(EndScore::class);
                 }
                 continue;
             }
 
             if ($target->type !== CARD_TYPE_SHIP) {
+                continue;
+            }
+
+            if ($ctx->isSolo() && $target->location === ZONE_SOLO_ENEMY_PLAY) {
+                $ctx->game->cardRepository->addCardToExile($target->id);
+                $ctx->game->notify->all(
+                    'onSoloEnemyCardExiled',
+                    clienttranslate('The enemy exiles ${card_name}'),
+                    ['card' => $target],
+                );
                 continue;
             }
 

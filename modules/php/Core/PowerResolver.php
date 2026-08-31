@@ -66,7 +66,9 @@ final class PowerResolver {
 
       foreach ($card->abilities ?? [] as $ability) {
          if (($ability['type'] ?? null) === ABILITY_ATTACK_PER_OPPONENT_REBEL_BASE) {
-            $victoryPile = $ctx->getVictoryPile($ctx->opponentPlayer()->playerId);
+            $victoryPile = $ctx->isSolo()
+               ? $ctx->getVictoryPile($ctx->currentPlayer()->playerId)
+               : $ctx->getVictoryPile($ctx->opponentPlayer()->playerId);
             $rebelBases = array_filter(
                $victoryPile,
                fn($victoryCard) => $victoryCard->type === CARD_TYPE_BASE && $victoryCard->faction === FACTION_REBEL

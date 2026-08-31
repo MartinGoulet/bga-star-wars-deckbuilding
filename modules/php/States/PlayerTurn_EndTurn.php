@@ -60,6 +60,11 @@ class PlayerTurn_EndTurn extends GameState {
 
         // Give some extra time to the active player when he completed an action
         $this->game->giveExtraTime($activePlayerId);
+
+        if ($this->game->getPlayersNumber() === 1) {
+            return SoloEnemy_BeginTurn::class;
+        }
+
         $this->game->activeNextPlayer();
 
         // Return to game action for the next player

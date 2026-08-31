@@ -19,6 +19,23 @@ export interface StarWarsGamedatas extends Gamedatas<StarWarsPlayer> {
    playerHand?: Card[];
    outerRimDeck: Card[];
    force: number;
+   soloEnemy?: SoloEnemyData;
+}
+
+export interface SoloEnemyData {
+   faction: string;
+   resources: number;
+   progress: number;
+   leaderGained: boolean;
+   leaderAssaulted: boolean;
+   leader: Card[];
+   activeBase?: Card;
+   bases: number[];
+   muster: Card[];
+   musterHidden: Card[];
+   reserve: Card[];
+   shuttles: Card[];
+   playArea: Card[];
 }
 
 export interface Card {

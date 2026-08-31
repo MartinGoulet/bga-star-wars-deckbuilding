@@ -9,6 +9,7 @@ use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\States\PossibleAction;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyContext;
 use BgaVisibleSystemException;
 use CardInstance;
 
@@ -26,11 +27,21 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     public function getArgs(): array {
         $ctx = new GameContext($this->game);
-        $opponent = $ctx->opponentPlayer();
-        $ships = $opponent->getCardsInShipArea();
+        if ($ctx->isSolo()) {
+            $enemy = new SoloEnemyContext($this->game);
+            $ships = array_values(array_filter(
+                $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),
+                fn(CardInstance $card) => $card->type === CARD_TYPE_SHIP,
+            ));
+            $opponentId = $ctx->currentPlayer()->playerId;
+        } else {
+            $opponent = $ctx->opponentPlayer();
+            $ships = $opponent->getCardsInShipArea();
+            $opponentId = $opponent->playerId;
+        }
         return [
             'ships' => $ships,
-            'opponentId' => $opponent->playerId,
+            'opponentId' => $opponentId,
             'remainingDamage' => $this->game->globals->get(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0),
             '_no_notify' => count($ships) < 2,
         ];
@@ -38,7 +49,15 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     function onEnteringState() {
         $ctx = new GameContext($this->game);
-        $ships = $ctx->opponentPlayer()->getCardsInShipArea();
+        if ($ctx->isSolo()) {
+            $enemy = new SoloEnemyContext($this->game);
+            $ships = array_values(array_filter(
+                $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),
+                fn(CardInstance $card) => $card->type === CARD_TYPE_SHIP,
+            ));
+        } else {
+            $ships = $ctx->opponentPlayer()->getCardsInShipArea();
+        }
         $remainingDamage = $this->game->globals->get(GVAR_REMAINING_DAMAGE_TO_ASSIGN, 0);
 
         // If only one ship, auto assign damage
@@ -55,20 +74,37 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
         }
 
         if (count($ships) === 0) {
-            $base = $this->game->cardRepository->getActiveBase($ctx->opponentPlayer()->playerId);
+            $base = $ctx->isSolo()
+                ? (new SoloEnemyContext($this->game))->getActiveBase()
+                : $this->game->cardRepository->getActiveBase($ctx->opponentPlayer()->playerId);
             if($base !== null) {
                 // Deal damage to base directly
                 $remainingDamage = $ctx->assignDamageToTarget($base, $remainingDamage);
 
                 if($base->damage >= $base->health) {
                     // Base destroyed
-                    $ctx->defeatBase($base);
+                    if ($ctx->isSolo()) {
+                        $this->game->cardRepository->addCardToExile($base->id);
+                        $this->notify->all(
+                            'onSoloEnemyDestroyBase',
+                            clienttranslate('${player_name} destroys ${card_name}'),
+                            [
+                                'player_id' => $ctx->currentPlayer()->playerId,
+                                'card' => $base,
+                            ],
+                        );
+                        $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
+                        $this->globals->inc(GVAR_SOLO_ENEMY_BASES_DESTROYED, 1);
+                    } else {
+                        $ctx->defeatBase($base);
+                    }
                 }
 
                 $this->globals->set(GVAR_REMAINING_DAMAGE_TO_ASSIGN, $remainingDamage);
             }
 
-            return $this->game->playerScore->get($ctx->currentPlayer()->playerId) >= 3
+            return ($ctx->isSolo() && $this->globals->get(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0) >= 3)
+                || $this->game->playerScore->get($ctx->currentPlayer()->playerId) >= 3
                 ? EndScore::class
                 : PlayerTurn_ActionSelection::class;
 
@@ -110,6 +146,19 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
 
     private function verifyShipDestroy(CardInstance $target, GameContext $ctx) {
         if ($target->damage < $target->health) return;
+
+        if ($ctx->isSolo()) {
+            $this->game->cardRepository->addCardToExile($target->id);
+            $this->game->notify->all(
+                'onExileCard',
+                clienttranslate('${player_name} exiles ${card_name}'),
+                [
+                    'player_id' => $ctx->currentPlayer()->playerId,
+                    'card' => $target,
+                ],
+            );
+            return;
+        }
 
         $this->game->cardRepository->addCardsToPlayerDiscard([$target->id], $ctx->opponentPlayer()->playerId);
         $target = $this->game->cardRepository->getCardById($target->id);

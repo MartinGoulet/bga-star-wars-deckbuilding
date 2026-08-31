@@ -34,6 +34,11 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
 
         // If random is true, randomly select cards and skip the player input step
         if ($this->target->selectionMode === SELECTION_MODE_RANDOM) {
+            if (empty($cards)) {
+                $ctx->globals->set($this->storeAs, []);
+                $this->nextState = '';
+                return;
+            }
             $selectedCards = array_rand($cards, min($this->target->max, count($cards)));
             if (!is_array($selectedCards)) {
                 $selectedCards = [$selectedCards];
@@ -42,6 +47,25 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
             $ctx->globals->set($this->storeAs, $selectedCardIds);
             $this->nextState = '';
             return;
+        }
+
+        if ($ctx->isSolo()
+            && $this->target->selectionMode === SELECTION_MODE_OPPONENT_CHOICE
+            && in_array(TARGET_SCOPE_OPPONENT_HAND, $this->target->zones, true)
+        ) {
+            if (empty($cards)) {
+                $ctx->globals->set($this->storeAs, []);
+                $this->nextState = '';
+                return;
+            }
+            usort($cards, function ($first, $second): int {
+                return ($first->cost <=> $second->cost)
+                    ?: ($first->power <=> $second->power)
+                    ?: ($first->locationArg <=> $second->locationArg);
+            });
+            $selectedCard = $cards[0] ?? null;
+            $ctx->globals->set($this->storeAs, $selectedCard === null ? [] : [$selectedCard->id]);
+            $this->nextState = '';
         }
     }
 
@@ -52,7 +76,7 @@ final class SelectCardEffect extends EffectInstance implements NeedsPlayerInput 
     public function getArgs(GameContext $ctx): array {
         
         $selectedCards = $ctx->targetResolver->resolve($this->target);
-        $player_id = $this->target->selectionMode === SELECTION_MODE_PLAYER_CHOICE
+        $player_id = $ctx->isSolo() || $this->target->selectionMode === SELECTION_MODE_PLAYER_CHOICE
             ? $ctx->currentPlayer()->playerId
             : $ctx->opponentPlayer()->playerId;
 

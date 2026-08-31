@@ -25,6 +25,7 @@ use Bga\GameFramework\Components\Counters\PlayerCounter;
 use Bga\GameFramework\Components\Counters\TableCounter;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
+use Bga\Games\StarWarsDeckbuilding\States\SoloEnemy_BeginTurn;
 use CardInstance;
 
 require_once('constants.inc.php');
@@ -208,6 +209,32 @@ class Game extends \Bga\GameFramework\Table {
             $player['ships'] = array_values($this->cardRepository->getPlayerShips($pId));
         }
 
+        if (count($result['players']) === 1) {
+            $result['soloEnemy'] = [
+                'faction' => $this->globals->get(GVAR_SOLO_ENEMY_FACTION),
+                'resources' => $this->globals->get(GVAR_SOLO_ENEMY_RESOURCES, 0),
+                'progress' => $this->globals->get(GVAR_SOLO_ENEMY_PROGRESS, 0),
+                'leaderGained' => $this->globals->get(GVAR_SOLO_ENEMY_LEADER_GAINED, false),
+                'leaderAssaulted' => $this->globals->get(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false),
+                'leader' => array_values($this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_LEADER)),
+                'activeBase' => $this->cardRepository->getSoloEnemyActiveBase(),
+                'bases' => array_values(array_map(
+                    fn($card) => $card->getOnlyId(),
+                    $this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_BASES),
+                )),
+                'muster' => array_values($this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_MUSTER_VISIBLE)),
+                'musterHidden' => array_values(array_merge(
+                    array_map(fn($card) => $card->getOnlyId(), $this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_MUSTER_HIDDEN)),
+                )),
+                'reserve' => array_values(array_map(
+                    fn($card) => $card->getOnlyId(),
+                    $this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_RESERVE),
+                )),
+                'shuttles' => array_values($this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_SHUTTLES)),
+                'playArea' => array_values($this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_PLAY)),
+            ];
+        }
+
         $this->playerResources->fillResult($result);
         $this->forceTrack->fillResult($result);
 
@@ -233,7 +260,19 @@ class Game extends \Bga\GameFramework\Table {
         $default_colors = $gameinfos['player_colors'];
 
         $factions = [FACTION_REBEL, FACTION_EMPIRE];
-        shuffle($factions);
+        if (count($players) === 1) {
+            $soloFactionOption = $this->tableOptions->get(OPTION_SOLO_FACTION) ?? SOLO_FACTION_RANDOM;
+            $soloFaction = match ($soloFactionOption) {
+                SOLO_FACTION_EMPIRE => FACTION_EMPIRE,
+                SOLO_FACTION_REBEL => FACTION_REBEL,
+                default => $factions[array_rand($factions)],
+            };
+            $factions = [$soloFaction];
+        } else {
+            shuffle($factions);
+        }
+
+        $query_values = [];
 
         foreach ($players as $player_id => &$player) {
             $player['player_id'] = $player_id;
@@ -274,12 +313,43 @@ class Game extends \Bga\GameFramework\Table {
         // $this->playerStats->init('player_teststat1', 0);
 
         // TODO: Setup the initial game situation here.
-        $this->cardRepository->setup($players);
+        $soloEnemyFaction = null;
+        $soloShuttleCount = 3;
+        if (count($players) === 1) {
+            $soloEnemyFaction = $players[array_key_first($players)]['faction'] === FACTION_REBEL
+                ? FACTION_EMPIRE
+                : FACTION_REBEL;
+            $soloDifficulty = $this->tableOptions->get(OPTION_SOLO_DIFFICULTY) ?? SOLO_DIFFICULTY_STANDARD;
+            $soloShuttleCount = match ($soloDifficulty) {
+                SOLO_DIFFICULTY_RELAXED => 2,
+                SOLO_DIFFICULTY_HARD => 4,
+                default => 3,
+            };
+            $this->globals->set(GVAR_SOLO_ENEMY_FACTION, $soloEnemyFaction);
+            $this->globals->set(GVAR_SOLO_ENEMY_RESOURCES, 0);
+            $this->globals->set(GVAR_SOLO_ENEMY_PROGRESS, 0);
+            $this->globals->set(GVAR_SOLO_ENEMY_LEADER_GAINED, false);
+            $this->globals->set(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false);
+            $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, false);
+            $this->globals->set(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0);
+            $this->globals->set(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, -1);
+            $this->globals->set(GVAR_SOLO_ENEMY_DESTROY_CAPITAL_ON_PURCHASE, false);
+        }
 
-        // Empire starts first
+        $this->cardRepository->setup($players, $soloEnemyFaction, $soloShuttleCount);
+
+        if (count($players) === 1) {
+            // The human player is the only BGA player in solo mode.
+            $humanPlayerId = array_key_first($players);
+            $this->gamestate->changeActivePlayer($humanPlayerId);
+            return $soloEnemyFaction === FACTION_EMPIRE
+                ? SoloEnemy_BeginTurn::class
+                : PlayerTurn_ActionSelection::class;
+        }
+
+        // Empire starts first in multiplayer.
         $player = array_find($players, fn($p) => $p['faction'] === FACTION_EMPIRE);
         $this->gamestate->changeActivePlayer($player['player_id']);
-
         return PlayerTurn_ActionSelection::class;
     }
 

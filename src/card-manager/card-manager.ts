@@ -28,7 +28,7 @@ export class MyCardManager extends BgaCards.Manager<Card> {
                this.setDamageOnCard(card);
             }
          },
-         isCardVisible: (card: Card) => "img" in card,
+         isCardVisible: (card: Card) => "img" in card && Number(card.img) > 0,
          cardBorderRadius: "8px",
          cardWidth: 120,
          cardHeight: 168,

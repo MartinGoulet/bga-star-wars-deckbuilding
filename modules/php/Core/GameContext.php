@@ -6,8 +6,10 @@ use Bga\GameFramework\Db\Globals;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\Effects\Pipeline\PreventDamagePerTurnEffect;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyContext;
 use Bga\Games\StarWarsDeckbuilding\Targeting\TargetResolver;
 use CardInstance;
+use const GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION;
 
 final class GameContext {
     private int $activePlayerId;
@@ -47,6 +49,18 @@ final class GameContext {
 
     public function opponentPlayer(): PlayerContext {
         return new PlayerContext($this->game, $this->getOpponentId());
+    }
+
+    public function isSolo(): bool {
+        return $this->game->getPlayersNumber() === 1;
+    }
+
+    public function soloEnemy(): SoloEnemyContext {
+        if (!$this->isSolo()) {
+            throw new \LogicException('The solo enemy is only available in solo mode.');
+        }
+
+        return new SoloEnemyContext($this->game);
     }
 
     public function galaxy(): GalaxyContext {
@@ -162,6 +176,15 @@ final class GameContext {
      */
     public function assignDamageToTarget(CardInstance $target, int $amount): int {
         $remaining = 0;
+
+        if ($this->isSolo() && $target->location === ZONE_SOLO_ENEMY_ACTIVE_BASE) {
+            $preventable = (int) $this->globals->get(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, -1);
+            if ($preventable >= 0) {
+                $prevented = min($amount, $preventable);
+                $amount -= $prevented;
+                $this->globals->set(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, $preventable - $prevented);
+            }
+        }
 
         $modifiers = $this->getDamageModifiersForTarget($target);
         foreach ($modifiers as $modifier) {

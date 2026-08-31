@@ -27,6 +27,11 @@ class PlayerTurn_StartTurn extends GameState
         // Reset attack modifiers
         $this->game->globals->set(GVAR_ATTACK_MODIFIER_PER_CARDS, []);
 
+        $baseDamagePrevention = (int) $this->globals->get(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, -1);
+        if ($baseDamagePrevention >= 0) {
+            $this->globals->set(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, 2);
+        }
+
         return PlayerTurn_StartTurnBase::class;
     }
 

@@ -26,6 +26,16 @@ final class DestroyCardEffect extends EffectInstance {
     }
 
     private function destroyCard(GameContext $ctx, CardInstance $card): void {
+        if ($ctx->isSolo() && $card->location === ZONE_SOLO_ENEMY_PLAY) {
+            $ctx->game->cardRepository->addCardToExile($card->id);
+            $ctx->game->notify->all(
+                'onSoloEnemyCardExiled',
+                clienttranslate('The enemy exiles ${card_name}'),
+                ['card' => $card],
+            );
+            return;
+        }
+
         // If card is in the galaxy zone, discard it to the galaxy discard pile
         if (in_array($card->location, [ZONE_GALAXY_DECK, ZONE_GALAXY_ROW])) {
             $ctx->galaxy()->destroyCard($card);

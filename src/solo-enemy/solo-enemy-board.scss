@@ -1,0 +1,100 @@
+.swd-solo-enemy {
+   display: flex;
+   margin: auto;
+   width: max-content;
+   transform: translate(-75px, 0);
+   padding-bottom: 20px;
+
+   &[data-faction="empire"] {
+      .swd-solo-enemy__center {
+         background-image: url("img/solo-enemy-empire.jpg");
+      }
+   }
+
+   &[data-faction="rebel"] {
+      .swd-solo-enemy__center {
+         background-image: url("img/solo-enemy-rebel.jpg");
+      }
+   }
+
+   .swd-solo-enemy__left-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-right: 10px;
+
+      .card-stock {
+         .card:not(:first-child) {
+            margin-left: -98px;
+         }
+      }
+   }
+
+   .swd-solo-enemy__center {
+      background-size: cover;
+      width: calc(2400px * 0.20);
+      height: calc(1750px * 0.20);
+      position: relative;
+
+      .bga-cards_card {
+         zoom: 1.3;
+      }
+
+      .swd-solo-enemy__progress {
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         height: 42px;
+         // background-color: red;
+      }
+
+      .swd-solo-enemy__active-base {
+         position: absolute;
+         top: 143px;
+         left: 37px;
+         width: 219px;
+         height: 157px;
+         // background-color: blue;
+      }
+
+      .swd-solo-enemy__leader {
+         position: absolute;
+         top: 82px;
+         left: 284px;
+         width: 155px;
+         height: 217px;
+         // background-color: green;
+      }
+
+      .swd-solo-enemy__resources {
+         position: absolute;
+         bottom: 0;
+         left: 0;
+         right: 0;
+         height: 44px;
+         // background-color: yellow;
+      }
+
+   }
+
+   .swd-solo-enemy__right-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-left: 10px;
+
+      .card-stock {
+         .card:not(:first-child) {
+            margin-left: -98px;
+         }
+      }
+
+      .swd-solo-enemy__muster {
+         display: flex;
+         gap: 5px;
+      }
+   }
+}

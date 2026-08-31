@@ -20,6 +20,16 @@ const ST_PLAYER_TURN_START_TURN_RESOURCES = 17;
 const ST_PLAYER_TURN_ATTACK_RESOLVE_DAMAGE_SHIP_BASE = 18;
 const ST_PLAYER_TURN_START_TURN = 19;
 
+// Solo enemy turn states
+const ST_SOLO_ENEMY_BEGIN_TURN = 20;
+const ST_SOLO_ENEMY_GAIN_RESOURCES = 21;
+const ST_SOLO_ENEMY_GAIN_FORCE = 22;
+const ST_SOLO_ENEMY_PURCHASE = 23;
+const ST_SOLO_ENEMY_ATTACK = 24;
+const ST_SOLO_ENEMY_ASSIGN_DAMAGE = 25;
+const ST_SOLO_ENEMY_CHOOSE_TARGET = 26;
+const ST_SOLO_ENEMY_END_TURN = 27;
+
 const ST_PURCHASE_BEGIN = 40;
 const ST_PURCHASE_DESTINATION = 41;
 const ST_PURCHASE_END = 42;
@@ -46,6 +56,17 @@ const GVAR_PURCHASE_CARD_ID = 'purchase_card_id';
 const GVAR_PURCHASE_DESTINATIONS = 'purchase_destinations';
 const GVAR_PENDING_EVENTS = 'pending_events';
 const GVAR_VICTORY_PILES = 'victory_piles';
+const GVAR_SOLO_ENEMY_RESOURCES = 'solo_enemy_resources';
+const GVAR_SOLO_ENEMY_PROGRESS = 'solo_enemy_progress';
+const GVAR_SOLO_ENEMY_FACTION = 'solo_enemy_faction';
+const GVAR_SOLO_ENEMY_LEADER_GAINED = 'solo_enemy_leader_gained';
+const GVAR_SOLO_ENEMY_LEADER_ASSAULTED = 'solo_enemy_leader_assaulted';
+const GVAR_SOLO_ENEMY_BASE_DESTROYED = 'solo_enemy_base_destroyed';
+const GVAR_SOLO_ENEMY_BASES_DESTROYED = 'solo_enemy_bases_destroyed';
+const GVAR_SOLO_ENEMY_ATTACK_POWER = 'solo_enemy_attack_power';
+const GVAR_SOLO_ENEMY_PENDING_TARGETS = 'solo_enemy_pending_targets';
+const GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION = 'solo_enemy_base_damage_prevention';
+const GVAR_SOLO_ENEMY_DESTROY_CAPITAL_ON_PURCHASE = 'solo_enemy_destroy_capital_on_purchase';
 
 /**
  * Factions
@@ -198,6 +219,26 @@ const ZONE_EXILE = 'exile';
 const ZONE_OUTER_RIM_DECK = 'outer_rim_deck';
 const ZONE_TOP_DECK = 'top_deck';
 const ZONE_CONDITIONAL = 'conditional';
+
+// Solo enemy card zones. The enemy is not represented by a BGA player.
+const ZONE_SOLO_ENEMY_LEADER = 'solo_enemy_leader';
+const ZONE_SOLO_ENEMY_RESERVE = 'solo_enemy_reserve';
+const ZONE_SOLO_ENEMY_SHUTTLES = 'solo_enemy_shuttles';
+const ZONE_SOLO_ENEMY_MUSTER_VISIBLE = 'solo_enemy_muster_visible';
+const ZONE_SOLO_ENEMY_MUSTER_HIDDEN = 'solo_enemy_muster_hidden';
+const ZONE_SOLO_ENEMY_PLAY = 'solo_enemy_play';
+const ZONE_SOLO_ENEMY_BASES = 'solo_enemy_bases';
+const ZONE_SOLO_ENEMY_ACTIVE_BASE = 'solo_enemy_active_base';
+
+// Values of the game options used by the solo variant.
+const OPTION_SOLO_FACTION = 100;
+const OPTION_SOLO_DIFFICULTY = 101;
+const SOLO_FACTION_EMPIRE = 1;
+const SOLO_FACTION_REBEL = 2;
+const SOLO_FACTION_RANDOM = 3;
+const SOLO_DIFFICULTY_RELAXED = 1;
+const SOLO_DIFFICULTY_STANDARD = 2;
+const SOLO_DIFFICULTY_HARD = 3;
 
 /**
  * Targeting

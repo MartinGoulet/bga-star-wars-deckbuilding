@@ -100,7 +100,7 @@ class MyCardManager extends BgaCards.Manager {
                     this.setDamageOnCard(card);
                 }
             },
-            isCardVisible: (card) => "img" in card,
+            isCardVisible: (card) => "img" in card && Number(card.img) > 0,
             cardBorderRadius: "8px",
             cardWidth: 120,
             cardHeight: 168,
@@ -292,6 +292,48 @@ class NotificationManager {
             const slideTo = this.game.tableCenter.galaxyDiscard.element;
             await stock.removeCard(args.card, { slideTo });
         }
+    }
+    async notif_onSoloEnemyCardMoved(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyCardRevealed(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyPurchase(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyGainShuttle(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyCardReturnedToMuster(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyLeaderGained(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+    }
+    async notif_onSoloEnemyCardExiled(args) {
+        await this.game.soloEnemyBoard?.removeCard(args.card);
+    }
+    async notif_onSoloEnemyDefeatGalaxyCard(args) {
+        await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+    }
+    async notif_onSoloEnemyDiscardGalaxyCard(args) {
+        await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+    }
+    async notif_onSoloEnemyBaseRevealed(args) {
+        await this.game.soloEnemyBoard?.moveCard(args.card, "solo_enemy_active_base");
+    }
+    async notif_onSoloEnemyDestroyBase(args) {
+        await this.game.soloEnemyBoard?.removeCard(args.card);
+    }
+    notif_onSoloEnemyResourcesChanged(args) {
+        this.game.soloEnemyBoard?.setResources(args.value);
+    }
+    notif_onSoloEnemyProgressChanged(args) {
+        this.game.soloEnemyBoard?.setProgress(args.progress);
+    }
+    notif_onSoloEnemyDamageBase(args) {
+        this.game.cardManager.setDamageOnCard(args.card);
     }
     async notif_onNewBase(args) {
         const table = this.game.getPlayerTable(args.player_id);
@@ -855,6 +897,9 @@ class PlayerTurnAttackDeclarationState extends BaseState {
     onEnteringState(args, isCurrentPlayerActive) {
         const stocks = this.game.playerTables.flatMap((table) => [table.activeBase, table.ships]);
         stocks.push(this.game.tableCenter.galaxyRow);
+        if (this.game.soloEnemyBoard) {
+            stocks.push(...this.game.soloEnemyBoard.getAttackTargetStocks());
+        }
         stocks.forEach((stock) => {
             stock.setSelectionMode("single");
             stock.setSelectableCards(args.targets);
@@ -893,6 +938,123 @@ class PlayerTurnStartTurnBaseState extends BaseState {
         this.bases.removeAll();
         this.bases.onCardClick = undefined;
         super.onLeavingState(isCurrentPlayerActive);
+    }
+}
+
+class SoloEnemyChooseTargetState extends BaseState {
+    onEnteringState(args, isCurrentPlayerActive) {
+        const stocks = this.game.playerTables.flatMap((table) => [table.activeBase, table.ships]);
+        stocks.push(this.game.tableCenter.galaxyRow);
+        if (this.game.soloEnemyBoard) {
+            stocks.push(...this.game.soloEnemyBoard.getAttackTargetStocks());
+        }
+        stocks.forEach((stock) => {
+            stock.setSelectionMode("single");
+            stock.setSelectableCards(args.targets);
+            stock.onCardClick = async (card) => {
+                stock.unselectCard(card, true);
+                if (isCurrentPlayerActive && args.targets.some((target) => target.id === card.id)) {
+                    await this.game.actions.performAction("actChooseTarget", { cardId: card.id });
+                }
+            };
+        });
+    }
+}
+
+class SoloEnemyBoard {
+    constructor(game, data) {
+        this.game = game;
+        const container = document.querySelector(".swd-player-table-opponent");
+        if (!container)
+            throw new Error("Solo enemy container not found");
+        const html = `
+        <div class="swd-solo-enemy" data-faction="${data.faction.toLowerCase()}">
+            <div class="swd-solo-enemy__left-side">
+                <div class="swd-solo-enemy__reserves"></div>
+                <div class="swd-solo-enemy__shuttles"></div>
+            </div>
+            <div class="swd-solo-enemy__center">
+                <div class="swd-solo-enemy__progress"></div>
+                <div class="swd-solo-enemy__active-base"></div>
+                <div class="swd-solo-enemy__leader"></div>
+                <div class="swd-solo-enemy__resources"></div>
+            </div>
+            <div class="swd-solo-enemy__right-side">
+                <div class="swd-solo-enemy__muster">
+                    <div class="swd-solo-enemy__muster-visible"></div>
+                    <div class="swd-solo-enemy__muster-hidden2"></div>
+                </div>
+                <div class="swd-solo-enemy__play"></div>
+            </div>
+        </div>`;
+        console.log("Enemy data", data);
+        container.insertAdjacentHTML("beforeend", html);
+        this.stocks = {
+            leader: this.createStock(container, ".swd-solo-enemy__leader"),
+            activeBase: this.createStock(container, ".swd-solo-enemy__active-base"),
+            reserve: this.createStock(container, ".swd-solo-enemy__reserves"),
+            shuttles: this.createStock(container, ".swd-solo-enemy__shuttles"),
+            muster: this.createStock(container, ".swd-solo-enemy__muster-visible"),
+            musterHidden: this.createStock(container, ".swd-solo-enemy__muster-hidden2"),
+            play: this.createStock(container, ".swd-solo-enemy__play"),
+        };
+        this.resourcesElement = container.querySelector(".swd-solo-enemy__resources");
+        this.progressElement = container.querySelector(".swd-solo-enemy__progress-value");
+        this.progressTrackElement = container.querySelector(".swd-solo-enemy__progress-track");
+        this.render(data);
+    }
+    render(data) {
+        this.setResources(data.resources);
+        this.replaceStock("leader", data.leader);
+        this.replaceStock("activeBase", data.activeBase ? [data.activeBase] : []);
+        this.replaceStock("shuttles", data.shuttles);
+        this.replaceStock("muster", data.muster);
+        this.replaceStock("musterHidden", data.musterHidden);
+        this.replaceStock("play", data.playArea);
+        this.replaceStock("reserve", data.reserve);
+    }
+    async moveCard(card, destination) {
+        const target = this.zoneFor(destination);
+        if (!target)
+            return;
+        const targetStock = this.stocks[target];
+        await targetStock.addCard(card);
+    }
+    async removeCard(card) {
+        for (const stock of Object.values(this.stocks)) {
+            if (stock.getCards().some((candidate) => candidate.id === card.id)) {
+                await stock.removeCard(card);
+                return;
+            }
+        }
+    }
+    setResources(value) {
+        this.resourcesElement.textContent = String(value);
+    }
+    setProgress(value) {
+    }
+    getAttackTargetStocks() {
+        return [this.stocks.leader, this.stocks.activeBase, this.stocks.play];
+    }
+    createStock(container, selector) {
+        return new BgaCards.LineStock(this.game.cardManager, container.querySelector(selector), { center: true });
+    }
+    replaceStock(zone, cards) {
+        const stock = this.stocks[zone];
+        stock.removeAll();
+        stock.addCards(cards);
+    }
+    zoneFor(destination) {
+        switch (destination) {
+            case "solo_enemy_leader": return "leader";
+            case "solo_enemy_active_base": return "activeBase";
+            case "solo_enemy_shuttles": return "shuttles";
+            case "solo_enemy_muster_visible": return "muster";
+            case "solo_enemy_muster_hidden": return "musterHidden";
+            case "solo_enemy_play": return "play";
+            case "solo_enemy_reserve": return "reserve";
+            default: return null;
+        }
     }
 }
 
@@ -1002,6 +1164,9 @@ class Game {
         this.discardCardManager = new DiscardCardManager(this);
         this.tableCenter = new TableCenter(this);
         this.playerTables = this.createPlayerTables();
+        if (this.gamedatas.soloEnemy) {
+            this.soloEnemyBoard = new SoloEnemyBoard(this, this.gamedatas.soloEnemy);
+        }
         this.setupPlayerHand();
         this.registerStates();
         this.setupNotifications();
@@ -1015,6 +1180,7 @@ class Game {
         this.states.register("effectCardSelection", new EffectCardSelectionState(this));
         this.states.register("playerTurnStartTurnBase", new PlayerTurnStartTurnBaseState(this));
         this.states.register("PlayerTurn_ActionResolveDamageShipBase", new PlayerTurnActionResolveDamageShipBaseState(this));
+        this.states.register("SoloEnemy_ChooseTarget", new SoloEnemyChooseTargetState(this));
     }
     getCurrentPlayerTable() {
         return this.getPlayerTable(this.players.getCurrentPlayerId());

@@ -11,6 +11,7 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
 use Bga\Games\StarWarsDeckbuilding\Core\PowerResolver;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyContext;
 
 class PlayerTurn_AttackDeclaration extends GameState {
     function __construct(protected Game $game) {
@@ -46,11 +47,18 @@ class PlayerTurn_AttackDeclaration extends GameState {
             fn($card) => $card->health <= $totalPower && $card->type !== CARD_TYPE_SHIP
         );
 
-        $ships = $ctx->opponentPlayer()->getCardsInShipArea();
-        if(empty($ships)) {
-            $baseOrShips = [$this->game->cardRepository->getActiveBase($ctx->getOpponentId())];
+        if ($ctx->isSolo()) {
+            $enemy = new SoloEnemyContext($this->game);
+            $ships = array_values(array_filter(
+                $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),
+                fn($card) => $card->type === CARD_TYPE_SHIP,
+            ));
+            $baseOrShips = empty($ships) ? [$enemy->getActiveBase()] : $ships;
         } else {
-            $baseOrShips = $ships;
+            $ships = $ctx->opponentPlayer()->getCardsInShipArea();
+            $baseOrShips = empty($ships)
+                ? [$this->game->cardRepository->getActiveBase($ctx->getOpponentId())]
+                : $ships;
         }
 
 
@@ -59,6 +67,16 @@ class PlayerTurn_AttackDeclaration extends GameState {
             $baseOrShips,
             array_values($galaxyCardsWithHealth)
         );
+
+        if ($ctx->isSolo()
+            && !$this->game->globals->get(GVAR_SOLO_ENEMY_LEADER_GAINED, false)
+            && !$this->game->globals->get(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false)
+        ) {
+            $leader = (new SoloEnemyContext($this->game))->getCards(ZONE_SOLO_ENEMY_LEADER);
+            if (!empty($leader) && $leader[0]->health <= $totalPower) {
+                $targets[] = $leader[0];
+            }
+        }
 
         // Remove null
         $targets = array_filter($targets, fn($card) => $card !== null);
