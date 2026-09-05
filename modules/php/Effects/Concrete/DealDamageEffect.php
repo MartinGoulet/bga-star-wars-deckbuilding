@@ -31,6 +31,7 @@ final class DealDamageEffect extends EffectInstance
                     $ctx->game->cardRepository->addCardToExile($target->id);
                     $ctx->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
                     $ctx->globals->inc(GVAR_SOLO_ENEMY_BASES_DESTROYED, 1);
+                    $ctx->game->playerScore->inc($ctx->currentPlayer()->playerId, 1);
                     $ctx->game->notify->all(
                         'onSoloEnemyDestroyBase',
                         clienttranslate('${player_name} destroys ${card_name}'),

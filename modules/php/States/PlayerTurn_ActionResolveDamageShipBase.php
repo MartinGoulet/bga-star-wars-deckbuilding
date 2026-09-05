@@ -95,6 +95,7 @@ class PlayerTurn_ActionResolveDamageShipBase extends GameState {
                         );
                         $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
                         $this->globals->inc(GVAR_SOLO_ENEMY_BASES_DESTROYED, 1);
+                        $this->game->playerScore->inc($ctx->currentPlayer()->playerId, 1);
                     } else {
                         $ctx->defeatBase($base);
                     }

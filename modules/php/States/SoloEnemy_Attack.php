@@ -175,9 +175,12 @@ class SoloEnemy_Attack extends GameState
             $this->globals->set(GVAR_SOLO_ENEMY_BASES_DESTROYED, $destroyedBases);
             $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
             $this->notify->all(
-                'onSoloEnemyDestroyBase',
+                'onExileCard',
                 clienttranslate('The enemy destroys ${card_name}'),
-                ['card' => $base],
+                [
+                    'player_id' => $humanPlayerId,
+                    'card' => $this->game->cardRepository->getCardById($base->id),
+                ],
             );
         }
     }
