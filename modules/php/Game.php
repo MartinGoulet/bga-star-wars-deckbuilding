@@ -37,6 +37,7 @@ class Game extends \Bga\GameFramework\Table {
     public array $galaxy_deck_composition;
     public array $base_decks;
     public array $all_bases;
+    public array $solo_progress_track;
 
     public TableCounter $forceTrack;
     public PlayerCounter $playerResources;

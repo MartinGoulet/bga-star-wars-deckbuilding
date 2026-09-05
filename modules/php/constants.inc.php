@@ -240,6 +240,13 @@ const SOLO_DIFFICULTY_RELAXED = 1;
 const SOLO_DIFFICULTY_STANDARD = 2;
 const SOLO_DIFFICULTY_HARD = 3;
 
+// Solo variant progress track
+const SOLO_GAIN_FORCE = 'solo_gain_force';
+const SOLO_GAIN_SHUTTLE = 'solo_gain_shuttle';
+const SOLO_GAIN_TEMPLE_GUARDIAN = 'solo_gain_temple_guardian';
+const SOLO_GAIN_INQUISITOR = 'solo_gain_inquisitor';
+const SOLO_GAIN_LEADER = 'solo_gain_leader';
+
 /**
  * Targeting
  */

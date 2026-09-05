@@ -159,46 +159,57 @@ export class NotificationManager {
 
    private async notif_onSoloEnemyCardMoved(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyCardRevealed(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyPurchase(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyGainShuttle(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyCardReturnedToMuster(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyLeaderGained(args: { card: Card; destination: string }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyCardExiled(args: { card: Card }) {
       await this.game.soloEnemyBoard?.removeCard(args.card);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyDefeatGalaxyCard(args: { card: Card }) {
       await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyDiscardGalaxyCard(args: { card: Card }) {
       await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyBaseRevealed(args: { card: Card }) {
       await this.game.soloEnemyBoard?.moveCard(args.card, "solo_enemy_active_base");
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyDestroyBase(args: { card: Card }) {
       await this.game.soloEnemyBoard?.removeCard(args.card);
+      await this.game.gameui.wait(350);
    }
 
    private async notif_onSoloEnemyResourcesChanged(args: { value: number }) {
@@ -213,12 +224,15 @@ export class NotificationManager {
 
    private async notif_onSoloEnemyDamageBase(args: { card: Card }) {
       this.game.cardManager.setDamageOnCard(args.card);
+      await this.game.gameui.wait(350);
    }
+
    private async notif_onNewBase(args: { player_id: number; card: Card }) {
       const table = this.game.getPlayerTable(args.player_id);
       await table.activeBase.addCard(args.card);
       await this.game.gameui.wait(350);
    }
+   
    private async notif_onMoveCardToTopOfDeck(args: { player_id: number; card: Card; destination: string }) {
       switch (args.destination) {
          case "player_deck":

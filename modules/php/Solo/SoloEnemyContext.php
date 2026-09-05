@@ -7,6 +7,7 @@ namespace Bga\Games\StarWarsDeckbuilding\Solo;
 use Bga\GameFramework\NotificationMessage;
 use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\Game;
+use CardIds;
 use CardInstance;
 
 final class SoloEnemyContext
@@ -86,6 +87,72 @@ final class SoloEnemyContext
             'card' => $source,
         ]);
         $this->game->forceTrack->set($newValue, $notification);
+    }
+
+    public function gainShuttle(): void
+    {
+        $shuttleType = $this->getFaction() === FACTION_EMPIRE
+            ? CardIds::IMPERIAL_SHUTTLE
+            : CardIds::ALLIANCE_SHUTTLE;
+
+        foreach ($this->getCards(ZONE_SOLO_ENEMY_RESERVE) as $card) {
+            if ($card->typeArg !== $shuttleType) {
+                continue;
+            }
+
+            $this->moveCard($card, ZONE_SOLO_ENEMY_SHUTTLES);
+            $this->game->notify->all(
+                'onSoloEnemyGainShuttle',
+                clienttranslate('The enemy gains a Shuttle'),
+                ['card' => $card, 'destination' => ZONE_SOLO_ENEMY_SHUTTLES],
+            );
+            return;
+        }
+    }
+
+    public function gainCardToMuster(int $cardTypeId): void
+    {
+        foreach ($this->getCards(ZONE_SOLO_ENEMY_RESERVE) as $card) {
+            if ($card->typeArg !== $cardTypeId) {
+                continue;
+            }
+
+            $this->moveCard($card, ZONE_SOLO_ENEMY_MUSTER_VISIBLE);
+            $this->game->notify->all(
+                'onSoloEnemyCardMoved',
+                clienttranslate('The enemy gains ${card_name} at Muster'),
+                ['card' => $card, 'destination' => ZONE_SOLO_ENEMY_MUSTER_VISIBLE],
+            );
+            return;
+        }
+    }
+
+    public function gainLeader(): bool
+    {
+        $leader = $this->getCards(ZONE_SOLO_ENEMY_LEADER)[0] ?? null;
+        if ($leader === null) {
+            return false;
+        }
+
+        $this->moveCard($leader, ZONE_SOLO_ENEMY_MUSTER_VISIBLE);
+        $this->game->notify->all(
+            'onSoloEnemyLeaderGained',
+            clienttranslate('The enemy gains its Leader at Muster'),
+            ['card' => $leader, 'destination' => ZONE_SOLO_ENEMY_MUSTER_VISIBLE],
+        );
+        return true;
+    }
+
+    public function applyProgressReward(string $reward): void
+    {
+        match ($reward) {
+            SOLO_GAIN_FORCE => $this->gainForce(1),
+            SOLO_GAIN_SHUTTLE => $this->gainShuttle(),
+            SOLO_GAIN_TEMPLE_GUARDIAN => $this->gainCardToMuster(CardIds::TEMPLE_GUARDIAN),
+            SOLO_GAIN_INQUISITOR => $this->gainCardToMuster(CardIds::INQUISITOR),
+            SOLO_GAIN_LEADER => $this->gainLeader(),
+            default => throw new \InvalidArgumentException('Unknown solo progress reward.'),
+        };
     }
 
     /**

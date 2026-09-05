@@ -299,36 +299,47 @@ class NotificationManager {
     }
     async notif_onSoloEnemyCardMoved(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyCardRevealed(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyPurchase(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyGainShuttle(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyCardReturnedToMuster(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyLeaderGained(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, args.destination);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyCardExiled(args) {
         await this.game.soloEnemyBoard?.removeCard(args.card);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyDefeatGalaxyCard(args) {
         await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyDiscardGalaxyCard(args) {
         await this.notif_onDiscardGalaxyCard({ player_id: this.game.players.getCurrentPlayerId(), card: args.card });
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyBaseRevealed(args) {
         await this.game.soloEnemyBoard?.moveCard(args.card, "solo_enemy_active_base");
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyDestroyBase(args) {
         await this.game.soloEnemyBoard?.removeCard(args.card);
+        await this.game.gameui.wait(350);
     }
     async notif_onSoloEnemyResourcesChanged(args) {
         this.game.soloEnemyBoard?.setResources(args.value);
@@ -340,6 +351,7 @@ class NotificationManager {
     }
     async notif_onSoloEnemyDamageBase(args) {
         this.game.cardManager.setDamageOnCard(args.card);
+        await this.game.gameui.wait(350);
     }
     async notif_onNewBase(args) {
         const table = this.game.getPlayerTable(args.player_id);

@@ -111,14 +111,14 @@ class SoloEnemy_BeginTurn extends GameState
 
     private function gainShuttleAndMoveGalaxyCard(SoloEnemyContext $enemy): bool
     {
-        $this->gainShuttle($enemy);
+        $enemy->gainShuttle();
         $this->moveHighestOpposingGalaxyCardToMuster($enemy);
         return false;
     }
 
     private function resolveFirstBaseFourteen(SoloEnemyContext $enemy, CardInstance $base): bool
     {
-        $this->gainShuttle($enemy);
+        $enemy->gainShuttle();
         return $enemy->isForceFullyWithEnemy()
             ? $this->queueHumanDiscard($base, false)
             : $this->gainForceAndContinue($enemy);
@@ -130,13 +130,13 @@ class SoloEnemy_BeginTurn extends GameState
             return $this->enableCapitalShipPurchaseDestruction($enemy);
         }
 
-        $this->gainShuttle($enemy);
+        $enemy->gainShuttle();
         return $this->queueHumanDiscard($base, $enemy->isForceWithEnemy());
     }
 
     private function resolveFinalBaseFourteen(SoloEnemyContext $enemy, CardInstance $base): bool
     {
-        $this->gainShuttle($enemy);
+        $enemy->gainShuttle();
         if ($enemy->getFaction() === FACTION_EMPIRE) {
             if ($enemy->isForceFullyWithEnemy()) {
                 return $this->discardOpposingGalaxyCards($enemy, false);
@@ -152,7 +152,7 @@ class SoloEnemy_BeginTurn extends GameState
 
     private function resolveFinalBaseSixteen(SoloEnemyContext $enemy, CardInstance $base): bool
     {
-        $this->gainShuttle($enemy);
+        $enemy->gainShuttle();
         if ($enemy->getFaction() === FACTION_EMPIRE) {
             return false;
         }
@@ -229,26 +229,6 @@ class SoloEnemy_BeginTurn extends GameState
         ];
         $this->globals->set(GVAR_EFFECTS_TO_RESOLVE, $effects);
         return true;
-    }
-
-    private function gainShuttle(SoloEnemyContext $enemy): void
-    {
-        $shuttleType = $enemy->getFaction() === FACTION_EMPIRE
-            ? CardIds::IMPERIAL_SHUTTLE
-            : CardIds::ALLIANCE_SHUTTLE;
-        foreach ($enemy->getCards(ZONE_SOLO_ENEMY_RESERVE) as $card) {
-            if ($card->typeArg !== $shuttleType) {
-                continue;
-            }
-
-            $enemy->moveCard($card, ZONE_SOLO_ENEMY_SHUTTLES);
-            $this->notify->all(
-                'onSoloEnemyGainShuttle',
-                clienttranslate('The enemy gains a Shuttle'),
-                ['card' => $card, 'destination' => ZONE_SOLO_ENEMY_SHUTTLES],
-            );
-            return;
-        }
     }
 
     private function moveHighestOpposingGalaxyCardToMuster(SoloEnemyContext $enemy): bool

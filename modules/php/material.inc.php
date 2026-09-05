@@ -52,3 +52,23 @@ $this->base_decks = [
 
 
 $this->all_bases = $empire_bases + $rebel_bases;
+
+$this->solo_progress_track = [
+   FACTION_REBEL => [
+      2 => SOLO_GAIN_FORCE, 
+      4 => SOLO_GAIN_SHUTTLE,
+      5 => SOLO_GAIN_FORCE,
+      6 => SOLO_GAIN_TEMPLE_GUARDIAN,
+      7 => SOLO_GAIN_FORCE,
+      11 => SOLO_GAIN_FORCE,
+      12 => SOLO_GAIN_LEADER,
+   ],
+   FACTION_EMPIRE => [
+      2 => SOLO_GAIN_FORCE, 
+      4 => SOLO_GAIN_FORCE,
+      5 => SOLO_GAIN_INQUISITOR,
+      6 => SOLO_GAIN_SHUTTLE,
+      7 => SOLO_GAIN_FORCE,
+      12 => SOLO_GAIN_LEADER,
+   ]
+];

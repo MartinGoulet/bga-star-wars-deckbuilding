@@ -70,7 +70,7 @@ class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
         $resources = $enemy->getResources();
         $progress = (int) $this->globals->get(GVAR_SOLO_ENEMY_PROGRESS, 0);
         $advance = $resources > 0 ? $resources : 1;
-        $newProgress = min(10, $progress + $advance);
+        $newProgress = min(12, $progress + $advance);
         $this->globals->set(GVAR_SOLO_ENEMY_RESOURCES, 0);
         $this->globals->set(GVAR_SOLO_ENEMY_PROGRESS, $newProgress);
 
@@ -82,23 +82,25 @@ class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
             );
         }
 
-        if ($newProgress === 10 && !$this->globals->get(GVAR_SOLO_ENEMY_LEADER_GAINED, false)) {
-            $leader = $enemy->getCards(ZONE_SOLO_ENEMY_LEADER)[0] ?? null;
-            if ($leader !== null) {
-                $leaderIsHidden = $this->globals->get(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false);
-                $destination = $leaderIsHidden
-                    ? ZONE_SOLO_ENEMY_MUSTER_HIDDEN
-                    : ZONE_SOLO_ENEMY_MUSTER_VISIBLE;
-                $enemy->moveCard($leader, $destination);
-                $this->globals->set(GVAR_SOLO_ENEMY_LEADER_GAINED, true);
-                $this->notify->all(
-                    'onSoloEnemyLeaderGained',
-                    $leaderIsHidden
-                        ? clienttranslate('The enemy gains its Leader face down at Muster')
-                        : clienttranslate('The enemy gains its Leader at Muster'),
-                    ['card' => $leaderIsHidden ? $leader->getOnlyId() : $leader, 'destination' => $destination],
-                );
+        $progressTrack = $this->game->solo_progress_track[$enemy->getFaction()] ?? [];
+        for ($position = $progress + 1; $position <= $newProgress; $position++) {
+            $reward = $progressTrack[$position] ?? null;
+            if ($reward === null) {
+                continue;
             }
+
+            if ($reward === SOLO_GAIN_LEADER) {
+                if ($this->globals->get(GVAR_SOLO_ENEMY_LEADER_GAINED, false)) {
+                    continue;
+                }
+
+                if ($enemy->gainLeader()) {
+                    $this->globals->set(GVAR_SOLO_ENEMY_LEADER_GAINED, true);
+                }
+                continue;
+            }
+
+            $enemy->applyProgressReward($reward);
         }
 
         $this->globals->set(GVAR_SOLO_ENEMY_ATTACK_POWER, 0);
