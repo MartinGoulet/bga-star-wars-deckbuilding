@@ -72,6 +72,13 @@ class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
         $advance = $resources > 0 ? $resources : 1;
         $newProgress = min(12, $progress + $advance);
         $this->globals->set(GVAR_SOLO_ENEMY_RESOURCES, 0);
+        if ($resources > 0) {
+            $this->notify->all(
+                'onSoloEnemyResourcesChanged',
+                clienttranslate('The enemy uses its remaining resources'),
+                ['amount' => -$resources, 'value' => 0],
+            );
+        }
         $this->globals->set(GVAR_SOLO_ENEMY_PROGRESS, $newProgress);
 
         if ($newProgress !== $progress) {
