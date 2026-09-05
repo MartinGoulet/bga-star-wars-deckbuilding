@@ -16,9 +16,9 @@ import { TableCenter } from "./table-center/table-center";
 import { StarWarsGamedatas, StarWarsPlayer } from "./types/game";
 
 interface Game extends Bga {
-   onEnteringState: (stateName: string, args: any) => void;
-   onLeavingState: (stateName: string) => void;
-   onUpdateActionButtons: (stateName: string, args: any) => void;
+   // onEnteringState: (stateName: string, args: any) => void;
+   // onLeavingState: (stateName: string) => void;
+   // onUpdateActionButtons: (stateName: string, args: any) => void;
 }
 
 class Game implements Game {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Game;
@@ -29,6 +30,9 @@ class SoloEnemy_GainResources extends GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('II. Gain Resources'));
+        $this->game->soloEnemyPhase->set(2, $message);
+
         $enemy = new SoloEnemyContext($this->game);
         $cards = array_merge(
             $enemy->getCards(ZONE_SOLO_ENEMY_PLAY),

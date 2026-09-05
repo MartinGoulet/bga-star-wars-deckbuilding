@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
 use Bga\GameFramework\StateType;
+use Bga\GameFramework\NotificationMessage;
 use Bga\Games\StarWarsDeckbuilding\Game;
 use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyContext;
 use CardIds;
-use CardInstance;
 
 class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
 {
@@ -28,6 +28,9 @@ class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('VI. End Turn'));
+        $this->game->soloEnemyPhase->set(6, $message);
+
         $enemy = new SoloEnemyContext($this->game);
         $cardsToMuster = [
             CardIds::REBEL_TROOPER,
@@ -99,6 +102,7 @@ class SoloEnemy_EndTurn extends \Bga\GameFramework\States\GameState
         }
 
         $this->globals->set(GVAR_SOLO_ENEMY_ATTACK_POWER, 0);
+        $this->game->soloEnemyPhase->set(0);
         return PlayerTurn_StartTurn::class;
     }
 }

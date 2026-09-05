@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Game;
@@ -29,6 +30,9 @@ class SoloEnemy_BeginTurn extends GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('I. Begin Turn'));
+        $this->game->soloEnemyPhase->set(1, $message);
+        
         $enemy = new SoloEnemyContext($this->game);
 
         $pendingHumanDiscard = false;
@@ -90,8 +94,8 @@ class SoloEnemy_BeginTurn extends GameState
         $isFinalBase = $destroyedBases >= 2;
         if (!$isFinalBase) {
             return match ($base->health) {
-                10, 12 => $this->moveHighestOpposingGalaxyCardToMuster($enemy),
-                14 => $this->resolveFirstBaseFourteen($enemy),
+                10, 12 => $this->gainShuttleAndMoveGalaxyCard($enemy),
+                14 => $this->resolveFirstBaseFourteen($enemy, $base),
                 16 => $this->resolveFirstBaseSixteen($enemy, $base),
                 default => false,
             };
@@ -112,11 +116,12 @@ class SoloEnemy_BeginTurn extends GameState
         return false;
     }
 
-    private function resolveFirstBaseFourteen(SoloEnemyContext $enemy): bool
+    private function resolveFirstBaseFourteen(SoloEnemyContext $enemy, CardInstance $base): bool
     {
-        return $enemy->getFaction() === FACTION_EMPIRE
-            ? $this->discardOpposingGalaxyCards($enemy, true)
-            : $this->enableBaseDamagePrevention();
+        $this->gainShuttle($enemy);
+        return $enemy->isForceFullyWithEnemy()
+            ? $this->queueHumanDiscard($base, false)
+            : $this->gainForceAndContinue($enemy);
     }
 
     private function resolveFirstBaseSixteen(SoloEnemyContext $enemy, CardInstance $base): bool
@@ -125,9 +130,8 @@ class SoloEnemy_BeginTurn extends GameState
             return $this->enableCapitalShipPurchaseDestruction($enemy);
         }
 
-        $pendingDiscard = $this->queueHumanDiscard($base, true);
-        $this->damageHumanBase(2);
-        return $pendingDiscard;
+        $this->gainShuttle($enemy);
+        return $this->queueHumanDiscard($base, $enemy->isForceWithEnemy());
     }
 
     private function resolveFinalBaseFourteen(SoloEnemyContext $enemy, CardInstance $base): bool

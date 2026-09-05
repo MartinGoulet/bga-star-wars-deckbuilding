@@ -41,6 +41,7 @@ class Game extends \Bga\GameFramework\Table {
     public TableCounter $forceTrack;
     public PlayerCounter $playerResources;
     public TableCounter $nbrPurchasesThisRound;
+    public TableCounter $soloEnemyPhase;
 
     private \Bga\GameFramework\Components\Deck $cards;
     public CardRepository $cardRepository;
@@ -63,6 +64,7 @@ class Game extends \Bga\GameFramework\Table {
         $this->playerResources = $this->counterFactory->createPlayerCounter('resources', 0);
         $this->forceTrack = $this->counterFactory->createTableCounter('force', -3, 3);
         $this->nbrPurchasesThisRound = $this->counterFactory->createTableCounter('nbrPurchasesThisRound', 0);
+        $this->soloEnemyPhase = $this->counterFactory->createTableCounter('soloEnemyPhase');
 
         require('material.inc.php');
 
@@ -253,6 +255,7 @@ class Game extends \Bga\GameFramework\Table {
         $this->playerResources->initDb(array_keys($players), initialValue: 0);
         $this->forceTrack->initDb(initialValue: 3); // Rebel side
         $this->nbrPurchasesThisRound->initDb(initialValue: 0);
+        $this->soloEnemyPhase->initDb(initialValue: 0); // Initial phase for solo enemy
 
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
         // number of colors defined here must correspond to the maximum number of players allowed for the gams.
@@ -392,7 +395,8 @@ class Game extends \Bga\GameFramework\Table {
     }
 
     public function debug_initCounter() {
-        $this->nbrPurchasesThisRound->initDb(initialValue: 0);
+        // $this->nbrPurchasesThisRound->initDb(initialValue: 0);
+        $this->soloEnemyPhase->initDb(initialValue: 0);
     }
 
     #[Debug(reload: true)]

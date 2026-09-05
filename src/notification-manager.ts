@@ -43,9 +43,12 @@ export class NotificationManager {
    //    // debugger;
    // }
 
-   private notif_setTableCounter(args: TableCounterNotificationArgs) {
+   private async notif_setTableCounter(args: TableCounterNotificationArgs) {
       if (args.name === "force") {
          this.game.tableCenter.setForceCounter(args.value);
+      } else if (args.name === "soloEnemyPhase") {
+         this.game.soloEnemyBoard!.setPhase(args.value);
+         await this.game.gameui.wait(350);
       }
    }
 
@@ -198,15 +201,17 @@ export class NotificationManager {
       await this.game.soloEnemyBoard?.removeCard(args.card);
    }
 
-   private notif_onSoloEnemyResourcesChanged(args: { value: number }) {
+   private async notif_onSoloEnemyResourcesChanged(args: { value: number }) {
       this.game.soloEnemyBoard?.setResources(args.value);
+      await this.game.gameui.wait(350);
    }
 
-   private notif_onSoloEnemyProgressChanged(args: { progress: number }) {
+   private async notif_onSoloEnemyProgressChanged(args: { progress: number }) {
       this.game.soloEnemyBoard?.setProgress(args.progress);
+      await this.game.gameui.wait(350);
    }
 
-   private notif_onSoloEnemyDamageBase(args: { card: Card }) {
+   private async notif_onSoloEnemyDamageBase(args: { card: Card }) {
       this.game.cardManager.setDamageOnCard(args.card);
    }
    private async notif_onNewBase(args: { player_id: number; card: Card }) {

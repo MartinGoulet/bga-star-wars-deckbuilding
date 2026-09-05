@@ -86,6 +86,9 @@ export class PlayerTable {
          document.querySelector(`#player-table-${this.playerId} .swd-player-ships`)!,
          {
             center: true,
+            selectedCardStyle: {
+               outlineColor: "#00FFFF",
+            },
          }
       );
 

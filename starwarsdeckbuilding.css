@@ -722,10 +722,9 @@
 
 .swd-solo-enemy {
   display: flex;
-  margin: auto;
   width: max-content;
-  transform: translate(-75px, 0);
   padding-bottom: 20px;
+  margin: auto;
 }
 .swd-solo-enemy[data-faction=empire] .swd-solo-enemy__center {
   background-image: url("img/solo-enemy-empire.jpg");
@@ -780,6 +779,13 @@
   right: 0;
   height: 44px;
 }
+.swd-solo-enemy .swd-solo-enemy__center .swd-solo-enemy__phases {
+  position: absolute;
+  bottom: -35px;
+  left: 0;
+  right: 0;
+  height: 30px;
+}
 .swd-solo-enemy .swd-solo-enemy__right-side {
   display: flex;
   flex-direction: column;
@@ -793,6 +799,134 @@
 .swd-solo-enemy .swd-solo-enemy__right-side .swd-solo-enemy__muster {
   display: flex;
   gap: 5px;
+}
+.swd-solo-enemy .progress-track-indicator {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  top: 2px;
+  background-image: url("img/cubes.png");
+  background-size: 1000% 100%;
+  background-position-x: -601%;
+  transition: transform 0.5s ease-in-out;
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="0"] {
+  transform: translateX(7px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="1"] {
+  transform: translateX(41px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="2"] {
+  transform: translateX(75px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="3"] {
+  transform: translateX(109px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="4"] {
+  transform: translateX(143px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="5"] {
+  transform: translateX(178px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="6"] {
+  transform: translateX(212px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="7"] {
+  transform: translateX(246px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="8"] {
+  transform: translateX(280px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="9"] {
+  transform: translateX(314px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="10"] {
+  transform: translateX(348px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="11"] {
+  transform: translateX(382px);
+}
+.swd-solo-enemy .progress-track-indicator[data-progression="12"] {
+  transform: translateX(416px);
+}
+.swd-solo-enemy .resources-track-indicator {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 68px;
+  background-image: url("img/cubes.png");
+  background-size: 1000% 100%;
+  background-position-x: -601%;
+  transition: transform 0.5s ease-in-out;
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="0"] {
+  transform: translateX(7px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="1"] {
+  transform: translateX(41px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="2"] {
+  transform: translateX(75px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="3"] {
+  transform: translateX(109px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="4"] {
+  transform: translateX(143px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="5"] {
+  transform: translateX(178px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="6"] {
+  transform: translateX(212px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="7"] {
+  transform: translateX(246px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="8"] {
+  transform: translateX(280px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="9"] {
+  transform: translateX(314px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="10"] {
+  transform: translateX(348px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="11"] {
+  transform: translateX(382px);
+}
+.swd-solo-enemy .resources-track-indicator[data-progression="12"] {
+  transform: translateX(416px);
+}
+.swd-solo-enemy .phases-track-indicator {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 30px;
+  background-image: url("img/cubes.png");
+  background-size: 1000% 100%;
+  transition: transform 0.5s ease-in-out;
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="0"] {
+  transform: translateX(-60px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="1"] {
+  transform: translateX(0px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="2"] {
+  transform: translateX(81px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="3"] {
+  transform: translateX(162px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="4"] {
+  transform: translateX(232px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="5"] {
+  transform: translateX(300px);
+}
+.swd-solo-enemy .phases-track-indicator[data-progression="6"] {
+  transform: translateX(366px);
 }
 
 html {

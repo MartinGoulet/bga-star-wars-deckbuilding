@@ -9,6 +9,8 @@ export abstract class BaseState<T> implements StateHandler<T> {
         this.game.playerTables.forEach((table) => table.onLeaveState());
         this.game.tableCenter.onLeaveState();
 
+        this.game.soloEnemyBoard?.onLeaveState();
+
         this.game.playerHand.setSelectionMode("none");
         this.game.playerHand.onCardClick = undefined;
         this.game.playerHand.onSelectionChange = undefined;

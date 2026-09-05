@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Game;
@@ -29,6 +30,9 @@ class SoloEnemy_GainForce extends GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('III. Gain Force'));
+        $this->game->soloEnemyPhase->set(3, $message);
+
         $enemy = new SoloEnemyContext($this->game);
         $force = 0;
         $specialCards = [CardIds::TEMPLE_GUARDIAN, CardIds::INQUISITOR, CardIds::LOBOT];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Core\GameContext;
@@ -31,6 +32,9 @@ class SoloEnemy_Attack extends GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('V. Attack'));
+        $this->game->soloEnemyPhase->set(5, $message);
+        
         $enemy = new SoloEnemyContext($this->game);
         $humanPlayerId = (int) $this->game->getActivePlayerId();
         $forceIsFullyWithEnemy = $enemy->isForceFullyWithEnemy();

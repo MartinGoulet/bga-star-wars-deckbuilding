@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\StarWarsDeckbuilding\States;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\StateType;
 use Bga\GameFramework\States\GameState;
 use Bga\Games\StarWarsDeckbuilding\Game;
@@ -30,6 +31,9 @@ class SoloEnemy_Purchase extends GameState
 
     public function onEnteringState(int $activePlayerId)
     {
+        $message = new NotificationMessage(clienttranslate('IV. Purchase'));
+        $this->game->soloEnemyPhase->set(4, $message);
+        
         $enemy = new SoloEnemyContext($this->game);
         $targetState = $this->resolveCapitalShipPurchaseDestruction($enemy);
         if ($targetState !== null) {

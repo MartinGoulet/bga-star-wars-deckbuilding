@@ -194,9 +194,13 @@ class NotificationManager {
             duration: 500,
         });
     }
-    notif_setTableCounter(args) {
+    async notif_setTableCounter(args) {
         if (args.name === "force") {
             this.game.tableCenter.setForceCounter(args.value);
+        }
+        else if (args.name === "soloEnemyPhase") {
+            this.game.soloEnemyBoard.setPhase(args.value);
+            await this.game.gameui.wait(350);
         }
     }
     async notif_onPurchaseGalaxyCard(args) {
@@ -326,13 +330,15 @@ class NotificationManager {
     async notif_onSoloEnemyDestroyBase(args) {
         await this.game.soloEnemyBoard?.removeCard(args.card);
     }
-    notif_onSoloEnemyResourcesChanged(args) {
+    async notif_onSoloEnemyResourcesChanged(args) {
         this.game.soloEnemyBoard?.setResources(args.value);
+        await this.game.gameui.wait(350);
     }
-    notif_onSoloEnemyProgressChanged(args) {
+    async notif_onSoloEnemyProgressChanged(args) {
         this.game.soloEnemyBoard?.setProgress(args.progress);
+        await this.game.gameui.wait(350);
     }
-    notif_onSoloEnemyDamageBase(args) {
+    async notif_onSoloEnemyDamageBase(args) {
         this.game.cardManager.setDamageOnCard(args.card);
     }
     async notif_onNewBase(args) {
@@ -576,6 +582,9 @@ class PlayerTable {
         });
         this.ships = new BgaCards.LineStock(this.game.cardManager, document.querySelector(`#player-table-${this.playerId} .swd-player-ships`), {
             center: true,
+            selectedCardStyle: {
+                outlineColor: "#00FFFF",
+            },
         });
         if (player.ships)
             this.ships.addCards(player.ships);
@@ -628,6 +637,7 @@ class BaseState {
         this.game.cardManager.removeAllCardsAsSelected();
         this.game.playerTables.forEach((table) => table.onLeaveState());
         this.game.tableCenter.onLeaveState();
+        this.game.soloEnemyBoard?.onLeaveState();
         this.game.playerHand.setSelectionMode("none");
         this.game.playerHand.onCardClick = undefined;
         this.game.playerHand.onSelectionChange = undefined;
@@ -974,10 +984,17 @@ class SoloEnemyBoard {
                 <div class="swd-solo-enemy__shuttles"></div>
             </div>
             <div class="swd-solo-enemy__center">
-                <div class="swd-solo-enemy__progress"></div>
+                <div class="swd-solo-enemy__progress">
+                    <div class="progress-track-indicator" data-progression="0"></div>
+                </div>
                 <div class="swd-solo-enemy__active-base"></div>
                 <div class="swd-solo-enemy__leader"></div>
-                <div class="swd-solo-enemy__resources"></div>
+                <div class="swd-solo-enemy__resources">
+                    <div class="resources-track-indicator" data-progression="0"></div>
+                </div>
+                <div class="swd-solo-enemy__phases">
+                    <div class="phases-track-indicator" data-progression="0"></div>
+                </div>
             </div>
             <div class="swd-solo-enemy__right-side">
                 <div class="swd-solo-enemy__muster">
@@ -998,13 +1015,14 @@ class SoloEnemyBoard {
             musterHidden: this.createStock(container, ".swd-solo-enemy__muster-hidden2"),
             play: this.createStock(container, ".swd-solo-enemy__play"),
         };
-        this.resourcesElement = container.querySelector(".swd-solo-enemy__resources");
-        this.progressElement = container.querySelector(".swd-solo-enemy__progress-value");
-        this.progressTrackElement = container.querySelector(".swd-solo-enemy__progress-track");
+        this.resourcesElement = container.querySelector(".resources-track-indicator");
+        this.progressElement = container.querySelector(".progress-track-indicator");
+        this.phasesElement = container.querySelector(".phases-track-indicator");
         this.render(data);
     }
     render(data) {
         this.setResources(data.resources);
+        this.setProgress(data.progress);
         this.replaceStock("leader", data.leader);
         this.replaceStock("activeBase", data.activeBase ? [data.activeBase] : []);
         this.replaceStock("shuttles", data.shuttles);
@@ -1029,9 +1047,13 @@ class SoloEnemyBoard {
         }
     }
     setResources(value) {
-        this.resourcesElement.textContent = String(value);
+        this.resourcesElement.dataset.progression = String(value);
     }
     setProgress(value) {
+        this.progressElement.dataset.progression = String(value);
+    }
+    setPhase(value) {
+        this.phasesElement.dataset.progression = String(value);
     }
     getAttackTargetStocks() {
         return [this.stocks.leader, this.stocks.activeBase, this.stocks.play];
@@ -1055,6 +1077,13 @@ class SoloEnemyBoard {
             case "solo_enemy_reserve": return "reserve";
             default: return null;
         }
+    }
+    onLeaveState() {
+        Object.entries(this.stocks).forEach(([zone, stock]) => {
+            stock.setSelectionMode("none");
+            stock.onSelectionChange = undefined;
+            stock.onCardClick = undefined;
+        });
     }
 }
 

@@ -1,9 +1,8 @@
 .swd-solo-enemy {
    display: flex;
-   margin: auto;
    width: max-content;
-   transform: translate(-75px, 0);
    padding-bottom: 20px;
+   margin: auto;
 
    &[data-faction="empire"] {
       .swd-solo-enemy__center {
@@ -47,7 +46,6 @@
          left: 0;
          right: 0;
          height: 42px;
-         // background-color: red;
       }
 
       .swd-solo-enemy__active-base {
@@ -56,7 +54,6 @@
          left: 37px;
          width: 219px;
          height: 157px;
-         // background-color: blue;
       }
 
       .swd-solo-enemy__leader {
@@ -65,7 +62,6 @@
          left: 284px;
          width: 155px;
          height: 217px;
-         // background-color: green;
       }
 
       .swd-solo-enemy__resources {
@@ -74,7 +70,14 @@
          left: 0;
          right: 0;
          height: 44px;
-         // background-color: yellow;
+      }
+
+      .swd-solo-enemy__phases {
+         position: absolute;
+         bottom: -35px;
+         left: 0;
+         right: 0;
+         height: 30px;
       }
 
    }
@@ -96,5 +99,172 @@
          display: flex;
          gap: 5px;
       }
+   }
+
+   .progress-track-indicator {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      top: 2px;
+      background-image: url("img/cubes.png");
+      background-size: 1000% 100%;
+      background-position-x: -601%;
+      transition: transform 0.5s ease-in-out;
+
+      &[data-progression="0"] {
+         transform: translateX(7px);
+      }
+
+      &[data-progression="1"] {
+         transform: translateX(41px);
+      }
+
+      &[data-progression="2"] {
+         transform: translateX(75px);
+      }
+
+      &[data-progression="3"] {
+         transform: translateX(109px);
+      }
+
+      &[data-progression="4"] {
+         transform: translateX(143px);
+      }
+
+      &[data-progression="5"] {
+         transform: translateX(178px);
+      }
+
+      &[data-progression="6"] {
+         transform: translateX(212px);
+      }
+
+      &[data-progression="7"] {
+         transform: translateX(246px);
+      }
+
+      &[data-progression="8"] {
+         transform: translateX(280px);
+      }
+
+      &[data-progression="9"] {
+         transform: translateX(314px);
+      }
+
+      &[data-progression="10"] {
+         transform: translateX(348px);
+      }
+
+      &[data-progression="11"] {
+         transform: translateX(382px);
+      }
+
+      &[data-progression="12"] {
+         transform: translateX(416px);
+      }
+   }
+
+   .resources-track-indicator {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      // top: 0px;
+      left: 68px;
+      background-image: url("img/cubes.png");
+      background-size: 1000% 100%;
+      background-position-x: -601%;
+      transition: transform 0.5s ease-in-out;
+
+      &[data-progression="0"] {
+         transform: translateX(7px);
+      }
+
+      &[data-progression="1"] {
+         transform: translateX(41px);
+      }
+
+      &[data-progression="2"] {
+         transform: translateX(75px);
+      }
+
+      &[data-progression="3"] {
+         transform: translateX(109px);
+      }
+
+      &[data-progression="4"] {
+         transform: translateX(143px);
+      }
+
+      &[data-progression="5"] {
+         transform: translateX(178px);
+      }
+
+      &[data-progression="6"] {
+         transform: translateX(212px);
+      }
+
+      &[data-progression="7"] {
+         transform: translateX(246px);
+      }
+
+      &[data-progression="8"] {
+         transform: translateX(280px);
+      }
+
+      &[data-progression="9"] {
+         transform: translateX(314px);
+      }
+
+      &[data-progression="10"] {
+         transform: translateX(348px);
+      }
+
+      &[data-progression="11"] {
+         transform: translateX(382px);
+      }
+
+      &[data-progression="12"] {
+         transform: translateX(416px);
+      }
+   }
+
+   .phases-track-indicator {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      left: 30px;
+      background-image: url("img/cubes.png");
+      background-size: 1000% 100%;
+      // background-position-x: -101%;
+      transition: transform 0.5s ease-in-out;
+
+      &[data-progression="0"] {
+         transform: translateX(-60px);
+      }
+
+      &[data-progression="1"] {
+         transform: translateX(0px);
+      }
+
+      &[data-progression="2"] {
+         transform: translateX(81px);
+      }
+
+      &[data-progression="3"] {
+         transform: translateX(162px);
+      }
+
+      &[data-progression="4"] {
+         transform: translateX(232px);
+      }
+
+      &[data-progression="5"] {
+         transform: translateX(300px);
+      }
+
+      &[data-progression="6"] {
+         transform: translateX(366px);
+      }
+
    }
 }

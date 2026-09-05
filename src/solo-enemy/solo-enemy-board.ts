@@ -18,7 +18,7 @@ export class SoloEnemyBoard {
     private readonly stocks: Record<SoloZone, InstanceType<typeof BgaCards.LineStock<Card>>>;
     private readonly resourcesElement: HTMLElement;
     private readonly progressElement: HTMLElement;
-    private readonly progressTrackElement: HTMLElement;
+    private readonly phasesElement: HTMLElement;
 
     constructor(private game: Game, data: SoloEnemyData) {
         const container = document.querySelector(".swd-player-table-opponent");
@@ -31,10 +31,17 @@ export class SoloEnemyBoard {
                 <div class="swd-solo-enemy__shuttles"></div>
             </div>
             <div class="swd-solo-enemy__center">
-                <div class="swd-solo-enemy__progress"></div>
+                <div class="swd-solo-enemy__progress">
+                    <div class="progress-track-indicator" data-progression="0"></div>
+                </div>
                 <div class="swd-solo-enemy__active-base"></div>
                 <div class="swd-solo-enemy__leader"></div>
-                <div class="swd-solo-enemy__resources"></div>
+                <div class="swd-solo-enemy__resources">
+                    <div class="resources-track-indicator" data-progression="0"></div>
+                </div>
+                <div class="swd-solo-enemy__phases">
+                    <div class="phases-track-indicator" data-progression="0"></div>
+                </div>
             </div>
             <div class="swd-solo-enemy__right-side">
                 <div class="swd-solo-enemy__muster">
@@ -59,16 +66,16 @@ export class SoloEnemyBoard {
             play: this.createStock(container, ".swd-solo-enemy__play"),
         };
 
-        this.resourcesElement = container.querySelector(".swd-solo-enemy__resources")!;
-        this.progressElement = container.querySelector(".swd-solo-enemy__progress-value")!;
-        this.progressTrackElement = container.querySelector(".swd-solo-enemy__progress-track")!;
+        this.resourcesElement = container.querySelector(".resources-track-indicator")!;
+        this.progressElement = container.querySelector(".progress-track-indicator")!;
+        this.phasesElement = container.querySelector(".phases-track-indicator")!;
 
         this.render(data);
     }
 
     public render(data: SoloEnemyData): void {
         this.setResources(data.resources);
-        // this.setProgress(data.progress);
+        this.setProgress(data.progress);
         this.replaceStock("leader", data.leader);
         this.replaceStock("activeBase", data.activeBase ? [data.activeBase] : []);
         this.replaceStock("shuttles", data.shuttles);
@@ -96,12 +103,16 @@ export class SoloEnemyBoard {
     }
 
     public setResources(value: number): void {
-        this.resourcesElement.textContent = String(value);
+        this.resourcesElement.dataset.progression = String(value);
     }
 
     public setProgress(value: number): void {
-        // this.progressElement.textContent = String(value);
+        this.progressElement.dataset.progression = String(value);
         // this.progressTrackElement.style.setProperty("--progress", String(Math.max(0, Math.min(10, value))));
+    }
+
+    public setPhase(value: number): void {
+        this.phasesElement.dataset.progression = String(value);
     }
 
     public getAttackTargetStocks(): Array<InstanceType<typeof BgaCards.LineStock<Card>>> {
@@ -133,5 +144,13 @@ export class SoloEnemyBoard {
             case "solo_enemy_reserve": return "reserve";
             default: return null;
         }
+    }
+
+    public onLeaveState(): void {
+        Object.entries(this.stocks).forEach(([zone, stock]) => {
+            stock.setSelectionMode("none");
+            stock.onSelectionChange = undefined;
+            stock.onCardClick = undefined;
+        });
     }
 }
