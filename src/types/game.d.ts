@@ -26,6 +26,7 @@ export interface SoloEnemyData {
    faction: string;
    resources: number;
    progress: number;
+   score: number;
    leaderGained: boolean;
    leaderAssaulted: boolean;
    leader: Card[];

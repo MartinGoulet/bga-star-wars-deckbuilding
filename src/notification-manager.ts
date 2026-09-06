@@ -227,6 +227,11 @@ export class NotificationManager {
       await this.game.gameui.wait(350);
    }
 
+   private async notif_onSoloEnemyScoreChanged(args: { score: number }) {
+      this.game.playerPanels.getScoreCounter(0).toValue(args.score);
+      await this.game.gameui.wait(350);
+   }
+
    private async notif_onNewBase(args: { player_id: number; card: Card }) {
       const table = this.game.getPlayerTable(args.player_id);
       await table.activeBase.addCard(args.card);

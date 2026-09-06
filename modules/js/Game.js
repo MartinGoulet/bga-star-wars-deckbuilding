@@ -353,6 +353,10 @@ class NotificationManager {
         this.game.cardManager.setDamageOnCard(args.card);
         await this.game.gameui.wait(350);
     }
+    async notif_onSoloEnemyScoreChanged(args) {
+        this.game.playerPanels.getScoreCounter(0).toValue(args.score);
+        await this.game.gameui.wait(350);
+    }
     async notif_onNewBase(args) {
         const table = this.game.getPlayerTable(args.player_id);
         await table.activeBase.addCard(args.card);
@@ -1210,6 +1214,13 @@ class Game {
         }
         this.setupPlayerHand();
         this.registerStates();
+        if (this.gamedatas.soloEnemy) {
+            this.playerPanels.addAutomataPlayerPanel(0, 'The Enemy', {
+                iconClass: 'luke-avatar',
+                score: this.gamedatas.soloEnemy.score,
+                color: '7b7b7b',
+            });
+        }
         this.setupNotifications();
     }
     registerStates() {

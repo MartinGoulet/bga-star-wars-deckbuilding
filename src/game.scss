@@ -127,3 +127,12 @@ html::after {
       vertical-align: middle;
    }
 }
+
+.luke-avatar {
+   background-image: url("img/cards.jpg");
+   background-size: 1400px 2000px; //calc(3000px / 2) calc(4244px / 2);
+   width: 32px;
+   height: 32px;
+   border-radius: 50%;
+   background-position: -1128px -1260px;
+}

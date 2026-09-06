@@ -76,6 +76,14 @@ class Game implements Game {
 
       this.registerStates();
 
+      if (this.gamedatas.soloEnemy) {
+         this.playerPanels.addAutomataPlayerPanel(0, 'The Enemy', {
+            iconClass: 'luke-avatar',
+            score: this.gamedatas.soloEnemy.score,
+            color: '7b7b7b',
+         });
+      }
+
       this.setupNotifications();
    }
 
@@ -163,19 +171,19 @@ class Game implements Game {
 
             ["resource_icon"].forEach((field) => {
                if (args[field] !== null && args[field] !== undefined) {
-                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`; 
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-resource"></span></span>`;
                }
             });
 
             ["resource_power", "power_icon"].forEach((field) => {
                if (args[field] !== null && args[field] !== undefined) {
-                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`; 
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-power"></span></span>`;
                }
             });
 
             ["resource_force", "force_icon"].forEach((field) => {
                if (args[field] !== null && args[field] !== undefined) {
-                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`; 
+                  args[field] = `<span class="swd-icon-container"><span class="swd-icon swd-icon-force"></span></span>`;
                }
             });
 

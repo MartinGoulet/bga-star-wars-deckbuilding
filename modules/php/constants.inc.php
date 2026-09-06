@@ -63,6 +63,7 @@ const GVAR_SOLO_ENEMY_LEADER_GAINED = 'solo_enemy_leader_gained';
 const GVAR_SOLO_ENEMY_LEADER_ASSAULTED = 'solo_enemy_leader_assaulted';
 const GVAR_SOLO_ENEMY_BASE_DESTROYED = 'solo_enemy_base_destroyed';
 const GVAR_SOLO_ENEMY_BASES_DESTROYED = 'solo_enemy_bases_destroyed';
+const GVAR_SOLO_PLAYER_BASES_DESTROYED = 'solo_player_bases_destroyed';
 const GVAR_SOLO_ENEMY_ATTACK_POWER = 'solo_enemy_attack_power';
 const GVAR_SOLO_ENEMY_PENDING_TARGETS = 'solo_enemy_pending_targets';
 const GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION = 'solo_enemy_base_damage_prevention';
@@ -369,3 +370,5 @@ final class CardIds {
     public const YAVIN_4 = 89;
 }
 
+# Automa
+const PLAYER_AUTOMA = 1;

@@ -27,11 +27,13 @@ use Bga\Games\StarWarsDeckbuilding\Cards\CardRepository;
 use Bga\Games\StarWarsDeckbuilding\States\PlayerTurn_ActionSelection;
 use Bga\Games\StarWarsDeckbuilding\States\SoloEnemy_BeginTurn;
 use CardInstance;
+use const GVAR_SOLO_PLAYER_BASES_DESTROYED;
 
 require_once('constants.inc.php');
 require_once('Cards/CardInstance.php');
 
-class Game extends \Bga\GameFramework\Table {
+class Game extends \Bga\GameFramework\Table
+{
     public array $card_types;
     public array $starter_decks;
     public array $galaxy_deck_composition;
@@ -58,7 +60,8 @@ class Game extends \Bga\GameFramework\Table {
      * NOTE: afterward, you can get/set the global variables with `getGameStateValue`, `setGameStateInitialValue` or
      * `setGameStateValue` functions.
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->initGameStateLabels([]); // mandatory, even if the array is empty
 
@@ -104,7 +107,8 @@ class Game extends \Bga\GameFramework\Table {
             if (str_contains($message, '${power_icon}')) {
                 $args['power_icon'] = 'Power';
                 $args['i18n'][] = ['power_icon'];
-            }if (str_contains($message, '${force_icon}')) {
+            }
+            if (str_contains($message, '${force_icon}')) {
                 $args['force_icon'] = 'Force';
                 $args['i18n'][] = ['force_icon'];
             }
@@ -117,8 +121,16 @@ class Game extends \Bga\GameFramework\Table {
         $this->cardRepository = new CardRepository($this, $this->cards);
     }
 
-    public static function get(): Game {
+    public static function get(): Game
+    {
         return self::$instance;
+    }
+
+    public function getPlayerName(int $player_id)
+    {
+        if ($player_id == PLAYER_AUTOMA)
+            return _('The Enemy');
+        return $this->getPlayerNameById($player_id);
     }
 
     /**
@@ -131,7 +143,8 @@ class Game extends \Bga\GameFramework\Table {
      * @return int
      * @see ./states.inc.php
      */
-    public function getGameProgression() {
+    public function getGameProgression()
+    {
         // TODO: compute and return the game progression
 
         return 0;
@@ -148,7 +161,8 @@ class Game extends \Bga\GameFramework\Table {
      * @param int $from_version
      * @return void
      */
-    public function upgradeTableDb($from_version) {
+    public function upgradeTableDb($from_version)
+    {
         //       if ($from_version <= 1404301345)
         //       {
         //            // ! important ! Use `DBPREFIX_<table_name>` for all tables
@@ -174,7 +188,8 @@ class Game extends \Bga\GameFramework\Table {
      * - when the game starts
      * - when a player refreshes the game page (F5)
      */
-    protected function getAllDatas(): array {
+    protected function getAllDatas(): array
+    {
         $result = [];
 
         // WARNING: We must only return information visible by the current player.
@@ -198,12 +213,12 @@ class Game extends \Bga\GameFramework\Table {
         $result['galaxyDeck'] = array_values($this->cardRepository->getGalaxyDeckUI());
 
         $galaxyRevealedCard = $this->globals->get(GVAR_GALAXY_DECK_REVEALED_CARD, []);
-        if(!empty($galaxyRevealedCard)) {
+        if (!empty($galaxyRevealedCard)) {
             $cardId = array_shift($galaxyRevealedCard);
             $result['galaxyDeckRevealedCard'] = $this->cardRepository->getCard($cardId);
         }
-        
-        foreach($result["players"] as &$player) {
+
+        foreach ($result["players"] as &$player) {
             $pId = intval($player['id']);
             $player['playAreaCards'] = array_values($this->cardRepository->getPlayerPlayArea($pId));
             $player['deckCount'] = $this->cardRepository->countPlayerDeck($pId);
@@ -217,6 +232,7 @@ class Game extends \Bga\GameFramework\Table {
                 'faction' => $this->globals->get(GVAR_SOLO_ENEMY_FACTION),
                 'resources' => $this->globals->get(GVAR_SOLO_ENEMY_RESOURCES, 0),
                 'progress' => $this->globals->get(GVAR_SOLO_ENEMY_PROGRESS, 0),
+                'score' => $this->globals->get(GVAR_SOLO_PLAYER_BASES_DESTROYED, 0),
                 'leaderGained' => $this->globals->get(GVAR_SOLO_ENEMY_LEADER_GAINED, false),
                 'leaderAssaulted' => $this->globals->get(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false),
                 'leader' => array_values($this->cardRepository->getSoloEnemyCards(ZONE_SOLO_ENEMY_LEADER)),
@@ -241,7 +257,7 @@ class Game extends \Bga\GameFramework\Table {
         $this->playerResources->fillResult($result);
         $this->forceTrack->fillResult($result);
 
-        if($this->getBgaEnvironment() == 'studio') {
+        if ($this->getBgaEnvironment() == 'studio') {
             $result['debug_cards'] = array_values($this->getCollectionFromDB("SELECT * FROM card"));
         }
 
@@ -252,7 +268,8 @@ class Game extends \Bga\GameFramework\Table {
      * This method is called only once, when a new game is launched. In this method, you must setup the game
      *  according to the game rules, so that the game is ready to be played.
      */
-    protected function setupNewGame($players, $options = []) {
+    protected function setupNewGame($players, $options = [])
+    {
         $this->playerResources->initDb(array_keys($players), initialValue: 0);
         $this->forceTrack->initDb(initialValue: 3); // Rebel side
         $this->nbrPurchasesThisRound->initDb(initialValue: 0);
@@ -336,6 +353,7 @@ class Game extends \Bga\GameFramework\Table {
             $this->globals->set(GVAR_SOLO_ENEMY_LEADER_ASSAULTED, false);
             $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, false);
             $this->globals->set(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0);
+            $this->globals->set(GVAR_SOLO_PLAYER_BASES_DESTROYED, 0);
             $this->globals->set(GVAR_SOLO_ENEMY_BASE_DAMAGE_PREVENTION, -1);
             $this->globals->set(GVAR_SOLO_ENEMY_DESTROY_CAPITAL_ON_PURCHASE, false);
         }
@@ -362,19 +380,22 @@ class Game extends \Bga\GameFramework\Table {
      * Here, jump to a state you want to test (by default, jump to next player state)
      * You can trigger it on Studio using the Debug button on the right of the top bar.
      */
-    public function debug_goToState(int $state = 3) {
+    public function debug_goToState(int $state = 3)
+    {
         $this->gamestate->jumpToState($state);
     }
 
     /**
      * Another example of debug function, to easily test the zombie code.
      */
-    public function debug_playOneMove() {
+    public function debug_playOneMove()
+    {
         $this->debug->playUntil(fn(int $count) => $count == 1);
     }
 
     #[Debug(reload: true)]
-    public function debug_resetDeck() {
+    public function debug_resetDeck()
+    {
         $sql = "TRUNCATE TABLE card";
         self::DbQuery($sql);
         $sql = "SELECT player_id, player_faction `faction` FROM player";
@@ -385,27 +406,32 @@ class Game extends \Bga\GameFramework\Table {
     }
 
     #[Debug(reload: true)]
-    public function debug_resetAttack() {
+    public function debug_resetAttack()
+    {
         $this->globals->set(GVAR_ATTACKERS_CARD_IDS, []);
         $this->globals->set(GVAR_ALREADY_ATTACKING_CARDS_IDS, []);
     }
 
     #[Debug(reload: false)]
-    public function debug_shuffle() {
+    public function debug_shuffle()
+    {
         $this->cards->shuffle(ZONE_GALAXY_DECK);
     }
 
-    public function debug_initCounter() {
+    public function debug_initCounter()
+    {
         // $this->nbrPurchasesThisRound->initDb(initialValue: 0);
         $this->soloEnemyPhase->initDb(initialValue: 0);
     }
 
     #[Debug(reload: true)]
-    public function debug_unsetUseCard() {
+    public function debug_unsetUseCard()
+    {
         $this->globals->set(GVAR_ABILITY_USED_CARD_IDS, []);
     }
 
-    public function debug_effectToResolve() {
+    public function debug_effectToResolve()
+    {
         var_dump(
             $this->globals->get(GVAR_EFFECTS_TO_RESOLVE)
         );

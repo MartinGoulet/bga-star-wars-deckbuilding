@@ -13,6 +13,7 @@ use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyContext;
 use Bga\Games\StarWarsDeckbuilding\Solo\SoloEnemyRules;
 use CardIds;
 use CardInstance;
+use const GVAR_SOLO_PLAYER_BASES_DESTROYED;
 
 class SoloEnemy_Attack extends GameState
 {
@@ -80,7 +81,7 @@ class SoloEnemy_Attack extends GameState
         $this->game->globals->set(GVAR_SOLO_ENEMY_ATTACK_POWER, $remainingPower);
         $this->attackHumanShipsAndBase($humanPlayerId, $remainingPower);
 
-        return $this->globals->get(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0) >= 3
+        return $this->globals->get(GVAR_SOLO_PLAYER_BASES_DESTROYED, 0) >= 3
             ? EndScore::class
             : SoloEnemy_EndTurn::class;
     }
@@ -171,9 +172,8 @@ class SoloEnemy_Attack extends GameState
         $ctx->assignDamageToTarget($base, $damage);
         if ($base->damage >= $base->health) {
             $this->game->cardRepository->addCardToExile($base->id);
-            $destroyedBases = (int) $this->globals->get(GVAR_SOLO_ENEMY_BASES_DESTROYED, 0) + 1;
-            $this->globals->set(GVAR_SOLO_ENEMY_BASES_DESTROYED, $destroyedBases);
-            $this->globals->set(GVAR_SOLO_ENEMY_BASE_DESTROYED, true);
+            $destroyedBases = (int) $this->globals->get(GVAR_SOLO_PLAYER_BASES_DESTROYED, 0) + 1;
+            $this->globals->set(GVAR_SOLO_PLAYER_BASES_DESTROYED, $destroyedBases);
             $this->notify->all(
                 'onExileCard',
                 clienttranslate('The enemy destroys ${card_name}'),
@@ -181,6 +181,11 @@ class SoloEnemy_Attack extends GameState
                     'player_id' => $humanPlayerId,
                     'card' => $this->game->cardRepository->getCardById($base->id),
                 ],
+            );
+            $this->notify->all(
+                'onSoloEnemyScoreChanged',
+                clienttranslate('The enemy scores a point'),
+                ['score' => $destroyedBases],
             );
         }
     }
